@@ -1,12 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\merchants;
 
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Image;
+use App\Models\Review;
+use App\Models\Product;
+use App\Models\Category;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Carbon\Carbon;
+use App\Models\ReservationStatus;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
@@ -15,8 +22,14 @@ class ReservationController extends Controller
         try {
             $reservation = Reservation::findOrFail($reservationId);
 
+     /*
+            dd([
+                'start_date' => $reservation->start_date,
+                'now' => now(),
+                'diffInHours' => now()->diffInHours($reservation->start_date, false),
+            ]); */
 
-            $remainingHours = \Carbon\Carbon::parse($reservation->start_date)->diffInHours(now(), false);
+            $remainingHours = now()->diffInHours($reservation->start_date, false);
 
             if ($remainingHours > 48) {
                 $reservation->status = 'cancelled';
@@ -30,10 +43,12 @@ class ReservationController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Error while cancelling reservation: ' . $e->getMessage());
+
             return redirect()->route('merchant.reservation.details', $reservationId)
                 ->with('error', 'An error occurred while cancelling the reservation.');
         }
     }
+
 
 
     public function showReservationDetails(string $reservationId)
@@ -50,4 +65,32 @@ class ReservationController extends Controller
 
         return view('merchants.reservation.productReservationDetails', compact('reservation', 'reviews'));
     }
+    //   Show rof on product reservations
+    public function showProductReservations(string $productId)
+    {
+        $product = Product::findOrFail($productId);
+
+        $reservations = Reservation::with(['user', 'product.reviews'])
+            ->where('product_id', $productId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(30);
+
+        return view('merchants.reservation.productReservations', compact('product', 'reservations'));
+    }
+
+      // Show all reservations for the current user
+    public function showReservations()
+{
+    $user = Auth::user();
+
+    // Get all reservations where the product belongs to the current user
+    $reservations = Reservation::with(['user', 'product.reviews'])
+        ->whereHas('product', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(30);
+
+    return view('merchants.reservation.reservations', compact('reservations'));
+}
 }

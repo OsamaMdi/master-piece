@@ -3,7 +3,7 @@
 <!-- Call To Action Area Start -->
 <section class="roberto-cta-area">
     <div class="container">
-        <div class="cta-content bg-img bg-overlay jarallax" style="background-image: url('{{ asset('img/bg-img/1.jpg') }}');">
+        <div class="cta-content bg-img bg-overlay jarallax" style="background-image: url('{{ asset('img/tool1.png') }}');">
             <div class="row align-items-center">
                 <div class="col-12 col-md-7">
                     <div class="cta-text mb-50">
@@ -19,7 +19,6 @@
     </div>
 </section>
 <!-- Call To Action Area End -->
-
 <!-- Partner Area Start -->
 <div class="partner-area">
     <div class="container">
@@ -53,7 +52,9 @@
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="single-footer-widget mb-80">
                             <!-- Footer Logo -->
-                            <a href="#" class="footer-logo"><img src="img/core-img/logo2.png" alt=""></a>
+                            <a class="nav-brand" href="index.html">
+                                <img src="./img/logofoter.png" alt="Rentify Logo" class="logo-img">
+                              </a>
                             <p>We provide a wide range of tools for rent, from home improvement to gardening and construction. Rent the tools you need with ease!</p>
                         </div>
                     </div>
@@ -114,6 +115,26 @@
         </div>
     </footer>
     <!-- Footer Area End -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileButton = document.getElementById('profileButton');
+            const profileMenu = document.getElementById('profileMenu');
+
+            // Toggle عند الضغط
+            profileButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileMenu.classList.toggle('active');
+                console.log('Clicked! Current class:', profileMenu.className);
+            });
+
+            // إغلاق القائمة عند الضغط خارجها
+            document.addEventListener('click', (event) => {
+                if (!profileMenu.contains(event.target) && !profileButton.contains(event.target)) {
+                    profileMenu.classList.remove('active');
+                }
+            });
+        });
+    </script>
 
 
 <script src="{{ asset('js/jquery.min.js') }}"></script>
@@ -122,6 +143,10 @@
 <script src="{{ asset('js/roberto.bundle.js') }}"></script>
 <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
 <script src="{{ asset('js/default-assets/active.js') }}"></script>
+
+
+
+
 </body>
 
 </html>

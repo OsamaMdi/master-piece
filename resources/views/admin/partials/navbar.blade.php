@@ -10,6 +10,7 @@
         <a class="nav-brand" href="index.html">
             <img src="./img/logo.png" alt="Rentify Logo" class="logo-img">
         </a>
+
     </div>
 
     <!-- Center Section: Search -->

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\merchants;
+namespace App\Http\Controllers\admin;
 
 use App\Models\Image;
 use App\Models\Product;
@@ -20,7 +20,7 @@ class ProductController extends Controller
     $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
         ->where('user_id', Auth::id())
         ->paginate(16);
-    return view('merchants.product.products', compact('products', 'categories'));
+    return view('admin.product.products', compact('products', 'categories'));
     }
 
     public function store(Request $request)
@@ -105,7 +105,7 @@ class ProductController extends Controller
 
         $categories = Category::all();
 
-        return view('merchants.product.productShow', compact(
+        return view('admin.product.productShow', compact(
             'product',
             'reviews',
             'reservationsCount',
@@ -120,7 +120,7 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $product = Product::findOrFail($id);
-        return view('merchants.product.edit', compact('product'));
+        return view('admin.product.edit', compact('product'));
     }
 
     public function update(Request $request, string $id)

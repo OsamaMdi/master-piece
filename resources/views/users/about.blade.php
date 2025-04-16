@@ -1,7 +1,7 @@
 @extends('layouts.user.app')
 @section('content')
 <!-- Breadcrumb Area Start -->
-<div class="breadcrumb-area bg-img bg-overlay jarallax" style="background-image: url({{ asset('img/bg-img/16.jpg') }});">
+<div class="breadcrumb-area bg-img bg-overlay jarallax" style="background-image: url({{ asset('img/tool3.png') }});">
     <div class="container h-100">
         <div class="row h-100 align-items-center">
             <div class="col-12">
@@ -26,7 +26,7 @@
         <div class="row align-items-center">
             <div class="col-12 col-lg-6">
                 <div class="about-thumbnail pr-lg-5 mb-100 wow fadeInUp" data-wow-delay="100ms">
-                    <img src="{{ asset('img/bg-img/19.jpg') }}" alt="">
+                    <img src="{{ asset('img/tool1.png') }}" alt="">
                 </div>
             </div>
             <div class="col-12 col-lg-6">
@@ -46,7 +46,7 @@
 <!-- About Us Area End -->
 
 <!-- Video Area Start -->
-<div class="roberto--video--area bg-img bg-overlay jarallax section-padding-0-100" style="background-image: url({{ asset('img/bg-img/20.jpg') }});">
+<div class="roberto--video--area bg-img bg-overlay jarallax section-padding-0-100" style="background-image: url({{ asset('img/tool2.png') }});">
     <div class="container h-100">
         <div class="row h-100 align-items-center justify-content-center">
             <div class="col-12 col-md-6">

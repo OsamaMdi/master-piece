@@ -6,7 +6,7 @@
 <section class="welcome-area">
     <div class="welcome-slides owl-carousel">
         <!-- Single Welcome Slide -->
-        <div class="single-welcome-slide bg-img bg-overlay" style="background-image: url('{{ asset('img/bg-img/16.jpg') }}');" data-img-url="{{ asset('img/bg-img/16.jpg') }}">
+        <div class="single-welcome-slide bg-img bg-overlay" style="background-image: url('{{ asset('img/tool1.png') }}');" data-img-url="{{ asset('img/tool1.jpg') }}">
             <!-- Welcome Content -->
             <div class="welcome-content h-100">
                 <div class="container h-100">
@@ -24,7 +24,7 @@
         </div>
 
         <!-- Single Welcome Slide -->
-        <div class="single-welcome-slide bg-img bg-overlay" style="background-image: url('{{ asset('img/bg-img/17.jpg') }}');" data-img-url="{{ asset('img/bg-img/17.jpg') }}">
+        <div class="single-welcome-slide bg-img bg-overlay" style="background-image: url('{{ asset('img/tool2.png') }}');" data-img-url="{{ asset('img/tool2.png') }}">
             <div class="welcome-content h-100">
                 <div class="container h-100">
                     <div class="row h-100 align-items-center">
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Single Welcome Slide -->
-        <div class="single-welcome-slide bg-img bg-overlay" style="background-image: url('{{ asset('img/bg-img/18.jpg') }}');" data-img-url="{{ asset('img/bg-img/18.jpg') }}">
+        <div class="single-welcome-slide bg-img bg-overlay" style="background-image: url('{{ asset('img/tool3.png') }}');" data-img-url="{{ asset('img/tool3.png') }}">
             <div class="welcome-content h-100">
                 <div class="container h-100">
                     <div class="row h-100 align-items-center">
@@ -61,55 +61,53 @@
 </section>
 <!-- Welcome Area End -->
 
-<!-- Service Area Start -->
-<div class="roberto-service-area">
+<section class="roberto-service-area">
+    <h2 class="section-title">Our Services</h2>
+    <p class="section-subtitle">Explore the range of premium services we provide to enhance your experience.</p>
+
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="service-content d-flex align-items-center justify-content-between">
-                    <!-- Single Service Area -->
-                    <div class="single-service--area mb-100 wow fadeInUp" data-wow-delay="100ms">
-                        <img src="{{ asset('img/core-img/icon-1.png') }}" alt="">
-                        <h5>Transportion</h5>
-                    </div>
+      <div class="service-content">
 
-                    <!-- Single Service Area -->
-                    <div class="single-service--area mb-100 wow fadeInUp" data-wow-delay="300ms">
-                        <img src="{{ asset('img/core-img/icon-2.png') }}" alt="">
-                        <h5>Reiseservice</h5>
-                    </div>
-
-                    <!-- Single Service Area -->
-                    <div class="single-service--area mb-100 wow fadeInUp" data-wow-delay="500ms">
-                        <img src="{{ asset('img/core-img/icon-3.png') }}" alt="">
-                        <h5>Spa Relaxtion</h5>
-                    </div>
-
-                    <!-- Single Service Area -->
-                    <div class="single-service--area mb-100 wow fadeInUp" data-wow-delay="700ms">
-                        <img src="{{ asset('img/core-img/icon-4.png') }}" alt="">
-                        <h5>Restaurant</h5>
-                    </div>
-
-                    <!-- Single Service Area -->
-                    <div class="single-service--area mb-100 wow fadeInUp" data-wow-delay="900ms">
-                        <img src="{{ asset('img/core-img/icon-1.png') }}" alt="">
-                        <h5>Bar &amp; Drink</h5>
-                    </div>
-                </div>
-            </div>
+        <div class="single-service">
+          <span class="service-count">1</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/69/69524.png" alt="Transportation">
+          <h5>Transportation</h5>
         </div>
-    </div>
-</div>
-<!-- Service Area End -->
 
+        <div class="single-service">
+          <span class="service-count">2</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/201/201623.png" alt="Room Service">
+          <h5>Room Service</h5>
+        </div>
+
+        <div class="single-service">
+          <span class="service-count">3</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/2909/2909762.png" alt="Spa Relaxation">
+          <h5>Spa Relaxation</h5>
+        </div>
+
+        <div class="single-service">
+          <span class="service-count">4</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="Restaurant">
+          <h5>Restaurant</h5>
+        </div>
+
+        <div class="single-service">
+          <span class="service-count">5</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/2947/2947992.png" alt="Bar & Drinks">
+          <h5>Bar & Drinks</h5>
+        </div>
+
+      </div>
+    </div>
+  </section>
 
 <!-- Testimonials Area Start -->
 <section class="roberto-testimonials-area section-padding-100-0">
     <div class="container">
         <div class="row align-items-center">
 
-         
+
             <div class="col-12 col-md-6">
                 <div class="testimonial-thumbnail owl-carousel mb-100">
                     <img src="{{ asset('img/bg-img/10.jpg') }}" alt="">
@@ -117,7 +115,7 @@
                 </div>
             </div>
 
-            <!-- محتوى التستيمونيال (الجهة اليمنى) -->
+
             <div class="col-12 col-md-6">
                 <!-- Section Heading -->
                 <div class="section-heading">
@@ -188,72 +186,86 @@
 <!-- Testimonials Area End -->
 
 
-<!-- Blog Area Start -->
-<section class="roberto-blog-area section-padding-100-0">
+<!-- Subscription Plans Section -->
+<section class="subscription-plans">
     <div class="container">
-        <div class="row">
-            <!-- Section Heading -->
-            <div class="col-12">
-                <div class="section-heading text-center wow fadeInUp" data-wow-delay="100ms">
-                    <h6>Our Blog</h6>
-                    <h2>Latest News &amp; Event</h2>
-                </div>
+        <div class="section-header">
+            <h2 class="section-title">Choose Your Plan</h2>
+            <p class="section-subtitle">Flexible pricing for continuous access</p>
+            <div class="billing-toggle">
+                <span>Billed Monthly</span>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span>Billed Yearly <em>(Save 20%)</em></span>
             </div>
         </div>
 
-        <div class="row">
-
-            <!-- Single Blog Post -->
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="single-post-area mb-100 wow fadeInUp" data-wow-delay="300ms">
-                    <a href="#" class="post-thumbnail">
-                        <img src="{{ asset('img/bg-img/2.jpg') }}" alt="">
-                    </a>
-                    <div class="post-meta">
-                        <a href="#" class="post-date">Jan 02, 2019</a>
-                        <a href="#" class="post-catagory">Event</a>
+        <div class="plan-cards">
+            <!-- Starter Plan -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <h3 class="plan-name">Starter</h3>
+                    <div class="plan-price">
+                        <sup>$</sup>19<span>/mo</span>
                     </div>
-                    <a href="#" class="post-title">Learn How To Motivate Yourself</a>
-                    <p>How many free autoresponders have you tried? And how many emails did you get through using them?</p>
-                    <a href="#" class="btn continue-btn"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></a>
+                    <p class="plan-desc">Perfect for individual users</p>
                 </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Single User Account</li>
+                    <li><i class="fas fa-check"></i> Basic Analytics</li>
+                    <li><i class="fas fa-check"></i> 5GB Storage</li>
+                    <li><i class="fas fa-check"></i> Email Support</li>
+                </ul>
+                <button class="plan-cta">Start Free Trial</button>
+                <div class="plan-notice">7-day free trial</div>
             </div>
 
-            <!-- Single Blog Post -->
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="single-post-area mb-100 wow fadeInUp" data-wow-delay="500ms">
-                    <a href="#" class="post-thumbnail">
-                        <img src="{{ asset('img/bg-img/3.jpg') }}" alt="">
-                    </a>
-                    <div class="post-meta">
-                        <a href="#" class="post-date">Jan 02, 2019</a>
-                        <a href="#" class="post-catagory">Event</a>
+            <!-- Professional Plan (Featured) -->
+            <div class="plan-card featured">
+                <div class="plan-badge">Most Popular</div>
+                <div class="plan-header">
+                    <h3 class="plan-name">Professional</h3>
+                    <div class="plan-price">
+                        <sup>$</sup>49<span>/mo</span>
                     </div>
-                    <a href="#" class="post-title">What If Let You Run The Hubble</a>
-                    <p>My point here is that if you have no clue for the answers above you probably are not operating a followup.</p>
-                    <a href="#" class="btn continue-btn"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></a>
+                    <p class="plan-desc">For growing teams</p>
                 </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Up to 5 Users</li>
+                    <li><i class="fas fa-check"></i> Advanced Analytics</li>
+                    <li><i class="fas fa-check"></i> 25GB Storage</li>
+                    <li><i class="fas fa-check"></i> Priority Support</li>
+                </ul>
+                <button class="plan-cta">Start Free Trial</button>
+                <div class="plan-notice">14-day free trial</div>
             </div>
 
-            <!-- Single Blog Post -->
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="single-post-area mb-100 wow fadeInUp" data-wow-delay="700ms">
-                    <a href="#" class="post-thumbnail">
-                        <img src="{{ asset('img/bg-img/4.jpg') }}" alt="">
-                    </a>
-                    <div class="post-meta">
-                        <a href="#" class="post-date">Jan 02, 2019</a>
-                        <a href="#" class="post-catagory">Event</a>
+            <!-- Enterprise Plan -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <h3 class="plan-name">Enterprise</h3>
+                    <div class="plan-price">
+                        <sup>$</sup>99<span>/mo</span>
                     </div>
-                    <a href="#" class="post-title">Six Pack Abs The Big Picture</a>
-                    <p>Some good steps to take to ensure you are getting what you need out of a autoresponder include…</p>
-                    <a href="#" class="btn continue-btn"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></a>
+                    <p class="plan-desc">For large organizations</p>
                 </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Unlimited Users</li>
+                    <li><i class="fas fa-check"></i> Custom Analytics</li>
+                    <li><i class="fas fa-check"></i> 100GB Storage</li>
+                    <li><i class="fas fa-check"></i> 24/7 Support</li>
+                </ul>
+                <button class="plan-cta">Contact Sales</button>
+                <div class="plan-notice">Custom plans available</div>
             </div>
+        </div>
 
+        <div class="plan-footer">
+            <p>All plans include: <span>Secure hosting</span> • <span>Regular updates</span> • <span>99.9% uptime</span></p>
         </div>
     </div>
 </section>
-<!-- Blog Area End -->
 
 @endsection

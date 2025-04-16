@@ -58,6 +58,11 @@
       font-size: 26px;
       font-weight: 500; }
 
+      .classy-navbar .nav-brand img {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+      }
 .classynav ul li {
   display: inline-block;
   clear: both;

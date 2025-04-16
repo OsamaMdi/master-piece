@@ -543,3 +543,23 @@ function showCustomNotification(message, type = 'success') {
         progressBar.style.width = '0%';
     }, duration);
 }
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('imagePreviewModal');
+    const modalImage = document.getElementById('previewImage');
+
+
+    document.querySelectorAll('.swiper-slide img').forEach(img => {
+        img.addEventListener('click', () => {
+            modalImage.src = img.src;
+            modal.classList.remove('hidden');
+        });
+    });
+
+    modal.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modalImage.src = '';
+    });
+});

@@ -31,8 +31,8 @@ class AuthenticatedSessionController extends Controller
             $user = Auth::user();
 
             if ($user->user_type === 'merchant') {
-              
-                return redirect()->route('merchant.dashboard');
+
+                return redirect()->route('merchant.products.index');
             } else {
                 return redirect()->route('dashboard');
             }
