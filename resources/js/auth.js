@@ -1,4 +1,4 @@
-/* document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
     // ===== Toggle Password Visibility =====
     const setupPasswordToggle = (toggleId, iconId, inputId) => {
@@ -127,4 +127,4 @@
     }
 
 });
- */
+

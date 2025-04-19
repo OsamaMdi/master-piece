@@ -8,7 +8,7 @@
 
         <!-- Logo -->
         <a class="nav-brand" href="index.html">
-            <img src="./img/logo.png" alt="Rentify Logo" class="logo-img">
+            <img src="{{ asset('img/logof.png') }}" alt="Rentify Logo" class="logo-img">
         </a>
 
     </div>

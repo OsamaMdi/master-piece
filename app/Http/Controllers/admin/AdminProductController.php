@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Models\User;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Category;
@@ -12,35 +13,49 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-class ProductController extends Controller
+class AdminProductController extends Controller
 {
     public function index()
     {
         $categories = Category::all();
-    $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
-        ->where('user_id', Auth::id())
-        ->paginate(16);
-    return view('admin.product.products', compact('products', 'categories'));
+
+        $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
+            ->latest()
+            ->paginate(16);
+
+        $merchants = User::where('user_type', 'merchant')->get();
+
+        return view('admin.product.products', compact('products', 'categories', 'merchants'));
     }
+
+
 
     public function store(Request $request)
     {
         try {
+            // Validation
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'required|string|min:10',
                 'price' => 'required|numeric|min:0.01',
                 'quantity' => 'required|integer|min:1',
                 'category_id' => 'required|exists:categories,id',
+                'merchant_id' => 'required|exists:users,id',
             ]);
 
+            // Extra check just in case
+            if (!$request->has('merchant_id') || empty($request->merchant_id)) {
+                return redirect()->back()->with('error', 'Merchant is required to assign the product.')->withInput();
+            }
+
+            // Create product
             $product = Product::create([
                 'name' => $request->name,
                 'description' => $request->description,
                 'price' => $request->price,
                 'quantity' => $request->quantity,
                 'status' => 'available',
-                'user_id' => Auth::id(),
+                'user_id' => $request->merchant_id,
                 'category_id' => $request->category_id,
             ]);
 
@@ -49,16 +64,23 @@ class ProductController extends Controller
             }
 
             session(['newProductId' => $product->id]);
-            return redirect()->route('merchant.products.index')->with('success', 'Product added successfully!')->with('showUploadModal', true);
+            return redirect()->route('admin.products.index')
+                             ->with('success', 'Product added successfully!')
+                             ->with('showUploadModal', true);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->wantsJson()) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
             Log::error('Validation Error: ' . $e->getMessage());
-            return redirect()->back()->withErrors($e->errors());
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Unexpected error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unexpected error occurred.')->withInput();
         }
     }
+
 
     public function uploadImage(Request $request)
     {
@@ -146,7 +168,7 @@ class ProductController extends Controller
                 ]);
             }
 
-            return redirect()->route('merchant.products.index')->with('success', 'Product updated successfully!');
+            return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -170,25 +192,25 @@ class ProductController extends Controller
 
 
     public function destroy(string $id)
-    {
-        try {
-            $product = Product::findOrFail($id);
+{
+    try {
+        $product = Product::findOrFail($id);
 
-            foreach ($product->images as $image) {
-                if (Storage::disk('public')->exists($image->image_url)) {
-                    Storage::disk('public')->delete($image->image_url);
-                }
-                $image->delete();
+        foreach ($product->images as $image) {
+            if (Storage::disk('public')->exists($image->image_url)) {
+                Storage::disk('public')->delete($image->image_url);
             }
-
-            $product->delete();
-
-            return redirect()->route('merchant.products.index')->with('success', 'Product deleted successfully!');
-        } catch (\Exception $e) {
-            Log::error('Error while deleting product: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while deleting the product.');
+            $image->delete();
         }
+
+        $product->delete();
+
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
+    } catch (\Exception $e) {
+        Log::error('Error while deleting product: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'An error occurred while deleting the product.');
     }
+}
 
     public function updateImages(Request $request, string $id)
     {
@@ -237,7 +259,7 @@ class ProductController extends Controller
                 return response()->json(['message' => 'Images updated successfully!']);
             }
 
-            return redirect()->route('merchant.products.show', $product->id)
+            return redirect()->route('admin.products.show', $product->id)
                              ->with('success', 'Images updated successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson()) {

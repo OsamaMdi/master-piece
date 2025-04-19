@@ -1,4 +1,4 @@
-@extends('layouts.merchants.app')
+@extends('layouts.admin.app')
 
 @section('content')
 <div class="dashboard-overview">

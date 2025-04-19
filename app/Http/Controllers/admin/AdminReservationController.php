@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
-class ReservationController extends Controller
+class AdminReservationController extends Controller
 {
     public function cancel(string $reservationId)
     {
@@ -79,18 +79,13 @@ class ReservationController extends Controller
     }
 
       // Show all reservations for the current user
-    public function showReservations()
-{
-    $user = Auth::user();
+      public function showReservations()
+      {
+          $reservations = Reservation::with(['user', 'product.reviews'])
+              ->orderBy('created_at', 'desc')
+              ->paginate(30);
 
-    // Get all reservations where the product belongs to the current user
-    $reservations = Reservation::with(['user', 'product.reviews'])
-        ->whereHas('product', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(30);
+          return view('admin.reservation.reservations', compact('reservations'));
+      }
 
-    return view('admin.reservation.reservations', compact('reservations'));
-}
 }

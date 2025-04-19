@@ -154,6 +154,8 @@
 
             <!-- Modal Actions -->
             <div class="modal-actions">
+                <input type="hidden" id="redirectTo" value="merchant">
+                <input type="hidden" id="redirectTo" value="{{ session('redirectTo', 'merchant') }}">
                 <button type="submit" class="btn btn-primary">Upload Image</button>
                 <button type="button" id="finishUploading" class="btn btn-cancel">Finish</button>
             </div>

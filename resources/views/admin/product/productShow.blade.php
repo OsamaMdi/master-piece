@@ -1,4 +1,4 @@
-@extends('layouts.merchants.app')
+@extends('layouts.admin.app')
 
 @section('content')
 <!-- ======== Page Title ======== -->
@@ -66,7 +66,7 @@
     <p>Completed: {{ $completedReservationsCount }}</p>
     <p>Upcoming: {{ $upcomingReservationsCount }}</p>
 
-    <a href="{{ route('merchant.product.reservations', $product->id) }}" class="btn-view-reservations">View All Reservations</a>
+    <a href="{{ route('admin.product.reservations', $product->id) }}" class="btn-view-reservations">View All Reservations</a>
 </div>
 
 <!-- ======== Product Reviews Section ======== -->
@@ -103,7 +103,7 @@
 </div>
 
 <!-- ======== Fixed Back Button (at Bottom Left) ======== -->
-<a href="{{ route('merchant.products.index') }}" class="btn-back-fixed">
+<a href="{{ route('admin.products.index') }}" class="btn-back-fixed">
     🔙 Back
 </a>
 
@@ -116,7 +116,7 @@
         </div>
 
         <!-- Modal Body -->
-        <form id="editProductForm" action="{{ route('merchant.products.update', $product->id) }}" method="POST">
+        <form id="editProductForm" action="{{ route('admin.products.update', $product->id) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -184,7 +184,7 @@
         </div>
 
         <!-- Start Form -->
-        <form id="editImagesForm" action="{{ route('merchant.products.updateImages', $product->id) }}" method="POST" enctype="multipart/form-data">
+        <form id="editImagesForm" action="{{ route('admin.products.updateImages', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Existing Images Preview -->

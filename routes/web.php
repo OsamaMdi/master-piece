@@ -5,8 +5,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\merchants\ReservationController;
 use App\Http\Controllers\merchants\ProductController;
+use App\Http\Controllers\admin\AdminReservationController;
+use App\Http\Controllers\admin\AdminProductController;
 use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\SystemCheckController;
+use App\Http\Controllers\admin\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,14 +57,19 @@ Route::view('/contact', 'users.contact')->name('contact');
 */
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::get('/', [MerchantController::class, 'dashboard'])->name('dashboard');
-    Route::resource('products', ProductController::class);
-    Route::get('/{id}/reservations', [ReservationController::class, 'showProductReservations'])->name('product.reservations');
-    Route::get('/reservations', [ReservationController::class, 'showReservations'])->name('reservations');
-    Route::get('/reservation/{id}/details', [ReservationController::class, 'showReservationDetails'])->name('reservation.details');
-    Route::post('/products/{product}/update-images', [ProductController::class, 'updateImages'])->name('products.updateImages');
-    Route::post('products/upload-image', [ProductController::class, 'uploadImage'])->name('products.uploadImage');
-    Route::patch('/reservation/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservation.cancel');
+    Route::get('/', [MerchantController::class, 'adminDashboard'])->name('dashboard');
+    Route::resource('products', AdminProductController::class);
+    Route::get('/{id}/reservations', [AdminReservationController::class, 'showProductReservations'])->name('product.reservations');
+    Route::get('/reservations', [AdminReservationController::class, 'showReservations'])->name('reservations');
+    Route::get('/reservation/{id}/details', [AdminReservationController::class, 'showReservationDetails'])->name('reservation.details');
+    Route::post('/products/{product}/update-images', [AdminProductController::class, 'updateImages'])->name('products.updateImages');
+    Route::post('products/upload-image', [AdminProductController::class, 'uploadImage'])->name('products.uploadImage');
+    Route::patch('/reservation/{id}/cancel', [AdminReservationController::class, 'cancel'])->name('reservation.cancel');
+
+    Route::resource('users', UserController::class);
+    Route::post('users/upload-identity', [UserController::class, 'uploadIdentity'])->name('users.upload.identity');
+
+
     Route::get('products/{product}/images/count', function ($productId) {
         $product = App\Models\Product::findOrFail($productId);
         return response()->json([

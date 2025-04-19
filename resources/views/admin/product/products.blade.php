@@ -1,4 +1,4 @@
-@extends('layouts.merchants.app')
+@extends('layouts.admin.app')
 
 @section('content')
 
@@ -24,20 +24,24 @@
         </div>
 
         <div class="product-details">
-            {{-- اسم المنتج فقط --}}
+
+
             <h3 class="product-name">{{ $product->name }}</h3>
 
-            {{-- السعر والستوك --}}
+
+            <p class="product-merchant">By: {{ $product->user->name }}</p>
+
+            <!-- السعر والستوك -->
             <div class="product-row">
                 <p class="product-price">{{ number_format($product->price, 2) }} JOD/day</p>
                 <p class="product-stock">Stock: {{ $product->quantity }}</p>
             </div>
 
-            {{-- الأكشن + الحالة --}}
+            <!-- الإجراءات -->
             <div class="product-actions-row">
                 <div class="product-actions">
-                    <a href="{{ route('merchant.products.show', $product->id) }}" class="btn btn-view">👁️ View</a>
-                    <form method="POST" action="{{ route('merchant.products.destroy', $product->id) }}" class="delete-form">
+                    <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-view">👁️ View</a>
+                    <form method="POST" action="{{ route('admin.products.destroy', $product->id) }}" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-delete delete-btn">🗑️ Delete</button>
@@ -46,7 +50,6 @@
                 <p class="product-status {{ $product->status }}">{{ ucfirst($product->status) }}</p>
             </div>
         </div>
-
     </div>
     @empty
     <div class="empty-state">
@@ -55,6 +58,7 @@
     </div>
     @endforelse
 </div>
+
 
 <!-- ======== Confirmation Modal (for Deletion) ======== -->
 <div id="confirmationModal" class="modal hidden">
@@ -72,7 +76,7 @@
 <div id="addProductModal" class="modal {{ $errors->any() ? '' : 'hidden' }}">
     <div class="modal-content">
         <h3>Add New Product</h3>
-        <form id="addProductForm" action="{{ route('merchant.products.store') }}" method="POST">
+        <form id="addProductForm" action="{{ route('admin.products.store') }}" method="POST">
             @csrf
 
             <!-- Product Name Field -->
@@ -117,6 +121,25 @@
                 @error('category_id')<small class="error-text">{{ $message }}</small>@enderror
             </div>
 
+
+            <div class="form-group">
+                <label for="merchant">Select Merchant:</label>
+                <select name="merchant_id" id="merchant" class="form-control" required>
+                    <option value="">Select Merchant</option>
+                    @foreach($merchants as $merchant)
+                        <option value="{{ $merchant->id }}" {{ old('merchant_id') == $merchant->id ? 'selected' : '' }}>
+                            {{ $merchant->name }} ({{ $merchant->email }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('merchant_id')
+                    <small class="error-text text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+
+
+
+
             <!-- Modal Actions -->
             <div class="modal-actions">
                 <button type="button" id="cancelAddProduct" class="btn btn-cancel">Cancel</button>
@@ -141,7 +164,7 @@
         </div>
         @endif
 
-        <form id="uploadImageForm" action="{{ route('merchant.products.uploadImage') }}" method="POST" enctype="multipart/form-data">
+        <form id="uploadImageForm" action="{{ route('admin.products.uploadImage') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="product_id" id="uploadedProductId">
 
@@ -154,6 +177,8 @@
 
             <!-- Modal Actions -->
             <div class="modal-actions">
+                <input type="hidden" id="redirectTo" value="admin">
+                <input type="hidden" id="redirectTo" value="{{ session('redirectTo', 'admin') }}">
                 <button type="submit" class="btn btn-primary">Upload Image</button>
                 <button type="button" id="finishUploading" class="btn btn-cancel">Finish</button>
             </div>
@@ -204,6 +229,8 @@
             @endfor
         </ul>
     </div>
+
+
 @endif
 
 @endsection

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
     const toggleSidebar = document.getElementById('toggleSidebar');
@@ -8,17 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteButtons = document.querySelectorAll('.delete-btn');
     let currentForm = null;
 
-    // Sidebar management
+    // Sidebar toggle
     toggleSidebar.addEventListener('click', () => {
         if (window.innerWidth > 992) {
             sidebar.classList.toggle('hidden');
-            if (sidebar.classList.contains('hidden')) {
-                mainContent.style.transition = 'margin-left 0.3s ease';
-                mainContent.style.marginLeft = '0';
-            } else {
-                mainContent.style.transition = 'margin-left 0.3s ease';
-                mainContent.style.marginLeft = '220px';
-            }
+            mainContent.style.marginLeft = sidebar.classList.contains('hidden') ? '0' : '220px';
         } else {
             sidebar.classList.toggle('show');
         }
@@ -56,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.classList.add('hidden');
     });
 
-    // Mobile touch interaction with sidebar
+    // Touch support for sidebar
     let touchStartX = 0;
     const touchThreshold = 50;
 
@@ -74,21 +68,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Close modal by pressing Escape key
+    // Escape key closes modal
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
             modal.classList.add('hidden');
         }
     });
 
-    // Add Product and Upload Image Modals
+    // Modals
     const addProductModal = document.getElementById('addProductModal');
     const uploadImageModal = document.getElementById('uploadImageModal');
     const addProductForm = document.getElementById('addProductForm');
     const uploadImageForm = document.getElementById('uploadImageForm');
     const finishUploading = document.getElementById('finishUploading');
 
-    // Open Add Product Modal
     const openAddProductModalBtn = document.getElementById('openAddProductModal');
     if (openAddProductModalBtn) {
         openAddProductModalBtn.addEventListener('click', function() {
@@ -96,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Close Add Product Modal when clicking Cancel
     const cancelAddProductBtn = document.getElementById('cancelAddProduct');
     if (cancelAddProductBtn) {
         cancelAddProductBtn.addEventListener('click', function() {
@@ -104,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // After adding a product -> open upload image modal if necessary
+    // Check image upload status
     const showUploadModalMeta = document.querySelector('meta[name="show-upload-modal"]');
     const newProductIdMeta = document.querySelector('meta[name="new-product-id"]');
 
@@ -118,19 +110,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Finish Uploading Image button with check
-    finishUploading.addEventListener('click', function() {
-        const uploadedProductId = document.getElementById('uploadedProductId').value;
+   // ===== Finish Uploading Button Logic =====
+if (finishUploading) {
+    finishUploading.addEventListener('click', function () {
+        const uploadedProductId = document.getElementById('uploadedProductId')?.value;
+        const redirectTo = document.getElementById('redirectTo')?.value;
+
+        if (!uploadedProductId) {
+            showNotification('❌ Missing product ID!', 'error');
+            return;
+        }
 
         fetch(`/merchant/products/${uploadedProductId}/images/count`)
             .then(response => response.json())
             .then(data => {
                 if (data.count > 0) {
                     showCustomNotification('✅ Image uploaded successfully!', 'success');
-
                     setTimeout(() => {
-                        window.location.href = "/merchant/products";
-                    }, 1500); // نعطيه ثانية ونص عشان يشوف المسج قبل ما نوديه
+                        const redirectUrl = redirectTo === 'admin'
+                            ? "/admin/products"
+                            : "/merchant/products";
+                        window.location.href = redirectUrl;
+                    }, 1500);
                 } else {
                     showNotification('❌ You must upload at least one image before finishing!', 'error');
                 }
@@ -140,9 +141,70 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('An error occurred. Please try again.', 'error');
             });
     });
+}
 
 
-    // Notification Popup (success or error message)
+
+
+    // Add Product Form Validation
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', function (e) {
+            let hasError = false;
+
+            const nameInput = addProductForm.querySelector('input[name="name"]');
+            const descInput = addProductForm.querySelector('textarea[name="description"]');
+            const priceInput = addProductForm.querySelector('input[name="price"]');
+            const quantityInput = addProductForm.querySelector('input[name="quantity"]');
+            const categorySelect = addProductForm.querySelector('select[name="category_id"]');
+            const merchantSelect = addProductForm.querySelector('select[name="merchant_id"]');
+
+            const name = nameInput.value.trim();
+            const description = descInput.value.trim();
+
+            addProductForm.querySelectorAll('.error-text').forEach(e => e.remove());
+
+            const showError = (el, message) => {
+                const error = document.createElement('small');
+                error.classList.add('error-text');
+                error.style.color = 'red';
+                error.textContent = message;
+                el.parentElement.appendChild(error);
+                hasError = true;
+            };
+
+            if (name.length < 4) {
+                showError(nameInput, 'Name must be at least 4 characters.');
+            }
+
+            if (description.length < 20) {
+                showError(descInput, 'Description must be at least 20 characters.');
+            }
+
+            const priceValue = parseFloat(priceInput.value);
+            if (!priceInput.value || isNaN(priceValue) || priceValue < 1) {
+                showError(priceInput, 'Price must be 1 JOD or more.');
+            }
+
+            if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
+                showError(quantityInput, 'Quantity must be at least 1.');
+            }
+
+            if (!categorySelect.value) {
+                showError(categorySelect, 'Please select a category.');
+            }
+
+            if (merchantSelect && !merchantSelect.value) {
+                showError(merchantSelect, 'Please select a merchant.');
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                showNotification('❌ Please fix the form errors before submitting.', 'error');
+            }
+        });
+    }
+
+    // Notification popup
     window.showNotification = function(message, type = 'success', showActions = false) {
         const popup = document.getElementById('notificationPopup');
         const messageBox = document.getElementById('notificationMessage');
@@ -158,17 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
             popup.style.color = '#721c24';
         }
 
-        if (showActions) {
-            actions.classList.remove('hidden');
-        } else {
-            actions.classList.add('hidden');
-        }
+        actions.classList.toggle('hidden', !showActions);
 
         popup.classList.remove('hidden');
         popup.classList.add('show');
 
-        // When a popup is showing, hide actions
-        if (showActions) {
+        if (!showActions) {
             setTimeout(() => {
                 popup.classList.remove('show');
                 popup.classList.add('hidden');
@@ -176,23 +233,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Custom Notification Popup with Progress Bar
+    // Custom notification with progress
     function showCustomNotification(message, type = 'success') {
         const popup = document.getElementById('customNotification');
         const icon = document.getElementById('notificationIcon');
         const messageBox = document.getElementById('customNotificationMessage');
         const progressBar = document.getElementById('customProgressBar');
 
-        const duration = 7000; // 10 seconds
+        const duration = 7000;
 
         messageBox.textContent = message;
-
-        // Remove all previous notification types (success, error, warning)
         popup.classList.remove('success', 'error', 'warning');
 
         let soundSrc = '';
 
-        // Set icon and sound based on type
         if (type === 'success') {
             popup.classList.add('success');
             icon.innerHTML = '✔️';
@@ -207,37 +261,31 @@ document.addEventListener('DOMContentLoaded', function() {
             soundSrc = '/sounds/warning.mp3';
         }
 
-        // Play notification sound if it exists
         if (soundSrc) {
             const audio = new Audio(soundSrc);
             audio.play();
         }
 
-        // Remove previous animation states
         icon.classList.remove('bounce');
         popup.classList.remove('hidden');
         popup.classList.add('show');
 
-        // Apply bounce animation
-        void icon.offsetWidth; // Trigger reflow
-        icon.classList.add('bounce'); // Add bounce animation
+        void icon.offsetWidth;
+        icon.classList.add('bounce');
 
-        // Reset and animate progress bar
-        progressBar.style.transition = 'none';  // Remove any transition during reset
-        progressBar.style.width = '0%';  // Start from 0%
-        void progressBar.offsetWidth; // Trigger reflow
-        progressBar.style.transition = `width ${duration}ms linear`;  // Apply smooth transition
-        progressBar.style.width = '100%';  // Animate to 100%
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        void progressBar.offsetWidth;
+        progressBar.style.transition = `width ${duration}ms linear`;
+        progressBar.style.width = '100%';
 
-        // Hide notification after duration
         setTimeout(() => {
             popup.classList.remove('show');
             popup.classList.add('hidden');
-            progressBar.style.width = '0%';  // Reset the progress bar
+            progressBar.style.width = '0%';
         }, duration);
     }
 
-    // Close custom notification manually
     const closeCustomNotificationBtn = document.getElementById('closeCustomNotification');
     if (closeCustomNotificationBtn) {
         closeCustomNotificationBtn.addEventListener('click', function() {
@@ -247,6 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
 // ======== Product Show Page Scripts (FIXED No Animation, No Loading Issues) ========
 
 var link = document.createElement('link');
@@ -563,3 +612,6 @@ document.addEventListener('DOMContentLoaded', function () {
         modalImage.src = '';
     });
 });
+
+
+
