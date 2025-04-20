@@ -9,10 +9,10 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // اسم التصنيف
-            $table->text('description')->nullable(); // وصف التصنيف (اختياري)
+            $table->string('name'); 
+            $table->text('description')->nullable();
             $table->timestamps();
-            $table->softDeletes(); // سوفت دليت
+            $table->softDeletes();
         });
     }
 

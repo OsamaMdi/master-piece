@@ -2,14 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MerchantController;
-use App\Http\Controllers\merchants\ReservationController;
-use App\Http\Controllers\merchants\ProductController;
-use App\Http\Controllers\admin\AdminReservationController;
-use App\Http\Controllers\admin\AdminProductController;
 use App\Http\Controllers\IdentityController;
-use App\Http\Controllers\SystemCheckController;
+use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\SystemCheckController;
+use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\merchants\ProductController;
+use App\Http\Controllers\admin\AdminProductController;
+use App\Http\Controllers\Admin\WebsiteReviewController;
+use App\Http\Controllers\merchants\ReservationController;
+use App\Http\Controllers\admin\AdminReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +72,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::post('users/upload-identity', [UserController::class, 'uploadIdentity'])->name('users.upload.identity');
 
+    Route::resource('categories', CategoryController::class);
+    Route::resource('reviews', ReviewController::class);
+    Route::resource('website-reviews', WebsiteReviewController::class);
 
     Route::get('products/{product}/images/count', function ($productId) {
         $product = App\Models\Product::findOrFail($productId);

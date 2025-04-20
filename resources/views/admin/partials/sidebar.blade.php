@@ -19,7 +19,24 @@
             <a href="{{ route('admin.reservations') }}"><i class="fas fa-calendar-check"></i> Reservations</a>
         </li>
         <li>
-            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            <a href="{{ route('admin.categories.index') }}">
+                <i class="fas fa-layer-group"></i> Categories
+            </a>
+
         </li>
+
+        <li>
+            <a href="{{ route('admin.reviews.index') }}">
+                <i class="fas fa-star-half-alt"></i> Product Reviews
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('admin.website-reviews.index') }}">
+                <i class="fas fa-comment-dots"></i> Website Reviews
+            </a>
+        </li>
+
+        
     </ul>
 </div>

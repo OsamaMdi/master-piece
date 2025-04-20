@@ -1,13 +1,15 @@
-/* ====== Global User Management Style ====== */
-
-.page-header, .form-title, h2 {
+/* ====== الصفحة العامة ====== */
+.page-title {
     font-size: 1.8rem;
     font-weight: 600;
     color: #1a365d;
     margin-bottom: 1.5rem;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
+/* ====== البطاقات ====== */
 .card, .profile-card {
     background: #ffffff;
     border-radius: 16px;
@@ -21,6 +23,7 @@
     transform: translateY(-4px);
 }
 
+/* ====== الحقول ====== */
 label.form-label {
     font-weight: 500;
     color: #1a365d;
@@ -43,6 +46,7 @@ select.form-select:focus {
     box-shadow: 0 0 0 0.1rem rgba(66, 153, 225, 0.25);
 }
 
+/* ====== الأزرار ====== */
 .btn-primary {
     background-color: #4a6cf7;
     border-color: #4a6cf7;
@@ -50,19 +54,11 @@ select.form-select:focus {
     padding: 0.6rem 1.2rem;
     font-weight: 500;
     transition: background 0.3s ease-in-out;
+    color: #fff;
 }
 
 .btn-primary:hover {
     background-color: #2f55d4;
-}
-
-.btn-secondary {
-    background-color: #e2e8f0;
-    color: #2d3748;
-    border: none;
-    border-radius: 10px;
-    padding: 0.6rem 1.2rem;
-    font-weight: 500;
 }
 
 .btn-success {
@@ -78,6 +74,24 @@ select.form-select:focus {
     background-color: #2f855a;
 }
 
+.btnnn {
+    background-color: #38a169;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+}
+
+.btnnn:hover {
+    background-color: #2f855a;
+    transform: translateY(-2px);
+}
+
+
+/* ====== التنبيهات ====== */
 .alert {
     padding: 1rem;
     border-radius: 10px;
@@ -94,6 +108,12 @@ select.form-select:focus {
     color: #31708f;
 }
 
+small.text-danger {
+    font-size: 0.875rem;
+    color: #e53e3e;
+}
+
+/* ====== صور ====== */
 img {
     border-radius: 10px;
     margin-top: 1rem;
@@ -109,36 +129,13 @@ img {
     display: inline-block;
 }
 
-small.text-danger {
-    font-size: 0.875rem;
-    color: #e53e3e;
-}
-
-.form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-col {
-    flex: 1 1 calc(50% - 1rem);
-    min-width: 250px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.search-filter-form input,
-.search-filter-form select {
-    max-width: 250px;
-}
-
+/* ====== الجدول ====== */
 .table {
     background-color: #fff;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    width: 100%;
 }
 
 .table th, .table td {
@@ -156,10 +153,26 @@ small.text-danger {
     color: #4a5568;
 }
 
+/* شارات الحالة */
 .badge {
     font-size: 0.85rem;
     padding: 0.4em 0.75em;
     border-radius: 8px;
+}
+
+/* ====== أزرار الإجراءات (Actions) ====== */
+.table td.text-end {
+    text-align: right !important;
+}
+
+.table .d-flex.justify-content-end {
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.table td.text-end form {
+    display: inline-block;
+    margin: 0;
 }
 
 .table .btn-sm {
@@ -168,10 +181,8 @@ small.text-danger {
     border-radius: 6px;
 }
 
-/* Icon Styles */
 .table .btn i {
     font-size: 0.9rem;
-    margin-right: 2px;
     transition: transform 0.2s ease;
 }
 
@@ -179,7 +190,104 @@ small.text-danger {
     transform: scale(1.1);
 }
 
-/* Toast/Alert Fix */
+.table .btn-outline-primary i {
+    color: #4a6cf7;
+}
+
+.table .btn-outline-warning i {
+    color: #dd6b20;
+}
+
+.table .btn-outline-danger i {
+    color: #e53e3e;
+}
+
+/* ====== الفلاتر ====== */
+.search-filter-form,
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.search-filter-form input,
+.search-filter-form select,
+.filter-form input,
+.filter-form select {
+    max-width: 250px;
+}
+
+/* ====== تنسيق الحاوية ====== */
+.table-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ====== استجابة الجوال ====== */
+@media (max-width: 768px) {
+    .search-filter-form .form-control,
+    .search-filter-form .form-select,
+    .search-filter-form .btn,
+    .filter-form .form-control,
+    .filter-form .form-select,
+    .filter-form .btn {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .search-filter-form a.btn,
+    .btnnn {
+        margin-top: 0.5rem;
+        width: 100%;
+        text-align: center;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-form {
+        justify-content: center;
+    }
+
+    .table .d-flex.justify-content-end {
+        justify-content: flex-start !important;
+        flex-wrap: wrap;
+    }
+
+    .table td.text-end {
+        text-align: left !important;
+    }
+
+    .table .btn-sm {
+        margin: 2px;
+    }
+}
+
+/* ====== SweetAlert Layer Fix ====== */
 .swal2-container {
     z-index: 9999 !important;
+}
+
+.filter-header {
+    position: relative;
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+.force-right {
+    position: absolute !important;
+    right: 0;
+    top: 0;
+    margin:  0 !important;
+}
+
+
+@media (max-width: 768px) {
+    .force-right {
+        position: static !important;
+        width: 100%;
+        margin-top: 1rem !important;
+    }
 }

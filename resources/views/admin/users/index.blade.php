@@ -2,26 +2,33 @@
 
 @section('content')
 
-<!-- Page Header -->
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <h2 class="page-title">👥 Manage Users</h2>
+<!-- Page Header Title -->
+<h2 class="page-title mb-4">👥 Manage Users</h2>
 
-    <a href="{{ route('admin.users.create') }}" class="btn btn-success">
+<!-- Filter Row + Add Button -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <!-- Filters on the left -->
+    <form method="GET" class="d-flex flex-wrap gap-3 m-0">
+        <input type="text" name="search" class="form-control" placeholder="Search by name or email..." value="{{ request('search') }}">
+
+        <select name="sort" class="form-select">
+            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Newest First</option>
+            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">🔍 Filter</button>
+    </form>
+
+
+</div>
+<!-- Add New User Button on the right -->
+<div class="filter-header">
+    <a href="{{ route('admin.users.create') }}" class="btn btn-success force-right">
         ➕ Add New User
     </a>
 </div>
 
-<!-- Search & Filter -->
-<form method="GET" class="search-filter-form mb-4 d-flex gap-3 flex-wrap">
-    <input type="text" name="search" class="form-control" placeholder="Search by name or email..." value="{{ request('search') }}">
 
-    <select name="sort" class="form-select">
-        <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Newest First</option>
-        <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
-    </select>
-
-    <button type="submit" class="btn btn-primary">🔍 Filter</button>
-</form>
 
 <!-- Users Table -->
 @if($users->count())
@@ -32,7 +39,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Identity #</th> <!-- ✅ New Column -->
+            <th>Identity #</th>
             <th>Status</th>
             <th>Joined</th>
             <th>Actions</th>
@@ -45,7 +52,7 @@
             <td>{{ $user->name }}</td>
             <td>{{ $user->email }}</td>
             <td>{{ $user->phone ?? '—' }}</td>
-            <td>{{ $user->identity_number ?? '—' }}</td> <!-- ✅ New Cell -->
+            <td>{{ $user->identity_number ?? '—' }}</td>
             <td>
                 <span class="badge bg-{{ $user->status === 'active' ? 'success' : ($user->status === 'blocked' ? 'danger' : 'warning text-dark') }}">
                     {{ ucfirst($user->status) }}
@@ -73,7 +80,6 @@
         @endforeach
     </tbody>
 </table>
-
 
 <!-- Pagination -->
 <div class="mt-4">

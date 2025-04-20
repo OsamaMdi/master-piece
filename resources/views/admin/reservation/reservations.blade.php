@@ -30,7 +30,7 @@
             </div>
 
             <!-- View Details Button -->
-            <a href="{{ route('merchant.reservation.details', $reservation->id) }}" class="btn-view-details">
+            <a href="{{ route('admin.reservation.details', $reservation->id) }}" class="btn-view-details">
                 View Details
             </a>
         </div>

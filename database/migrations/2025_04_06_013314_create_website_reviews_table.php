@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('website_reviews', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->integer('rating'); // 1-5
+            $table->integer('rating');
             $table->text('review_text');
             $table->timestamps();
             $table->softDeletes();
 
-            // علاقة مع جدول المستخدمين
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
 

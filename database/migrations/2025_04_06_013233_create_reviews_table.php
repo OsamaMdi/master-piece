@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
-            $table->integer('rating'); // 1-5
+            $table->integer('rating');
             $table->text('review_text');
             $table->timestamps();
             $table->softDeletes();
 
-            // علاقة مع جدول المستخدمين
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            // علاقة مع جدول المنتجات
+            
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
 
