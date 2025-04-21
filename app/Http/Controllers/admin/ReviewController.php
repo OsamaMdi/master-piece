@@ -10,18 +10,31 @@ use Illuminate\Http\Request;
 class ReviewController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Review::with(['user', 'product.user']);
+    {
+        $query = Review::with(['user', 'product.user']);
 
+        // فلترة حسب التقييم
+        if ($request->filter === 'worst') {
+            $query->where('rating', '<=', 2);
+        } elseif ($request->filter === 'best') {
+            $query->where('rating', '>=', 4);
+        }
 
-    if ($request->has('filter') && $request->filter === 'worst') {
-        $query->where('rating', '<=', 2);
+        // ترتيب حسب السياق
+        if (in_array($request->filter, ['worst', 'best'])) {
+            // ترتيب حسب التقييم
+            $query->orderBy('rating', $request->sort === 'oldest' ? 'asc' : 'desc');
+        } else {
+            // ترتيب حسب تاريخ الإنشاء
+            $query->orderBy('created_at', $request->sort === 'oldest' ? 'asc' : 'desc');
+        }
+
+        $reviews = $query->paginate(20);
+
+        return view('admin.reviews.index', compact('reviews'));
     }
 
-    $reviews = $query->orderBy('created_at', 'desc')->paginate(20);
 
-    return view('admin.reviews.index', compact('reviews'));
-}
 
     public function create()
     {
@@ -46,7 +59,7 @@ class ReviewController extends Controller
 
     public function show(Review $review)
     {
-        $review->load(['user', 'product.owner']);
+        $review->load(['user', 'product.user']);
     return view('admin.reviews.show', compact('review'));
     }
 

@@ -9,11 +9,11 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); 
+            $table->string('name');
             $table->text('description');
             $table->decimal('price', 8, 2);
             $table->integer('quantity')->default(1);
-            $table->enum('status', ['available', 'rented', 'maintenance'])->default('available'); // حالة المنتج
+            $table->enum('status', ['available', 'rented', 'maintenance'])->default('available'); 
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->timestamps();

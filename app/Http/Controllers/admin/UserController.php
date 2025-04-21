@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Review;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\WebsiteReview;
 use App\Helpers\IdentityHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -78,11 +80,24 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 
-    public function show(string $id)
-    {
-        $user = User::findOrFail($id);
-        return view('admin.users.show', compact('user'));
-    }
+    public function show(User $user)
+{
+    $filter = request('filter');
+
+    $productReviews = Review::with('product')
+        ->where('user_id', $user->id)
+        ->latest()
+        ->paginate(10, ['*'], 'product_page');
+
+    $websiteReviews = WebsiteReview::where('user_id', $user->id)
+        ->latest()
+        ->paginate(10, ['*'], 'website_page');
+
+    $totalReviewsCount = $productReviews->total() + $websiteReviews->total();
+
+    return view('admin.users.show', compact('user', 'productReviews', 'websiteReviews', 'totalReviewsCount', 'filter'));
+}
+
 
     public function edit(string $id)
     {

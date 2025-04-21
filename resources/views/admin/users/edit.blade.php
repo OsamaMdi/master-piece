@@ -5,15 +5,16 @@
     <div class="profile-card">
 
         <!-- Header inside card: Profile Picture + Title -->
-        <div class="d-flex align-items-center mb-4" style="gap: 1.5rem;">
-            @if($user->profile_picture)
-                <img src="{{ asset('storage/' . $user->profile_picture) }}" class="profile-image-preview" alt="Profile Picture" style="width: 80px; height: 80px;">
-            @else
-                <div class="profile-image-preview" style="width: 80px; height: 80px; background: #edf2f7; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #718096;">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
-            @endif
-            <h2 class="form-title m-0">✏️ Edit User</h2>
+        <div class="custom-grid gap-2">
+            <div class="flex-shrink-0">
+                <img
+                src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('img/default-user.png') }}"
+                class="rounded-circle"
+                style="width: 90px; height: 70px;">
+            </div>
+            <div class="flex-grow-1">
+                <h2 class="m-0">✏️ Edit User</h2>
+            </div>
         </div>
 
         @if(session('success'))

@@ -6,6 +6,9 @@
 
     <meta charset="UTF-8">
     <title>Merchant Dashboard</title>
+    <!-- Font Awesome 6 Free CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="upload-id-route" content="{{ route('admin.users.upload.identity') }}">
     <meta name="show-upload-modal" content="{{ session('showUploadModal') ? 'true' : 'false' }}">
@@ -34,7 +37,7 @@
     <!-- JS -->
     <script src="{{ asset('js/merchant-script.js') }}"></script>
     <script src="{{ asset('js/user.js') }}"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

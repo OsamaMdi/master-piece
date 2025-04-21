@@ -9,17 +9,28 @@ use Illuminate\Http\Request;
 class WebsiteReviewController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = WebsiteReview::with('user');
+{
+    $query = WebsiteReview::with('user');
 
-        if ($request->has('filter') && $request->filter === 'worst') {
-            $query->where('rating', '<=', 2);
-        }
-
-        $reviews = $query->orderBy('created_at', 'desc')->paginate(20);
-
-        return view('admin.website_reviews.index', compact('reviews'));
+    if ($request->has('filter') && $request->filter === 'worst') {
+        $query->where('rating', '<=', 2);
     }
+
+    if ($request->has('filter') && $request->filter === 'best') {
+        $query->where('rating', '>=', 4);
+    }
+
+    if ($request->get('sort') === 'oldest') {
+        $query->orderBy('created_at', 'asc');
+    } else {
+        $query->orderBy('created_at', 'desc');
+    }
+
+    $reviews = $query->paginate(20);
+
+    return view('admin.website_reviews.index', compact('reviews'));
+}
+
 
 
     public function create()

@@ -5,22 +5,22 @@
 <!-- Page Header Title -->
 <h2 class="page-title mb-4">👥 Manage Users</h2>
 
-<!-- Filter Row + Add Button -->
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-    <!-- Filters on the left -->
-    <form method="GET" class="d-flex flex-wrap gap-3 m-0">
-        <input type="text" name="search" class="form-control" placeholder="Search by name or email..." value="{{ request('search') }}">
+<!-- ✅ Unified Filter Row -->
+<div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <input type="text" name="search" class="review-select review-search" placeholder="Search by name or email..." value="{{ request('search') }}">
 
-        <select name="sort" class="form-select">
+        <select name="sort" class="review-select">
             <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Newest First</option>
             <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
         </select>
 
-        <button type="submit" class="btn btn-primary">🔍 Filter</button>
+        <button type="submit" class="review-filter-btn">🔍 Filter</button>
     </form>
-
-
 </div>
+
+
+
 <!-- Add New User Button on the right -->
 <div class="filter-header">
     <a href="{{ route('admin.users.create') }}" class="btn btn-success force-right">

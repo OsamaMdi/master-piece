@@ -1,14 +1,39 @@
 @extends('layouts.admin.app')
 
 @section('content')
+
+<!-- Page Header Title -->
 <h2 class="page-title mb-4">💬 Website Reviews</h2>
 
-<form method="GET" class="d-flex gap-3 align-items-center mb-4 flex-wrap">
-    <select name="filter" class="form-select" onchange="this.form.submit()">
-        <option value="">-- All Reviews --</option>
-        <option value="worst" {{ request('filter') === 'worst' ? 'selected' : '' }}>Worst Ratings (1-2)</option>
-    </select>
-</form>
+<!-- ✅ Custom Filter Row (معدل) -->
+<div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <select name="filter" class="review-select">
+            <option value="">-- All Reviews --</option>
+            <option value="worst" {{ request('filter') === 'worst' ? 'selected' : '' }}>Worst Ratings (1-2)</option>
+            <option value="best" {{ request('filter') === 'best' ? 'selected' : '' }}>Best Ratings (4-5)</option>
+        </select>
+
+        <select name="sort" class="review-select">
+            <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Newest First</option>
+            <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
+        </select>
+
+        <button type="submit" class="review-filter-btn">🔍 Filter</button>
+    </form>
+</div>
+
+
+
+
+<!-- Add New Review Button -->
+<div class="filter-header">
+    <a href="{{ route('admin.website-reviews.create') }}" class="btn btn-success force-right">
+        ➕ Add Website Review
+    </a>
+</div>
+
+<!-- Website Reviews Table -->
 @if($reviews->count())
 <table class="table table-bordered align-middle">
     <thead class="table-light">
@@ -16,25 +41,17 @@
             <th>#</th>
             <th>User</th>
             <th>Rating</th>
-            <th>Comment</th>
-            <th>Actions</th>
+            <th>Review</th>
+            <th class="text-center">Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach($reviews as $review)
         <tr>
             <td>{{ $loop->iteration + ($reviews->currentPage() - 1) * $reviews->perPage() }}</td>
-
-            {{-- 👤 اسم المستخدم فقط --}}
             <td>{{ $review->user->name }}</td>
-
-            {{-- ⭐ التقييم --}}
             <td>{{ $review->rating }}/5</td>
-
-            {{-- 💬 جزء من التعليق --}}
-            <td>{{ Str::limit($review->review_text, 50) }}</td>
-
-            {{-- 🔘 الإجراءات --}}
+            <td>{{ Str::limit($review->review_text, 60) }}</td>
             <td class="text-center">
                 <a href="{{ route('admin.website-reviews.show', $review->id) }}" class="btn btn-sm btn-outline-primary" title="View">
                     <i class="fas fa-eye"></i>
@@ -43,7 +60,8 @@
                     <i class="fas fa-edit"></i>
                 </a>
                 <form action="{{ route('admin.website-reviews.destroy', $review->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this review?')">
-                    @csrf @method('DELETE')
+                    @csrf
+                    @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -61,4 +79,5 @@
 @else
     <div class="alert alert-info">No website reviews found.</div>
 @endif
+
 @endsection
