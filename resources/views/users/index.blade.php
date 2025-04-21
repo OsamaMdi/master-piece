@@ -59,130 +59,79 @@
 
     </div>
 </section>
-<!-- Welcome Area End -->
 
+<!-- Welcome Area End -->
 <section class="roberto-service-area">
     <h2 class="section-title">Our Services</h2>
     <p class="section-subtitle">Explore the range of premium services we provide to enhance your experience.</p>
 
     <div class="container">
-      <div class="service-content">
-
-        <div class="single-service">
-          <span class="service-count">1</span>
-          <img src="https://cdn-icons-png.flaticon.com/512/69/69524.png" alt="Transportation">
-          <h5>Transportation</h5>
+        <div class="service-content">
+            @foreach ($categories as $category)
+            <a href="{{ route('products.by.category', ['id' => $category->id]) }}"
+                class="single-service text-decoration-none"
+              {{--   style="--hover-color: {{ $category->hover_color ?? '#333' }};" --}}>
+                 {{-- <img src="{{ asset('storage/' . $category->icon_path) }}" alt="{{ $category->name }}"> --}}
+                 <h5>{{ $category->name }}</h5>
+             </a>
+            @endforeach
         </div>
-
-        <div class="single-service">
-          <span class="service-count">2</span>
-          <img src="https://cdn-icons-png.flaticon.com/512/201/201623.png" alt="Room Service">
-          <h5>Room Service</h5>
-        </div>
-
-        <div class="single-service">
-          <span class="service-count">3</span>
-          <img src="https://cdn-icons-png.flaticon.com/512/2909/2909762.png" alt="Spa Relaxation">
-          <h5>Spa Relaxation</h5>
-        </div>
-
-        <div class="single-service">
-          <span class="service-count">4</span>
-          <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="Restaurant">
-          <h5>Restaurant</h5>
-        </div>
-
-        <div class="single-service">
-          <span class="service-count">5</span>
-          <img src="https://cdn-icons-png.flaticon.com/512/2947/2947992.png" alt="Bar & Drinks">
-          <h5>Bar & Drinks</h5>
-        </div>
-
-      </div>
     </div>
-  </section>
-
+</section>
 <!-- Testimonials Area Start -->
+
+@if($reviews->isNotEmpty())
 <section class="roberto-testimonials-area section-padding-100-0">
     <div class="container">
         <div class="row align-items-center">
 
-
+            <!-- الصور الجانبية -->
             <div class="col-12 col-md-6">
-                <div class="testimonial-thumbnail owl-carousel mb-100">
-                    <img src="{{ asset('img/bg-img/10.jpg') }}" alt="">
-                    <img src="{{ asset('img/bg-img/11.jpg') }}" alt="">
+                <div class="testimonial-thumbnail owl-carousel mb-100 text-center">
+                    @foreach($reviews as $review)
+                        <img src="{{ $review->user->profile_picture
+                                        ? asset('storage/' . $review->user->profile_picture)
+                                        : asset('img/default-user.png') }}"
+                             onerror="this.onerror=null; this.src='{{ asset('img/default-user.png') }}';"
+                             alt="{{ $review->user->name }}">
+                    @endforeach
                 </div>
             </div>
 
-
+            <!-- التقييمات -->
             <div class="col-12 col-md-6">
-                <!-- Section Heading -->
                 <div class="section-heading">
                     <h6>Testimonials</h6>
                     <h2>Our Guests Love Us</h2>
                 </div>
 
-                <!-- Testimonial Slide -->
                 <div class="testimonial-slides owl-carousel mb-100">
+                    @foreach($reviews as $review)
+                        <div class="single-testimonial-slide">
+                            <h5>"{{ $review->review_text }}"</h5>
 
-                    <!-- Testimonial 1 -->
-                    <div class="single-testimonial-slide">
-                        <h5>“This can be achieved by applying search engine optimization or popularly known as SEO...”</h5>
-                        <div class="rating-title">
-                            <div class="rating">
-                                @for($i = 0; $i < 5; $i++)
+                            <!-- التقييم -->
+                            <div class="rating mb-1">
+                                @for($i = 0; $i < $review->rating; $i++)
                                     <i class="icon_star"></i>
                                 @endfor
                             </div>
-                            <h6>Robert Downey <span>- CEO Deercreative</span></h6>
-                        </div>
-                    </div>
 
-                    <!-- Testimonial 2 -->
-                    <div class="single-testimonial-slide">
-                        <h5>“Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus delectus...”</h5>
-                        <div class="rating-title">
-                            <div class="rating">
-                                @for($i = 0; $i < 5; $i++)
-                                    <i class="icon_star"></i>
-                                @endfor
-                            </div>
-                            <h6>Akash Downey <span>- CEO Deercreative</span></h6>
+                            <!-- الاسم تحت التقييم -->
+                            <h6 class="mt-1">{{ $review->user->name ?? 'Anonymous' }}</h6>
                         </div>
-                    </div>
-
-                    <!-- Testimonial 3 -->
-                    <div class="single-testimonial-slide">
-                        <h5>“Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolor, ex quos...”</h5>
-                        <div class="rating-title">
-                            <div class="rating">
-                                @for($i = 0; $i < 5; $i++)
-                                    <i class="icon_star"></i>
-                                @endfor
-                            </div>
-                            <h6>Downey Sarah <span>- CEO Deercreative</span></h6>
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 4 -->
-                    <div class="single-testimonial-slide">
-                        <h5>“Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore sequi laboriosam...”</h5>
-                        <div class="rating-title">
-                            <div class="rating">
-                                @for($i = 0; $i < 5; $i++)
-                                    <i class="icon_star"></i>
-                                @endfor
-                            </div>
-                            <h6>Robert Brown <span>- CEO Deercreative</span></h6>
-                        </div>
-                    </div>
-
+                    @endforeach
                 </div>
             </div>
+
         </div>
     </div>
 </section>
+@endif
+
+
+
+
 <!-- Testimonials Area End -->
 
 

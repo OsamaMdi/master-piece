@@ -1270,6 +1270,7 @@ input:focus {
     .rooms-slides .owl-next:hover, .rooms-slides .owl-next:focus {
       background-color: #2a303b !important;
       color: #ffffff; }
+
 /* Custom Styles for Product Grid */
 .roberto-rooms-area {
 
@@ -1296,6 +1297,7 @@ input:focus {
     position: relative;
     overflow: hidden;
     height: 250px;
+    border-radius: 10px;
 }
 
 .room-thumbnail img {
@@ -1312,16 +1314,17 @@ input:focus {
 /* Overlay Effect */
 .room-overlay {
     position: absolute;
-    top: 0;
+    top: 0; /* بدال bottom */
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: #2350ba52;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* لون شفاف فوق الصورة */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     opacity: 0;
     transition: opacity 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    z-index: 2;
 }
 
 .single-room-area:hover .room-overlay {
@@ -1329,64 +1332,150 @@ input:focus {
 }
 
 /* Product Content Styling */
+.product-card {
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+    margin-top:10px ;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.room-thumbnail {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+}
+
+.room-thumbnail img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+.product-card:hover .view-detail-btn {
+    transform: translateY(0);
+}
+
+.product-card:hover .room-thumbnail img {
+    transform: scale(1.05);
+}
+
+.room-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-card:hover .room-overlay {
+    opacity: 1;
+}
+
 .room-content {
-    padding: 20px;
-    text-align: center;
+    padding: 1.5rem;
 }
 
 .room-content h2 {
-    color: #333;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.25rem;
     font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #2d3748;
+    text-align: center;
 }
 
-.room-content h4 {
-    color: #2563eb;
-    font-size: 1.3rem;
-    margin-bottom: 15px;
+.price-badge-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.room-feature p {
-    color: #666;
-    margin: 8px 0;
-    font-size: 0.9rem;
+.price-tag {
+    font-size: 1.1rem;
+    color: #3b82f6;
+    font-weight: 700;
 }
 
-.room-feature strong {
-    color: #444;
-    font-weight: 500;
+.category-badge {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
 }
 
-/* View Details Button */
+.product-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+}
+
+.meta-item i {
+    color: #94a3b8;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 2px;
+    color: #f59e0b;
+    justify-content: flex-start;
+}
+
+.rating-stars .text-sm {
+    margin-left: 8px;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
 .view-detail-btn {
-    background: white;
-    color: #2563eb;
-    padding: 12px 25px;
-    border-radius: 30px;
-    text-transform: uppercase;
-    font-weight: 600;
-    border: 2px solid #2563eb;
-    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-}
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #6990d2;
+    border-radius: 30px;
+    text-decoration: none;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 
-.view-detail-btn:hover {
-    background: #2563eb;
-    color: white;
-    transform: translateY(-2px);
+
 }
 
 .view-detail-btn i {
-    margin-left: 8px;
+    margin-right: 8px;
     transition: transform 0.3s ease;
 }
 
+.view-detail-btn:hover {
+    background: #ffffff;
+    color: #2563eb;
+    transform: scale(1.05);
+}
 .view-detail-btn:hover i {
     transform: translateX(3px);
 }
-
 /* Pagination Styling */
 .roberto-pagination .page-link {
     color: #2563eb;
@@ -1410,6 +1499,14 @@ input:focus {
     .room-thumbnail {
         height: 200px;
     }
+    .room-thumbnail-slides .carousel-inner {
+        min-height: 300px;
+        max-height: 400px;
+      }
+      .room-thumbnail-slides .carousel-indicators li {
+        width: 80px;
+        height: 60px;
+      }
 
     .room-content h2 {
         font-size: 1.3rem;
@@ -1512,24 +1609,66 @@ html .ui-button.ui-state-disabled:active {
   top: -7px; }
 
 .room-thumbnail-slides {
-  position: relative;
-  z-index: 1; }
+    position: relative;
+    z-index: 1;
+    background: #f5f5f5;
+    padding-bottom: 30px;
+}
+.room-thumbnail-slides .carousel-item {
+    transition: transform 0.6s ease-in-out !important;
+  }
+  .room-thumbnail-slides .carousel-item img {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+  }
+.room-thumbnail-slides .carousel-inner {
+    max-height: 600px;
+    min-height: 400px;
+  }
+
   .room-thumbnail-slides .carousel-indicators {
     position: relative;
-    margin-bottom: 0; }
+    margin: 60px -10px 0;
+    padding-bottom: 20px;
+ }
     .room-thumbnail-slides .carousel-indicators li {
-      width: 120px;
-      height: 70px; }
+        width: 100px;
+        height: 80px;
+        margin: 0 10px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 3px solid transparent;
+        flex-shrink: 0; /* منع تصغير الثمبنيل */
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .room-thumbnail-slides .carousel-indicators li::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.1); /* تأثير إضاءة داخلي */
+      }
 
-.room-features-area {
-  position: relative;
-  z-index: 1; }
+
+
+  .room-thumbnail-slides .carousel-indicators li.active {
+    border-color: #2a5f8a;
+  transform: scale(1.05);
+  }
+  .room-thumbnail-slides .carousel-indicators li img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
   .room-features-area h6 {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 25%;
-    flex: 0 0 25%;
-    max-width: 25%;
-    width: 25%;
     padding: 30px 15px;
     border-left: 1px solid #ebebeb;
     border-top: 1px solid #ebebeb;
@@ -1537,24 +1676,36 @@ html .ui-button.ui-state-disabled:active {
     text-align: center;
     color: #afb4bf;
     line-height: 1.5;
-    margin-bottom: 0; }
-    @media only screen and (min-width: 992px) and (max-width: 1199px) {
-      .room-features-area h6 {
-        font-size: 14px; } }
-    @media only screen and (max-width: 767px) {
-      .room-features-area h6 {
-        -webkit-box-flex: 0;
-        -ms-flex: 0 0 50%;
-        flex: 0 0 50%;
-        max-width: 50%;
-        width: 50%;
-        font-size: 13px;
-        padding: 20px 10px; } }
-    .room-features-area h6 span {
-      display: block;
-      color: #2a303b; }
-    .room-features-area h6:last-child {
-      border-right: 1px solid #ebebeb; }
+    margin-bottom: 0;
+    /* احذف width و flex */
+  }
+
+  .room-features-area h6 span {
+    display: block;
+    color: #2a303b;
+  }
+
+  .room-features-area h6:last-child {
+    border-right: 1px solid #ebebeb;
+  }
+
+  @media only screen and (min-width: 992px) and (max-width: 1199px) {
+    .room-features-area h6 {
+      font-size: 14px;
+    }
+  }
+
+  @media only screen and (max-width: 767px) {
+    .room-features-area h6 {
+      font-size: 13px;
+      padding: 20px 10px;
+    }
+  }
+  .room-features-area h6 {
+    background-color: #fff;
+    box-shadow: inset 0 -1px 0 #f2f2f2;
+  }
+
 
 .single-room-details-area {
   position: relative;
@@ -2861,7 +3012,7 @@ input:checked + .slider:before {
 }
 
 .partner-area {
-    padding: 20px 0;        
+    padding: 20px 0;
     background-color: #f8f9fa;
 }
 
@@ -2881,4 +3032,31 @@ input:checked + .slider:before {
 .partner-logo img:hover {
     filter: grayscale(0%);
     transform: scale(1.05);
+}
+
+
+.sticky-inside {
+    position: sticky;
+    top: 100px;
+    z-index: 10;
+}
+
+
+
+.star-rating .fa-star {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+}
+
+.star-rating .fa-star.text-warning {
+    color: #ffc107 !important;
+}
+
+.star-rating .fa-star.text-muted {
+    color: #6c757d !important;
+}
+
+.star-rating .fa-star:hover {
+    transform: scale(1.2);
 }

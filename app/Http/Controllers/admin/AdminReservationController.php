@@ -17,39 +17,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminReservationController extends Controller
 {
-    public function cancel(string $reservationId)
-    {
-        try {
-            $reservation = Reservation::findOrFail($reservationId);
-
-     /*
-            dd([
-                'start_date' => $reservation->start_date,
-                'now' => now(),
-                'diffInHours' => now()->diffInHours($reservation->start_date, false),
-            ]); */
-
-            $remainingHours = now()->diffInHours($reservation->start_date, false);
-
-            if ($remainingHours > 48) {
-                $reservation->status = 'cancelled';
-                $reservation->save();
-
-                return redirect()->route('merchant.reservation.details', $reservationId)
-                    ->with('success', 'Reservation cancelled successfully!');
-            } else {
-                return redirect()->route('merchant.reservation.details', $reservationId)
-                    ->with('error', 'You cannot cancel this reservation within 48 hours of the start date.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error while cancelling reservation: ' . $e->getMessage());
-
-            return redirect()->route('merchant.reservation.details', $reservationId)
-                ->with('error', 'An error occurred while cancelling the reservation.');
-        }
-    }
-
-
 
     public function showReservationDetails(string $reservationId)
     {
@@ -81,11 +48,49 @@ class AdminReservationController extends Controller
       // Show all reservations for the current user
       public function showReservations()
       {
-          $reservations = Reservation::with(['user', 'product.reviews'])
+          $reservations = Reservation::with(['user', 'product.reviews', 'product.user']) // 👈 أضفنا product.user
               ->orderBy('created_at', 'desc')
-              ->paginate(30);
+              ->paginate(20);
 
           return view('admin.reservation.reservations', compact('reservations'));
       }
 
+    
 }
+
+
+
+
+// public function cancel(string $reservationId)
+// {
+//     try {
+//         $reservation = Reservation::findOrFail($reservationId);
+
+//  /*
+//         dd([
+//             'start_date' => $reservation->start_date,
+//             'now' => now(),
+//             'diffInHours' => now()->diffInHours($reservation->start_date, false),
+//         ]); */
+
+//         $remainingHours = now()->diffInHours($reservation->start_date, false);
+
+//         if ($remainingHours > 48) {
+//             $reservation->status = 'cancelled';
+//             $reservation->save();
+
+//             return redirect()->route('merchant.reservation.details', $reservationId)
+//                 ->with('success', 'Reservation cancelled successfully!');
+//         } else {
+//             return redirect()->route('merchant.reservation.details', $reservationId)
+//                 ->with('error', 'You cannot cancel this reservation within 48 hours of the start date.');
+//         }
+//     } catch (\Exception $e) {
+//         Log::error('Error while cancelling reservation: ' . $e->getMessage());
+
+//         return redirect()->route('merchant.reservation.details', $reservationId)
+//             ->with('error', 'An error occurred while cancelling the reservation.');
+//     }
+// }
+
+

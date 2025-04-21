@@ -386,6 +386,10 @@ you can use the generic selector below, but it's slower:
 .icon_cart_alt:before {
 	content: "\e015";
 }
+.rating .icon_star {
+    color: #f1c40f;
+}
+
 .icon_paperclip:before {
 	content: "\e016";
 }
@@ -1156,4 +1160,4 @@ text-shadow: none;
 		font-size: 2em;
 	}
 
-	
+

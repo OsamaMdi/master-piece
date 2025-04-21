@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\MerchantController;
+use App\Http\Controllers\user\UserController as UserFrontendController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\SystemCheckController;
 use App\Http\Controllers\Admin\ReviewController;
@@ -46,13 +47,16 @@ require __DIR__.'/auth.php';
 | Public Website Routes - User Views
 |--------------------------------------------------------------------------
 */
-
-Route::view('/', 'users.index')->name('index');
+Route::get('/', [UserFrontendController::class, 'home'])->name('home');
+Route::get('/tools', [UserFrontendController::class, 'allTools'])->name('tools.all');
+Route::get('/products/category/{id}', [UserFrontendController::class, 'showByCategory'])->name('products.by.category');
+Route::get('/products/show/{id}', [UserFrontendController::class, 'showByCategory'])->name('products.show');
 Route::view('/room', 'users.room')->name('room');
 Route::view('/about', 'users.about')->name('about');
 Route::view('/single-room', 'users.single-room')->name('single-room');
 Route::view('/contact', 'users.contact')->name('contact');
-
+Route::get('/products/{id}', [UserFrontendController::class, 'showProduct'])->name('user.products.show');
+Route::post('/products/{id}/reviews', [UserFrontendController::class, 'storeReview'])->name('user.products.reviews.store');
 /*
 |--------------------------------------------------------------------------
 | admin Website Routes - admin Views
@@ -65,9 +69,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/{id}/reservations', [AdminReservationController::class, 'showProductReservations'])->name('product.reservations');
     Route::get('/reservations', [AdminReservationController::class, 'showReservations'])->name('reservations');
     Route::get('/reservation/{id}/details', [AdminReservationController::class, 'showReservationDetails'])->name('reservation.details');
-    Route::post('/products/{product}/update-images', [AdminProductController::class, 'updateImages'])->name('products.updateImages');
+   /*  Route::post('/products/{product}/update-images', [AdminProductController::class, 'updateImages'])->name('products.updateImages'); */
     Route::post('products/upload-image', [AdminProductController::class, 'uploadImage'])->name('products.uploadImage');
-    Route::patch('/reservation/{id}/cancel', [AdminReservationController::class, 'cancel'])->name('reservation.cancel');
+
+    Route::patch('products/{id}/block', [AdminProductController::class, 'blockWithCancel'])->name('products.block');
+
 
     Route::resource('users', UserController::class);
     Route::post('users/upload-identity', [UserController::class, 'uploadIdentity'])->name('users.upload.identity');

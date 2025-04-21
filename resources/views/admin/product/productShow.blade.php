@@ -1,6 +1,7 @@
 @extends('layouts.admin.app')
 
 @section('content')
+
 <!-- ======== Page Title ======== -->
 <div class="product-page-header">
     <h1 class="page-title">{{ $product->name }}</h1>
@@ -50,12 +51,16 @@
                     ✏️ Edit Product
                 </button>
 
-                <button id="openEditImagesModal" class="btn btn-edit">
-                    📸 Edit Images
-                </button>
+                <!-- Disable Product Button -->
+                <form id="blockProductForm" action="{{ route('admin.products.block', $product->id) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <button type="button" class="btn btn-dark mt-4" id="confirmBlockBtn">
+                        <i class="fas fa-ban me-1" style="color: red"></i> Disable Product
+                    </button>
+                </form>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -102,59 +107,16 @@
     @endif
 </div>
 
-<!-- ======== Fixed Back Button (at Bottom Left) ======== -->
-<a href="{{ route('admin.products.index') }}" class="btn-back-fixed">
-    🔙 Back
-</a>
-
 <!-- ======== Edit Product Modal ======== -->
 <div id="editProductModal" class="modal hidden">
     <div class="modal-content">
-        <!-- Modal Header -->
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3>Edit Product</h3>
         </div>
 
-        <!-- Modal Body -->
         <form id="editProductForm" action="{{ route('admin.products.update', $product->id) }}" method="POST">
             @csrf
             @method('PUT')
-
-            <!-- Product Name -->
-            <div class="form-group">
-                <label>Product Name:</label>
-                <input type="text" name="name" value="{{ old('name', $product->name) }}" required>
-            </div>
-
-            <!-- Description -->
-            <div class="form-group">
-                <label>Description:</label>
-                <textarea name="description" required>{{ old('description', $product->description) }}</textarea>
-            </div>
-
-            <!-- Price -->
-            <div class="form-group">
-                <label>Price (JOD/day):</label>
-                <input type="number" name="price" step="0.01" value="{{ old('price', $product->price) }}" required>
-            </div>
-
-            <!-- Quantity -->
-            <div class="form-group">
-                <label>Quantity:</label>
-                <input type="number" name="quantity" min="1" value="{{ old('quantity', $product->quantity) }}" required>
-            </div>
-
-            <!-- Category -->
-            <div class="form-group">
-                <label>Category:</label>
-                <select name="category_id" required>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
 
             <!-- Status -->
             <div class="form-group">
@@ -166,7 +128,6 @@
                 </select>
             </div>
 
-            <!-- Modal Actions -->
             <div class="modal-actions">
                 <button type="button" id="cancelEditProduct" class="btn btn-cancel">Cancel</button>
                 <button type="submit" class="btn btn-add">Save Changes</button>
@@ -183,11 +144,9 @@
             <p style="font-size: 14px; color: #777;">Click on an image to replace it or add new images below.</p>
         </div>
 
-        <!-- Start Form -->
-        <form id="editImagesForm" action="{{ route('admin.products.updateImages', $product->id) }}" method="POST" enctype="multipart/form-data">
+        <form id="editImagesForm" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <!-- Existing Images Preview -->
             <div class="images-grid">
                 @foreach ($product->images as $image)
                     <div class="image-wrapper">
@@ -197,20 +156,16 @@
                 @endforeach
             </div>
 
-            <!-- Add New Images -->
             <div class="form-group" style="margin-top: 20px;">
                 <label>Add New Images:</label>
                 <input type="file" name="new_images[]" multiple accept="image/*">
             </div>
 
-            <!-- Modal Actions -->
             <div class="modal-actions" style="margin-top: 20px;">
                 <button type="button" id="cancelEditImages" class="btn btn-cancel">Cancel</button>
                 <button type="submit" class="btn btn-add">Save Changes</button>
             </div>
-
         </form>
-        <!-- End Form -->
     </div>
 </div>
 
@@ -218,6 +173,32 @@
 <div id="imagePreviewModal" class="modal hidden" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;">
     <img id="previewImage" src="" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 20px #000;">
 </div>
+
+<!-- ======== SweetAlert for Disable Product Confirmation ======== -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const blockBtn = document.getElementById('confirmBlockBtn');
+        const blockForm = document.getElementById('blockProductForm');
+
+        blockBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will block the product and cancel all future reservations starting after today.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, block it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    blockForm.submit();
+                }
+            });
+        });
+    });
+</script>
 
 <!-- Custom Notification Container -->
 <div id="customNotification" class="notification hidden">
@@ -227,5 +208,5 @@
         <div id="customProgressBar" class="progress-bar"></div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @endsection

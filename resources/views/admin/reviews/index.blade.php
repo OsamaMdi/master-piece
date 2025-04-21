@@ -57,9 +57,9 @@
                 <a href="{{ route('admin.reviews.show', $review->id) }}" class="btn btn-sm btn-outline-primary" title="View">
                     <i class="fas fa-eye"></i>
                 </a>
-                <a href="{{ route('admin.reviews.edit', $review->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                {{-- <a href="{{ route('admin.reviews.edit', $review->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
                     <i class="fas fa-edit"></i>
-                </a>
+                </a> --}}
                 <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this review?')">
                     @csrf
                     @method('DELETE')

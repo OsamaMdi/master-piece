@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Image;
 use App\Models\Product;
@@ -276,5 +277,25 @@ class AdminProductController extends Controller
             return redirect()->back()->with('error', 'Error updating images.');
         }
     }
+
+
+
+
+    public function blockWithCancel($id)
+    {
+        $product = Product::with('reservations')->findOrFail($id);
+        $product->status = 'blocked';
+        $product->save();
+
+        $today = now()->startOfDay();
+
+        $product->reservations()
+            ->whereDate('start_date', '>', $today)
+            ->whereIn('status', ['pending', 'approved'])
+            ->update(['status' => 'cancelled']);
+
+        return redirect()->back()->with('success', 'Product blocked and all future reservations cancelled.');
+    }
+
 
 }

@@ -4,4 +4,7 @@
 
   @yield('content')
 
+  @stack('scripts')
+  
   @include('users.footer')
+

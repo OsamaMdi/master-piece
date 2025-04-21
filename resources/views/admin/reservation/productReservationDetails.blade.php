@@ -39,23 +39,20 @@
             <div class="product-text-content">
                 <h3>{{ $reservation->product->name }}</h3>
                 {{-- Reservation Information --}}
-    <div class="reservation-info-detail-custom">
-        <h4>Reservation Info:</h4>
-        <p><strong>From:</strong> {{ \Carbon\Carbon::parse($reservation->start_date)->format('M d, Y') }}</p>
-        <p><strong>To:</strong> {{ \Carbon\Carbon::parse($reservation->end_date)->format('M d, Y') }}</p>
-        <p><strong>Status:</strong>
-            <span class="status-badge status-{{ $reservation->status }}">
-                {{ ucfirst($reservation->status) }}
-            </span>
-
-        </p>
-        <p><strong>Reserved At:</strong> {{ \Carbon\Carbon::parse($reservation->created_at)->format('M d, Y H:i') }}</p>
-    </div>
-
+                <div class="reservation-info-detail-custom">
+                    <h4>Reservation Info:</h4>
+                    <p><strong>From:</strong> {{ \Carbon\Carbon::parse($reservation->start_date)->format('M d, Y') }}</p>
+                    <p><strong>To:</strong> {{ \Carbon\Carbon::parse($reservation->end_date)->format('M d, Y') }}</p>
+                    <p><strong>Status:</strong>
+                        <span class="status-badge status-{{ $reservation->status }}">
+                            {{ ucfirst($reservation->status) }}
+                        </span>
+                    </p>
+                    <p><strong>Reserved At:</strong> {{ \Carbon\Carbon::parse($reservation->created_at)->format('M d, Y H:i') }}</p>
+                </div>
             </div>
         </div>
     </div>
-
 
     {{-- Number of Reservations --}}
     <div class="reservation-count-detail-custom">
@@ -69,7 +66,7 @@
     </div>
 
     {{-- All Reviews by the User on This Product --}}
-    <div class="user-reviews-on-product" style="margin-top: 40px;">
+    <div class="user-reviews-on-product mt-5">
         <h3>All Reviews by {{ $reservation->user->name }} on {{ $reservation->product->name }}</h3>
 
         @if($reviews->isNotEmpty())
@@ -89,35 +86,64 @@
         @endif
     </div>
 
+    {{-- Back and Disable Buttons --}}
+    @if($reservation->product->status !== 'maintenance')
+
+        <a href="{{ route('admin.reservations', $reservation->product_id) }}" class="btn btn-secondary mt-4">
+            <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+    @endif
 </div>
 
-{{-- Cancel Reservation Button --}}
-@if($reservation->status != 'cancelled' && now()->lt(\Carbon\Carbon::parse($reservation->start_date)) && \Carbon\Carbon::parse($reservation->start_date)->diffInHours(now()) > 48)
-    <form action="{{ route('merchant.reservation.cancel', $reservation->id) }}" method="POST">
-        @csrf
-        @method('PATCH')
-        <button type="submit" class="btn-cancel-reservation">Cancel Reservation</button>
-    </form>
-@endif
-
-{{-- Back Button --}}
-<a href="{{ route('merchant.reservations', $reservation->product_id) }}" class="btn-back-fixed">
-    🔙 Back
-</a>
-
-{{-- Success and Error Messages --}}
+{{-- SweetAlert + Session Messages --}}
 @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: "{{ session('success') }}",
+        timer: 2000,
+        showConfirmButton: false
+    });
+</script>
 @endif
 
 @if(session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: "{{ session('error') }}",
+    });
+</script>
 @endif
 
+{{-- SweetAlert Confirmation for Disable --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const confirmBtn = document.getElementById('confirmDisableBtn');
+        const disableForm = document.getElementById('disableProductForm');
+
+        if (confirmBtn && disableForm) {
+            confirmBtn.addEventListener('click', function () {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will disable the product and cancel all upcoming reservations.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, disable it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        disableForm.submit();
+                    }
+                });
+            });
+        }
+    });
+</script>
+
 @endsection
-
-
