@@ -95,6 +95,44 @@ public function storeReview(Request $request, $productId)
 }
 
 
+//                   user feedback for this website
+public function userFeedback()
+{
+    $allReviews = WebsiteReview::with('user')
+        ->latest()
+        ->take(18) // أقصى حد من التقييمات
+        ->get();
+
+    $page = request()->get('page', 1);
+    $perPage = 6;
+
+    $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+        $allReviews->forPage($page, $perPage),
+        $allReviews->count(),
+        $perPage,
+        $page,
+        ['path' => url()->current(), 'query' => request()->query()]
+    );
+
+    return view('users.about', ['recentReviews' => $paginated]);
+}
+
+
+public function storeWebsiteReview(Request $request)
+{
+    $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'review_text' => 'required|string|max:1000',
+    ]);
+
+    WebsiteReview::create([
+        'user_id' => auth()->id(),
+        'rating' => $request->rating,
+        'review_text' => $request->review_text,
+    ]);
+
+    return back()->with('success', 'Thank you for your feedback!');
+}
 }
 
 /*

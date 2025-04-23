@@ -12,7 +12,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\merchants\ProductController;
 use App\Http\Controllers\admin\AdminProductController;
 use App\Http\Controllers\Admin\WebsiteReviewController;
-use App\Http\Controllers\merchants\ReservationController;
+use App\Http\Controllers\merchants\ReservationController as MerchantReservationController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\admin\AdminReservationController;
 
 /*
@@ -57,6 +58,16 @@ Route::view('/single-room', 'users.single-room')->name('single-room');
 Route::view('/contact', 'users.contact')->name('contact');
 Route::get('/products/{id}', [UserFrontendController::class, 'showProduct'])->name('user.products.show');
 Route::post('/products/{id}/reviews', [UserFrontendController::class, 'storeReview'])->name('user.products.reviews.store');
+Route::get('/user-feedback', [UserFrontendController::class, 'userFeedback'])->name('user.feedback');
+Route::post('/website-reviews/store', [UserFrontendController::class, 'storeWebsiteReview'])
+    ->name('user.websiteReview.store')
+    ->middleware('auth');
+
+    // routes/api.php
+Route::get('/reservations/unavailable-dates/{product}', [ReservationController::class, 'getUnavailableDates']);
+Route::post('/rentals', [ReservationController::class, 'store'])->name('user.rentals.store');
+
+
 /*
 |--------------------------------------------------------------------------
 | admin Website Routes - admin Views
@@ -100,12 +111,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 Route::prefix('merchant')->name('merchant.')->middleware('auth')->group(function () {
     Route::get('/', [MerchantController::class, 'dashboard'])->name('dashboard');
     Route::resource('products', ProductController::class);
-    Route::get('/{id}/reservations', [ReservationController::class, 'showProductReservations'])->name('product.reservations');
-    Route::get('/reservations', [ReservationController::class, 'showReservations'])->name('reservations');
-    Route::get('/reservation/{id}/details', [ReservationController::class, 'showReservationDetails'])->name('reservation.details');
+    Route::get('/{id}/reservations', [MerchantReservationController::class, 'showProductReservations'])->name('product.reservations');
+    Route::get('/reservations', [MerchantReservationController::class, 'showReservations'])->name('reservations');
+    Route::get('/reservation/{id}/details', [MerchantReservationController::class, 'showReservationDetails'])->name('reservation.details');
     Route::post('/products/{product}/update-images', [ProductController::class, 'updateImages'])->name('products.updateImages');
     Route::post('products/upload-image', [ProductController::class, 'uploadImage'])->name('products.uploadImage');
-    Route::patch('/reservation/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservation.cancel');
+    Route::patch('/reservation/{id}/cancel', [MerchantReservationController::class, 'cancel'])->name('reservation.cancel');
     Route::get('products/{product}/images/count', function ($productId) {
         $product = App\Models\Product::findOrFail($productId);
         return response()->json([
