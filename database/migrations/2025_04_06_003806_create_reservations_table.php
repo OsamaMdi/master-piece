@@ -9,27 +9,40 @@ class CreateReservationsTable extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->enum('reservation_type', ['daily', 'hourly']);  // نوع الحجز (يومي أو بالساعة)
 
+            $table->string('slug')->unique();
+
+            $table->enum('reservation_type', ['daily', 'hourly']);
 
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
 
+            $table->dateTime('start_datetime')->nullable();
+            $table->dateTime('end_datetime')->nullable();
 
-            $table->dateTime('start_datetime')->nullable();  // تاريخ ووقت البداية
-            $table->dateTime('end_datetime')->nullable();    // تاريخ ووقت النهاية
+            $table->decimal('total_price', 10, 2)->nullable(); // السعر الكلي
+            $table->decimal('paid_amount', 10, 2)->nullable(); // المدفوع (10% أو كامل)
+            $table->decimal('platform_fee', 10, 2)->nullable(); // نسبة 5% من total_price
 
-            $table->decimal('total_price', 10, 2)->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])->default('pending');
+            $table->enum('status', [
+                'not_started',  // ✅ الحجز لم يبدأ بعد (default)
+                'cancelled',    // تم الإلغاء
+                'in_progress',  // الحجز حالياً عند الزبون
+                'completed',    // الحجز انتهى
+                'reported'      // عليه بلاغ
+            ])->default('not_started');
+
             $table->text('comment')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
         });
+
     }
 
 
-    
+
 }

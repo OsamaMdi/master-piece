@@ -11,12 +11,14 @@ use App\Helpers\IdentityHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class UserController extends Controller
-{
-    public function index(Request $request)
+{public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::query()
+            ->where('id', '!=', auth()->id());
+
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -25,60 +27,75 @@ class UserController extends Controller
             });
         }
 
-        if ($request->sort === 'oldest') {
-            $query->orderBy('created_at', 'asc');
-        } else {
-            $query->orderBy('created_at', 'desc');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
+
+
+        if ($request->filled('user_type')) {
+            $query->where('user_type', $request->user_type);
+        }
+
+
+        $query->orderBy('created_at', 'desc');
 
         $users = $query->paginate(20);
 
         return view('admin.users.index', compact('users'));
     }
 
+
     public function create()
     {
         return view('admin.users.create');
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'phone' => ['nullable', 'regex:/^([0-9]{8,10})$/'],
-            'status' => ['required', 'in:active,blocked,under_review'],
-            'user_type' => ['required', 'in:user,merchant,admin,delivery'],
-            'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'identity_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'identity_number' => ['nullable', 'string', 'min:8', 'max:20'],
-            'city' => ['nullable', 'string', 'max:100']
-        ]);
+    public function store(Request $request): RedirectResponse
+{
 
-        $profilePicturePath = $request->hasFile('profile_picture')
-            ? $request->file('profile_picture')->store('profile_pictures', 'public')
-            : null;
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'min:2', 'max:255'],
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:8'],
+        'phone' => ['nullable', 'regex:/^[0-9]{8,10}$/'],
+        'status' => ['required', 'in:active,blocked,under_review'],
+        'user_type' => ['required', 'in:user,merchant,admin,delivery'],
+        'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        'identity_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        'identity_number' => ['nullable', 'string', 'min:8', 'max:20'],
+        'identity_country' => ['nullable', 'in:Jordan,Other'],
+        'city' => ['nullable', 'string', 'max:100'],
+        'address' => ['nullable', 'string', 'max:255'],
+    ]);
 
-        $identityImagePath = $request->hasFile('identity_image')
-            ? $request->file('identity_image')->store('identity_images', 'public')
-            : null;
+    $profilePicturePath = $request->hasFile('profile_picture')
+        ? $request->file('profile_picture')->store('profile_pictures', 'public')
+        : null;
 
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'password' => Hash::make($validated['password']),
-            'profile_picture' => $profilePicturePath,
-            'identity_image' => $identityImagePath,
-            'user_type' => $validated['user_type'],
-            'status' => $validated['status'],
-            'identity_number' => $validated['identity_number'] ?? null,
-            'city' => $validated['city'] ?? null,
-        ]);
+    $identityImagePath = $request->hasFile('identity_image')
+        ? $request->file('identity_image')->store('identity_images', 'public')
+        : null;
 
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
-    }
+    User::create([
+        'name' => $validated['name'],
+        'slug' => Str::slug($validated['name']) . '-' . Str::random(5),
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'phone' => $validated['phone'] ?? null,
+        'status' => $validated['status'],
+        'user_type' => $validated['user_type'],
+        'profile_picture' => $profilePicturePath,
+        'identity_image' => $identityImagePath,
+        'identity_number' => $validated['identity_number'] ?? null,
+        'identity_country' => $validated['identity_country'] ?? null,
+        'city' => $validated['city'] ?? null,
+        'address' => $validated['address'] ?? null,
+    ]);
+
+    return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+}
+
 
     public function show(User $user)
 {
@@ -149,7 +166,6 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
-
     public function uploadIdentity(Request $request)
     {
         $request->validate([
@@ -161,6 +177,7 @@ class UserController extends Controller
         $fullPath = storage_path("app/{$path}");
 
         $text = IdentityHelper::scanIdentity($fullPath);
+
         if (str_starts_with($text, "Error:")) {
             return response()->json(['success' => false, 'message' => $text]);
         }
@@ -170,6 +187,24 @@ class UserController extends Controller
         }
 
         $data = IdentityHelper::extractDataFromText($text);
+
+
+        $city = IdentityHelper::extractCity($text);
+        $cityTranslations = [
+            'عمان' => 'Amman',
+            'اربد' => 'Irbid',
+            'الزرقاء' => 'Zarqa',
+            'مادبا' => 'Madaba',
+            'العقبة' => 'Aqaba',
+            'جرش' => 'Jerash',
+            'المفرق' => 'Mafraq',
+            'البلقاء' => 'Balqa',
+            'الكرك' => 'Karak',
+            'الطفيلة' => 'Tafilah',
+            'معان' => 'Ma\'an',
+        ];
+        $cityEn = $cityTranslations[$city] ?? null;
+
         Storage::delete($path);
 
         return response()->json([
@@ -177,6 +212,39 @@ class UserController extends Controller
             'name' => $data['name'] ?? null,
             'national_id' => $data['national_id'] ?? null,
             'birth_date' => $data['birth_date'] ?? null,
+            'city' => $cityEn,
         ]);
     }
+
+
+    public function block(Request $request, User $user)
+    {
+        $request->validate([
+            'duration' => 'required',
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $user->status = 'blocked';
+        $user->block_reason = $request->reason;
+
+        if ($request->duration === 'permanent') {
+            $user->blocked_until = null;
+        } else {
+            $user->blocked_until = now()->addDays((int) $request->duration);
+        }
+
+        $user->save();
+
+        return redirect()->back()->with('status', 'User has been blocked successfully.');
+    }
+    public function unblock(User $user)
+    {
+        $user->status = 'active';
+        $user->block_reason = null;
+        $user->blocked_until = null;
+        $user->save();
+
+        return redirect()->back()->with('status', 'User has been unblocked successfully.');
+    }
+
 }

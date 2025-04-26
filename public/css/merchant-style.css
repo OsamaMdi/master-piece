@@ -16,63 +16,305 @@ body {
 
 /* ========== Navbar ========== */
 .navbar {
-    background: #ffffff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 65px;
+    height: 70px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1000;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .navbar-left {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 1.5rem;
+    min-width: 220px;
 }
 
 .toggle-sidebar-btn {
+    font-size: 1.6rem;
+    color: #2c3e50;
+    transition: all 0.3s ease;
     background: none;
     border: none;
-    font-size: 26px;
-    cursor: pointer;
-    color: #2c3e50;
+    padding: 0.5rem;
 }
 
 .toggle-sidebar-btn:hover {
-    color: #007BE4;
-    transform: scale(1.2);
+    color: #3b82f6;
+    transform: scale(1.1);
 }
 
 .logo-img {
-    width: 150px; /* كبر أو صغر حسب التصميم */
-    height: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); /* ظل ناعم */
+    height: 40px;
+    width: auto;
 }
 
+/* Search Bar Styling */
 .navbar-center {
-    flex-grow: 1;
-    text-align: center;
+    flex: 1;
+    max-width: 600px;
+    margin: 0 2rem;
+}
+
+.search-form {
+    position: relative;
+    width: 100%;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.search-container:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.15);
 }
 
 .search-input {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width: 50%;
+    flex: 1;
+    height: 46px;
+    padding: 0 1.5rem;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    color: #1e293b;
 }
 
-.nav-right {
+.search-input::placeholder {
+    color: #94a3b8;
+}
+
+.search-container .search-btn {
+    width: 50px;
+    height: 46px;
+    background: #3b82f6;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.search-container .search-btn:hover {
+    background: #2563eb;
+}
+.search-results a {
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+}
+
+
+/* === Search Results Container === */
+.search-results {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1001;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+/* === Individual Result Row === */
+.search-results li {
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s ease;
+    margin-bottom: 6px; /* Spacing between results */
 }
+
+/* Hover effect */
+.search-results li:hover {
+    background: #f8fafc;
+}
+
+/* === Avatar Image === */
+.search-results li img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+}
+
+/* === Info Container: Name, Type, Status === */
+.search-results li .item-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* === Name === */
+.search-results li .name {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 15px;
+}
+
+/* === Type Label (User, Tool, Reservation) === */
+.search-results li .type {
+    font-size: 12px;
+    padding: 4px 8px;
+    background: #e0f2fe;
+    color: #0284c7;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* === Status === */
+.search-results li .status {
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* === Active Status Color === */
+.search-results li .status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Right Section Styling */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-width: 220px;
+    justify-content: flex-end;
+}
+
+.notification-badge {
+    position: relative;
+    font-size: 1.4rem;
+    color: #64748b;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.65rem;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.profile-dropdown {
+    position: relative;
+}
+
+.profile-pic {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.profile-pic:hover {
+    border-color: #3b82f6;
+}
+
+/* .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    min-width: 180px;
+    z-index: 1001;
+}
+ */
+
+.dropdown-item {
+    padding: 0.8rem 1rem;
+    color: #334155;
+    display: block;
+    transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc;
+}
+
+.dropdown-menu {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 1rem;
+    }
+
+    .logo-img {
+        height: 35px;
+    }
+
+    .navbar-left {
+        gap: 1rem;
+        min-width: auto;
+    }
+
+    .search-input {
+        padding: 0 1rem;
+    }
+}
+
 /* ======== Notification Popup Styles (specific to the notification popup) ======== */
 #notificationPopup {
     position: fixed;

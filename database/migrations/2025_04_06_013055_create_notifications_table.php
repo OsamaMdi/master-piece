@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('message');
+            $table->enum('priority', ['normal', 'important'])->default('normal');
             $table->boolean('is_read')->default(false);
             $table->timestamps();
             $table->softDeletes();
 
-            // علاقة مع جدول المستخدمين
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
 

@@ -208,5 +208,16 @@
         <div id="customProgressBar" class="progress-bar"></div>
     </div>
 </div>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const swiper = new Swiper(".mySwiper", {
+            loop: true,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            spaceBetween: 10,
+        });
+    });
+</script>
 @endsection

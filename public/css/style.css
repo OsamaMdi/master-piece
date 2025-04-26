@@ -624,7 +624,7 @@ input:focus {
     font-size: 14px;
     font-weight: 500;
     border-radius: 6px;
-    background-color: #e6f3ff; 
+    background-color: #e6f3ff;
     color: #2563eb;
     border: 1px solid #cce4ff;
     transition: 0.3s ease;
@@ -640,7 +640,7 @@ input:focus {
 
 
         /* أيقونة البحث */
-        .search-btn {
+         .search-btn {
             font-size: 18px;
             cursor: pointer;
             color: #2a303b;

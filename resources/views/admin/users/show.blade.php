@@ -1,6 +1,12 @@
 @extends('layouts.admin.app')
 
 @section('content')
+<style>
+    .modal-content {
+        margin: auto;
+    }
+    </style>
+
 <div class="container py-4">
     <div class="card p-4">
 
@@ -44,6 +50,24 @@
                 <p><strong>City:</strong> {{ $user->city }}</p>
             </div>
         </div>
+        @if($user->status === 'blocked')
+    <div class="form-row mt-4">
+        <div class="form-col">
+            <p><strong>Blocked Until:</strong>
+                @if($user->blocked_until)
+                    {{ \Carbon\Carbon::parse($user->blocked_until)->format('d-m-Y H:i') }}
+                @else
+                    Permanent Block
+                @endif
+            </p>
+        </div>
+
+        <div class="form-col">
+            <p><strong>Block Reason:</strong> {{ $user->block_reason ?? 'No reason provided' }}</p>
+        </div>
+    </div>
+@endif
+
 
         <!-- صورة الهوية -->
         @if($user->identity_image)
@@ -60,6 +84,22 @@
 
         <div class="mt-4 text-end" style="margin-top: 2rem;">
             <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">← Back to Users</a>
+
+            @if ($user->status === 'blocked')
+                <!-- Unblock Button -->
+                <form method="POST" action="{{ route('admin.users.unblock', $user->id) }}" style="display: inline;">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="btn btn-success">
+                        🔓 Unblock
+                    </button>
+                </form>
+            @else
+                <!-- Block Button -->
+                <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#blockUserModal">
+                    🔒 Block
+                </button>
+            @endif
         </div>
     </div>
 </div>
@@ -121,6 +161,46 @@
             {{ $websiteReviews->appends(['filter' => $filter])->links() }}
         @endif
     </div>
-@endif
+
+    @endif
+</div>
+</div>
+    <!-- Block User Modal -->
+    <div class="modal fade" id="blockUserModal" tabindex="-1" aria-labelledby="blockUserModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+          <form method="POST" action="{{ route('admin.users.block', $user->id) }}">
+              @csrf
+              @method('PATCH')
+
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
+                  </div>
+
+                  <div class="modal-body">
+                      <div class="mb-3">
+                          <label class="form-label">Block Duration</label>
+                          <select name="duration" class="form-select" required>
+                              <option value="1">1 Day</option>
+                              <option value="2">2 Days</option>
+                              <option value="7">1 Week</option>
+                              <option value="permanent">Permanent</option>
+                          </select>
+                      </div>
+
+                      <div class="mb-3">
+                          <label class="form-label">Block Reason</label>
+                          <textarea name="reason" class="form-control" rows="3" required></textarea>
+                      </div>
+                  </div>
+
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-danger">Confirm Block</button>
+                  </div>
+              </div>
+          </form>
+        </div>
+    </div>
 
 @endsection

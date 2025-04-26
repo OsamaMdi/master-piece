@@ -25,6 +25,7 @@
         @yield('content')
     </main>
 
+    <script src="{{ asset('js/merchantSearch.js') }}"></script>
     <!-- JS -->
     <script src="{{ asset('js/merchant-script.js') }}"></script>
 

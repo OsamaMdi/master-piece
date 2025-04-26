@@ -3,16 +3,20 @@
 @section('content')
 <h2 class="page-title mb-4">📂 Manage Categories</h2>
 
-<!-- Search + Add -->
+<!-- Search + Add (with unified filter classes) -->
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-    <form method="GET" class="d-flex flex-wrap gap-3 m-0">
-        <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
-        <button type="submit" class="btn btn-primary">🔍 Filter</button>
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <input type="text" name="search" class="review-select review-search" placeholder="Search by name..." value="{{ request('search') }}">
+        <button type="submit" class="review-filter-btn">🔍 Filter</button>
     </form>
+</div>
 
-    <a href="{{ route('admin.categories.create') }}" class="btn btn-success">
+
+</div><div class="filter-header">
+    <a href="{{ route('admin.categories.create') }}" class="btn btn-success force-right" style="margin-top: 15px;">
         ➕ Add New Category
     </a>
+</div>
 </div>
 
 @if($categories->count())
@@ -30,7 +34,13 @@
         @foreach($categories as $category)
         <tr>
             <td>{{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}</td>
-            <td>{{ $category->name }}</td>
+            <td>
+
+                <span style="display: inline-block; background-color: {{ $category->color }}; padding: 5px 10px; border-radius: 50%; margin-right: 10px;">
+                    <i class="{{ $category->icon }}" style="color: white; font-size: 14px;"></i>
+                </span>
+                {{ $category->name }}
+            </td>
             <td>{{ $category->description ?? '—' }}</td>
             <td>{{ $category->created_at->format('Y-m-d') }}</td>
             <td class="text-center">

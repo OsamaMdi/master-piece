@@ -18,7 +18,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // علاقة مع جدول المنتجات
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
 

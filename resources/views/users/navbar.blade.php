@@ -3,7 +3,7 @@
 
 <head>
 
-   
+
     <meta charset="UTF-8">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -15,6 +15,8 @@
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('img/logo.png') }}">
+
+    <link rel="stylesheet" href="{{ asset('css/block.css') }}">
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
@@ -30,20 +32,35 @@
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <style>
+          .hidden {
+        display: none !important;
+    }
+        #searchFormInput::placeholder {
+            color: #e9dede;
+            opacity: 1;
+        }
+    </style>
+
 @stack('styles')
 </head>
 
 <body>
+<!-- User Search -->
+    <span id="isUserAuthenticated" data-auth="{{ auth()->check() ? 'true' : 'false' }}"></span>
+
 
 <!-- Header Area Start -->
 <header class="header-area">
     <!-- Search Form -->
     <div class="search-form d-flex align-items-center">
         <div class="container">
-            <form action="index.html" method="get">
-                <input type="search" name="search-form-input" id="searchFormInput" placeholder="Type your keyword ...">
+            <form id="searchForm" onsubmit="return false;" class="position-relative">
+                <input type="search" id="searchFormInput" placeholder="Search for a product or category" autocomplete="off">
                 <button type="submit"><i class="icon_search"></i></button>
+                <ul id="liveSearchResults" class="list-group position-absolute w-100 bg-white shadow mt-1" style="z-index: 9999; display: none;"></ul>
             </form>
+
         </div>
     </div>
 
@@ -76,16 +93,22 @@
                             <!-- Left Side Nav -->
                             <ul id="nav" class="me-auto">
                                 <li class="active"><a href="{{ route('home') }}">Home</a></li>
-                                <li><a href="{{ route('tools.all') }}">Rooms</a></li>
+                                <li><a href="{{ route('tools.all') }}">All Tools</a></li>
                                 <li><a href="{{ route('user.feedback') }}">About Us</a></li>
-                                <li><a href="#">Pages</a>
+                                @auth
+                                <li><a href="#">Categories</a>
                                     <ul class="dropdown">
-                                        <li><a href="{{ route('home') }}">- Home</a></li>
-                                        <li><a href="{{ route('tools.all') }}">- Tools</a></li>
-                                        <li><a href="{{ route('user.feedback') }}">- About Us</a></li>
-                                        <li><a href="{{ route('contact') }}">- Contact</a></li>
+                                        @foreach($categories as $category)
+                                            <li>
+                                                <a href="{{ route('products.by.category', ['id' => $category->id]) }}">
+                                                    - {{ $category->name }}
+                                                </a>
+                                            </li>
+                                        @endforeach
                                     </ul>
                                 </li>
+                            @endauth
+
                                 <li><a href="{{ route('contact') }}">Contact</a></li>
                             </ul>
 
@@ -93,45 +116,58 @@
                            <!-- Right Side Auth & Search -->
 <div class="d-flex align-items-center ms-auto" style="margin-right: 25px">
 
-    <!-- Feedback Button -->
-    <div class="me-3">
-        <a href="#" class="btn btn-sm navbar-feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-            Leave Feedback
-        </a>
-    </div>
+    @auth
+    @if (auth()->user()->user_type === 'user')
+        <!-- Feedback Button -->
+        <div class="me-3">
+            <a href="#" class="btn btn-sm navbar-feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                Leave Feedback
+            </a>
+        </div>
+    @endif
+@endauth
+
 
     <!-- Search Icon -->
     <div class="search-btn me-3">
         <i class="fa fa-search"></i>
     </div>
 
-    <!-- Authenticated User -->
     @auth
-        <div class="profile-dropdown position-relative">
-            <img
-                id="profileButton"
-                src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : 'https://i.pravatar.cc/40' }}"
-                alt="Profile"
-                class="profile-pic"
-                style="cursor: pointer;"
-            >
-            <div class="dropdown-menu dropdown-menu-end" id="profileMenu" style="display: none; position: absolute; right: 0; top: 110%;">
-                <a href="{{ route('profile') }}">👤 Profile</a>
-                <a href="#">❓ Help</a>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit">🚪 Logout</button>
-                </form>
-            </div>
+    <div class="profile-dropdown position-relative" style="display: inline-block;">
+        <img
+            id="profileButton"
+            src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : 'https://i.pravatar.cc/40' }}"
+            alt="Profile"
+            style="cursor: pointer; width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+        >
+        <div id="profileMenu" class="dropdown-content hidden" style="
+            position: absolute;
+            right: 0;
+            top: 110%;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            min-width: 160px;
+            padding: 10px;
+            z-index: 1000;
+        ">
+            <a href="{{ route('profile') }}" style="display: block; padding: 8px;">👤 Profile</a>
+            <a href="#" style="display: block; padding: 8px;">❓ Help</a>
+            <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                @csrf
+                <button type="submit" style="display: block; width: 100%; padding: 8px; text-align: left;">🚪 Logout</button>
+            </form>
         </div>
+    </div>
     @endauth
 
-    <!-- Guest User -->
     @guest
-        <div style="margin-left: 15px;">
-            <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary">Login</a>
-            <a href="{{ route('register') }}" class="btn btn-sm btn-primary">Register</a>
-        </div>
+    <div style="margin-left: 15px;">
+        <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary">Login</a>
+        <a href="{{ route('register') }}" class="btn btn-sm btn-primary">Register</a>
+    </div>
     @endguest
 
 </div>

@@ -51,8 +51,8 @@
     </div>
     <div class="col">
         <div class="metric-card h-100">
-            <h4><i class="fas fa-star me-2 text-warning"></i> Total Reviews</h4>
-            <p>{{ $totalReviews }}</p>
+            <h4><i class="fas fa-star me-2 text-warning"></i> Average Reviews</h4>
+            <p>{{ $averageRating }}</p>
         </div>
     </div>
 </div>

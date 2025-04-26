@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\WebsiteReview;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -63,6 +64,19 @@ public function allTools()
 //                   show tool Details
 public function showProduct($id)
 {
+    // Check if user is not logged in or is blocked
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+
+    $user = Auth::user();
+
+    if ($user->status === 'blocked') {
+        Auth::logout();
+        return redirect()->route('blocked.page');
+    }
+
+    $categories = Category::all();
     $product = Product::with(['user', 'category', 'images'])->findOrFail($id);
     $mainImage = $product->images->sortByDesc('created_at')->first()?->image_url ?? 'images/default-product.png';
     $mainImage = asset('storage/' . $mainImage);
@@ -72,8 +86,9 @@ public function showProduct($id)
         ->latest()
         ->paginate(5);
 
-    return view('users.show-product', compact('product', 'mainImage', 'reviews'));
+    return view('users.show-product', compact('product', 'mainImage', 'reviews', 'categories'));
 }
+
 
 //          store review
 
@@ -100,7 +115,7 @@ public function userFeedback()
 {
     $allReviews = WebsiteReview::with('user')
         ->latest()
-        ->take(18) // أقصى حد من التقييمات
+        ->take(18) 
         ->get();
 
     $page = request()->get('page', 1);

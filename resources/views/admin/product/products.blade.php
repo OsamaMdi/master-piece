@@ -145,6 +145,10 @@
     </div>
 </div>
 
+<div id="imagePreviewModal" class="modal hidden" style="...">
+    <img id="previewImage" src="" style="...">
+</div>
+
 <!-- ✅ SweetAlert Notifications -->
 @if(session('success'))
 <script>

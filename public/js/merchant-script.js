@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const mainContent = document.getElementById('main-content');
     const toggleSidebar = document.getElementById('toggleSidebar');
     const profileButton = document.getElementById('profileButton');
-    const profileMenu = document.getElementById('profileMenu');
+    const profileMenu = document.querySelector('.dropdown-menu');
     const modal = document.getElementById('confirmationModal');
     const deleteButtons = document.querySelectorAll('.delete-btn');
     let currentForm = null;
@@ -18,14 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Profile dropdown
-    profileButton.addEventListener('click', function () {
-        profileMenu.classList.toggle('hidden');
+    if (!profileButton || !profileMenu) return;
+
+    profileButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileMenu.classList.toggle('show'); // ✅ هذا اللي بفعّل display: block
     });
 
-    window.addEventListener('click', function(e) {
+    window.addEventListener('click', function (e) {
         if (!profileButton.contains(e.target) && !profileMenu.contains(e.target)) {
-            profileMenu.classList.add('hidden');
+            profileMenu.classList.remove('show');
         }
     });
 
@@ -618,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-/*
+
 
 // Chart.js Script for Admin Dashboard Charts
 
@@ -722,4 +724,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
- */
+

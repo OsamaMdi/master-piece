@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,44 +12,65 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
         'quantity',
         'status',
+        'is_deliverable',
+        'usage_notes',
         'user_id',
         'category_id',
+        'block_reason', 'blocked_until'
     ];
 
-    // استخدام السوفت ديليت
     protected $dates = ['deleted_at'];
 
-    // العلاقة مع جدول المستخدمين (User)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // العلاقة مع جدول التصنيفات (Category)
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // العلاقة مع جدول الصور (ProductImages)
     public function images()
     {
         return $this->hasMany(Image::class);
     }
 
-    // العلاقة مع جدول الريفيوهات (Reviews)
     public function reviews()
     {
         return $this->hasMany(Review::class);
     }
 
-    // العلاقة مع جدول الحجوزات (Reservations)
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoredBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites')
+                    ->withTimestamps()
+                    ->withPivot('slug')
+                    ->whereNull('favorites.deleted_at');
+    }
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 }

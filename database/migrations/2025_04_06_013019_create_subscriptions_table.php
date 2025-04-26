@@ -14,13 +14,12 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('subscription_type'); // مثل شهري، سنوي، إلخ
+            $table->string('subscription_type'); 
             $table->timestamp('start_date');
-            $table->timestamp('end_date')->nullable(); 
+            $table->timestamp('end_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            // علاقة مع جدول المستخدمين
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
 

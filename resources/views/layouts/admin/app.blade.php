@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
 
+    ...
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 
 
     <meta charset="UTF-8">
     <title>Merchant Dashboard</title>
     <!-- Font Awesome 6 Free CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="upload-id-route" content="{{ route('admin.users.upload.identity') }}">
@@ -20,6 +25,7 @@
 
 <!-- Favicon -->
 <link rel="icon" href="{{ asset('img/logo.png') }}">
+
 
     <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user.css') }}">
@@ -37,7 +43,34 @@
     <!-- JS -->
     <script src="{{ asset('js/merchant-script.js') }}"></script>
     <script src="{{ asset('js/user.js') }}"></script>
+    <script src="{{ asset('js/adminSearch.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+        <!-- SweetAlert Notification -->
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: "{{ session('success') }}",
+        timer: 2000,
+        showConfirmButton: false
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: "{{ session('error') }}",
+    });
+</script>
+@endif
+
 </body>
 </html>

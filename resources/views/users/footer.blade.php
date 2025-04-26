@@ -26,6 +26,9 @@
 <div class="partner-area">
 
 </div>
+
+
+
 <!-- ✅ Bootstrap 5 Bundle (Modal + Popper included) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -35,6 +38,7 @@
 
 <!-- ❗ Keep jQuery only if used by old plugins like owl.carousel -->
 <script src="{{ asset('js/jquery.min.js') }}"></script>
+<script src="{{ asset('js/userSearch.js') }}"></script>
 <script src="{{ asset('js/roberto.bundle.js') }}"></script>
 <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
 <script src="{{ asset('js/default-assets/active.js') }}"></script>

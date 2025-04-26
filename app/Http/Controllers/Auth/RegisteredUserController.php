@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
@@ -33,7 +34,7 @@ class RegisteredUserController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'profile_picture' => ['nullable', 'image'],
-            'identity_image' => ['nullable', 'image'],
+            'identity_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'user_type' => ['required', 'in:user,merchant'],
         ]);
 
@@ -45,9 +46,11 @@ class RegisteredUserController extends Controller
             ? $request->file('identity_image')->store('identity_images', 'public')
             : null;
 
+            $status = $validated['user_type'] === 'merchant' ? 'under_review' : 'active';
 
         $user = User::create([
             'name' => $validated['name'],
+            'slug' => Str::slug($validated['name']) . '-' . Str::random(5),
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'identity_number' => $validated['identity_number'],
@@ -57,7 +60,7 @@ class RegisteredUserController extends Controller
             'phone' => $validated['phone'],
             'address' => $request->address ?? null,
             'city' => $validated['city'],
-            'status' => 'active',
+            'status' => $status,
             'user_type' => $validated['user_type'],
         ]);
 

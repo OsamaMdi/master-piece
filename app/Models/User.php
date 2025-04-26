@@ -11,53 +11,28 @@ class User extends Authenticatable
 {
     use HasFactory, SoftDeletes, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'identity_number',
-        'identity_image',
-        'profile_picture',
-        'identity_country',
-        'status',
-        'user_type',
-        'phone',
-        'address',
-        'city',
+        'name', 'slug', 'email', 'password',
+        'identity_number', 'profile_picture', 'identity_image', 'identity_country',
+        'status', 'user_type', 'phone', 'address', 'city',
+        'block_reason', 'blocked_until'
     ];
 
-    /**
-     * The attributes that should be mutated to dates (for soft deletes).
-     *
-     * @var array
-     */
     protected $dates = ['deleted_at'];
 
-    /**
-     * Hide sensitive attributes when returning user data.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
-    // ========== Relationships ==========
+/*     public function getRouteKeyName()
+    {
+        return 'slug';
+    } */
 
     public function reservations()
     {
@@ -98,8 +73,27 @@ class User extends Authenticatable
     {
         return $this->hasMany(WebsiteReview::class);
     }
+
     public function products()
-{
-    return $this->hasMany(Product::class);
-}
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoriteProducts()
+    {
+        return $this->belongsToMany(Product::class, 'favorites')
+                    ->withTimestamps()
+                    ->withPivot('slug')
+                    ->whereNull('favorites.deleted_at');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }

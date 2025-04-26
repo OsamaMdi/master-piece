@@ -11,6 +11,13 @@ class Review extends Model
 
     protected $fillable = ['user_id', 'product_id', 'rating', 'review_text'];
 
+
+    public function reports()
+{
+    return $this->morphMany(Report::class, 'reportable');
+}
+
+
     public function user()
     {
         return $this->belongsTo(User::class);

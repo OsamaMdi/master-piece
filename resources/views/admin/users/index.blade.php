@@ -4,15 +4,23 @@
 
 <!-- Page Header Title -->
 <h2 class="page-title mb-4">👥 Manage Users</h2>
-
-<!-- ✅ Unified Filter Row -->
+<!-- ✅ Unified Filter Row with Status, City, and User Type Filters -->
 <div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
     <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
         <input type="text" name="search" class="review-select review-search" placeholder="Search by name or email..." value="{{ request('search') }}">
 
-        <select name="sort" class="review-select">
-            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Newest First</option>
-            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+        <select name="status" class="review-select">
+            <option value="">All Statuses</option>
+            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+            <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>Blocked</option>
+            <option value="under_review" {{ request('status') == 'under_review' ? 'selected' : '' }}>Inactive</option>
+        </select>
+
+        <select name="user_type" class="review-select">
+            <option value="">All User Types</option>
+            <option value="user" {{ request('user_type') == 'user' ? 'selected' : '' }}>User</option>
+            <option value="merchant" {{ request('user_type') == 'merchant' ? 'selected' : '' }}>Merchant</option>
+            <option value="admin" {{ request('user_type') == 'admin' ? 'selected' : '' }}>Admin</option>
         </select>
 
         <button type="submit" class="review-filter-btn">🔍 Filter</button>
@@ -27,7 +35,6 @@
         ➕ Add New User
     </a>
 </div>
-
 
 
 <!-- Users Table -->
@@ -53,11 +60,19 @@
             <td>{{ $user->email }}</td>
             <td>{{ $user->phone ?? '—' }}</td>
             <td>{{ $user->identity_number ?? '—' }}</td>
-            <td>
-                <span class="badge bg-{{ $user->status === 'active' ? 'success' : ($user->status === 'blocked' ? 'danger' : 'warning text-dark') }}">
-                    {{ ucfirst($user->status) }}
-                </span>
-            </td>
+            @php
+            $statusClass = match($user->status) {
+                'active' => 'custom-status active',
+                'blocked' => 'custom-status blocked',
+                'under_review' => 'custom-status review',
+                default => 'custom-status unknown'
+            };
+        @endphp
+        <td>
+            <span class="{{ $statusClass }}">
+                {{ ucfirst($user->status ?? 'Unknown') }}
+            </span>
+        </td>
             <td>{{ $user->created_at->format('Y-m-d') }}</td>
             <td class="text-center">
                 <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-sm btn-outline-primary" title="View">
@@ -89,27 +104,5 @@
     <div class="alert alert-info">No users found.</div>
 @endif
 
-<!-- SweetAlert Notification -->
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: "{{ session('error') }}",
-    });
-</script>
-@endif
 
 @endsection

@@ -51,7 +51,6 @@
                     <select name="status" id="status" class="form-select" required>
                         <option value="active" {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="blocked" {{ old('status', $user->status) == 'blocked' ? 'selected' : '' }}>Blocked</option>
-                        <option value="under_review" {{ old('status', $user->status) == 'under_review' ? 'selected' : '' }}>Under Review</option>
                     </select>
                     @error('status') <small class="text-danger">{{ $message }}</small> @enderror
                 </div>
@@ -105,4 +104,7 @@
         </form>
     </div>
 </div>
+
+
 @endsection
+

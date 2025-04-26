@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
@@ -23,9 +24,18 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'color' => 'nullable|string|max:255',
+            'icon' => 'nullable|string|max:255',
         ]);
 
-        Category::create($request->only('name', 'description'));
+        // إنشاء الكاتيجوري مع توليد السلاق بشكل تلقائي
+        Category::create([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'description' => $request->description,
+            'color' => $request->color,
+            'icon' => $request->icon,
+        ]);
 
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully.');
     }
@@ -45,9 +55,18 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'color' => 'nullable|string|max:255',
+            'icon' => 'nullable|string|max:255',
         ]);
 
-        $category->update($request->only('name', 'description'));
+        // تحديث الكاتيجوري مع الحقول الجديدة
+        $category->update([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name), // إعادة توليد السلاق
+            'description' => $request->description,
+            'color' => $request->color,
+            'icon' => $request->icon,
+        ]);
 
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
     }

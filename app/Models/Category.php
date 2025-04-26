@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,14 +11,16 @@ class Category extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'description',
+        'name', 'slug', 'icon', 'color', 'description'
     ];
 
-    // استخدام السوفت ديليت
     protected $dates = ['deleted_at'];
 
-    // العلاقة مع جدول المنتجات (Product)
+   /*  public function getRouteKeyName()
+    {
+        return 'slug';
+    } */
+
     public function products()
     {
         return $this->hasMany(Product::class);

@@ -19,32 +19,55 @@
         'resources/js/app.js'
     ])
 </head>
+
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
 
-    <div class="min-h-screen flex flex-col">
+<div class="min-h-screen flex flex-col">
 
-        <!-- Navbar -->
-        @include('merchants.partials.navbar')
-        @include('merchants.partials.sidebar')
-        <!-- Page Header (if exists) -->
-        @if (isset($header))
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
+    <!-- Navbar and Sidebar based on User Type -->
+    @if (Auth::check())
+        @php
+            $user = Auth::user();
+        @endphp
+
+        @if ($user->user_type === 'admin')
+            @include('layouts.admin.navbar')
+            @include('layouts.admin.sidebar')
+
+        @elseif ($user->user_type === 'merchant')
+            @if (Auth::user()->status === 'active')
+                @include('layouts.merchant.navbar')
+                @include('layouts.merchant.sidebar')
+            @else
+                @include('users.navbar')
+            @endif
+
+        @elseif ($user->user_type === 'user')
+            @include('users.navbar')
         @endif
+    @endif
 
-        <!-- Main Content -->
-        <main class="flex-1">
-            {{ $slot }}
-        </main>
+    <!-- Page Header (if exists) -->
+    @if (isset($header))
+        <header class="bg-white dark:bg-gray-800 shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {{ $header }}
+            </div>
+        </header>
+    @endif
 
-    </div>
-    <script src="{{ asset('js/merchant-script.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmDelete() {
+    <!-- Main Content -->
+    <main class="flex-1">
+        {{ $slot }}
+    </main>
+
+</div>
+
+<script src="{{ asset('js/merchant-script.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function confirmDelete() {
         Swal.fire({
             title: 'Are you sure?',
             text: "Once your account is deleted, all of its resources and data will be permanently removed. Please confirm your password to proceed.",
@@ -70,6 +93,7 @@
             showConfirmButton: false
         });
     @endif
-        </script>
+</script>
+
 </body>
 </html>

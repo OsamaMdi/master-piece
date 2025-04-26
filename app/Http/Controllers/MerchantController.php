@@ -44,8 +44,8 @@ class MerchantController extends Controller
 
         // ✨ New stats
         $totalRevenue = DB::table('reservations')->whereNotNull('total_price')->sum('total_price');
-        $totalReviews = DB::table('reviews')->count();
-        $averageRating = DB::table('reviews')->avg('rating');
+        $averageRating = DB::table('website_reviews')->avg('rating') ?? 0;
+
 
         // === مقارنة المستخدمين
         $usersThisWeek = DB::table('users')->where('created_at', '>=', now()->startOfWeek())->count();
@@ -83,12 +83,13 @@ class MerchantController extends Controller
 
         // === Top Users
         $topUsers = DB::table('users')
-            ->leftJoin('reservations', 'users.id', '=', 'reservations.user_id')
-            ->select('users.id', 'users.name', 'users.email', DB::raw('COUNT(reservations.id) as reservations_count'))
-            ->groupBy('users.id', 'users.name', 'users.email')
-            ->orderByDesc('reservations_count')
-            ->take(5)
-            ->get();
+        ->leftJoin('reservations', 'users.id', '=', 'reservations.user_id')
+        ->where('users.user_type', 'user')
+        ->select('users.id', 'users.name', 'users.email', DB::raw('COUNT(reservations.id) as reservations_count'))
+        ->groupBy('users.id', 'users.name', 'users.email')
+        ->orderByDesc('reservations_count')
+        ->take(5)
+        ->get();
 
         // === Top Rated Products
         $topRatedProducts = DB::table('products')
@@ -114,7 +115,6 @@ class MerchantController extends Controller
             'totalUsers',
             'totalMerchants',
             'totalRevenue',
-            'totalReviews',
             'averageRating',
             'usersThisWeek',
             'usersLastWeek',

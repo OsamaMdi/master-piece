@@ -45,4 +45,19 @@ class IdentityHelper
             return "Error: " . $e->getMessage();
         }
     }
+    public static function extractCity($text)
+{
+    $cities = [
+        'عمان', 'اربد', 'الزرقاء', 'مادبا', 'العقبة',
+        'جرش', 'المفرق', 'البلقاء', 'الكرك', 'الطفيلة', 'معان'
+    ];
+
+    foreach ($cities as $city) {
+        if (strpos($text, $city) !== false) {
+            return $city;
+        }
+    }
+
+    return null;
+}
 }

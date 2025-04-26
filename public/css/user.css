@@ -534,7 +534,7 @@ small.text-danger {
     color: #2d3748;
     transition: all 0.3s ease;
     box-shadow: 0 0 0 0.1rem rgba(66, 153, 225, 0.25);
-    
+
 }
 
 .review-filter-form .review-filter-btn {
@@ -563,4 +563,83 @@ small.text-danger {
     transition: all 0.3s ease;
     box-shadow: 0 0 0 0.1rem rgba(66, 153, 225, 0.25);
 
+}
+
+
+
+
+.custom-status {
+    display: inline-block;
+    padding: 0.4em 0.9em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-transform: capitalize;
+    border: 1px solid transparent;
+}
+
+.custom-status.active {
+    background-color: #e6fffa;
+    color: #2c7a7b;
+    border-color: #b2f5ea;
+}
+
+.custom-status.blocked {
+    background-color: #fed7d7;
+    color: #c53030;
+    border-color: #feb2b2;
+}
+
+.custom-status.review {
+    background-color: #fefcbf;
+    color: #975a16;
+    border-color: #faf089;
+}
+
+.custom-status.unknown {
+    background-color: #e2e8f0;
+    color: #2d3748;
+    border-color: #cbd5e0;
+}
+
+
+
+
+
+
+
+
+
+
+.select2-container .select2-selection--single {
+    height: 38px; /* نفس ارتفاع input form-control */
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem; /* مثل Bootstrap */
+    display: flex;
+    align-items: center;
+}
+
+/* 🔵 خلي السهم Dropdown متناسق */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+    right: 8px;
+}
+
+/* 🔵 خفف المسافة بين الأيقونة أو اللون والنص */
+.select2-results__option span i,
+.select2-results__option span div {
+    margin-right: 8px;
+}
+
+/* 🔵 خفف حجم الأيقونة داخل الـ Select */
+.select2-selection__rendered i {
+    margin-right: 8px;
+    font-size: 1rem;
+}
+
+/* 🔵 خلي النصوص داخل السلكت تظهر بشكل مرتب */
+.select2-selection__rendered {
+    display: flex;
+    align-items: center;
 }

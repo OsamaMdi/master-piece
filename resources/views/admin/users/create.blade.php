@@ -72,7 +72,6 @@
                     <option value="user" {{ old('user_type') == 'user' ? 'selected' : '' }}>User</option>
                     <option value="merchant" {{ old('user_type') == 'merchant' ? 'selected' : '' }}>Merchant</option>
                     <option value="admin" {{ old('user_type') == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="delivery" {{ old('user_type') == 'delivery' ? 'selected' : '' }}>Delivery</option>
                 </select>
                 @error('user_type')<small class="text-danger">{{ $message }}</small>@enderror
             </div>
@@ -87,13 +86,14 @@
 
             <div class="form-col">
                 <label class="form-label">Identity Image</label>
-                <input type="file" name="identity_image" class="form-control" accept="image/*">
+                <input type="file" id="identity_image" name="identity_image" class="form-control" accept="image/*">
                 @error('identity_image')<small class="text-danger">{{ $message }}</small>@enderror
             </div>
         </div>
 
         <input type="hidden" name="identity_number" value="{{ old('identity_number') }}">
         <input type="hidden" name="city" value="{{ old('city') }}">
+
 
         <div class="mt-4 d-flex justify-content-between">
             <button type="submit" class="btn btn-primary">Save User</button>
@@ -102,8 +102,6 @@
     </form>
 </div>
 
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="upload-id-route" content="{{ route('admin.users.upload.identity') }}">
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
