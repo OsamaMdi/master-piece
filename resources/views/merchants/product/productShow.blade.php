@@ -133,24 +133,59 @@
 <div class="product-reviews-container">
     <h3>Reviews ({{ $reviews->total() }})</h3>
 
-    @forelse ($reviews as $review)
-   
+    @foreach ($reviews as $review)
+        @php
+            $report = \App\Models\Report::where('reportable_type', \App\Models\Review::class)
+                ->where('reportable_id', $review->id)
+                ->where('status', 'pending')
+                ->first();
+        @endphp
+
         <div class="review-card">
-            <div class="review-header">
-                <img class="user-avatar"
-    src="{{ $review->user->profile_picture ? asset('storage/' . $review->user->profile_picture) : asset('img/default-user.png') }}"
-    alt="{{ $review->user->name }}">
-                <strong>{{ $review->user->name }}</strong>
-                <span class="review-date">{{ $review->created_at->format('M d, Y') }}</span>
+            <div class="review-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <img class="user-avatar"
+                        src="{{ $review->user->profile_picture ? asset('storage/' . $review->user->profile_picture) : asset('img/default-user.png') }}"
+                        alt="{{ $review->user->name }}">
+                    <strong class="ms-2">{{ $review->user->name }}</strong>
+                    <span class="review-date ms-2">{{ $review->created_at->format('M d, Y') }}</span>
+
+                    @if ($report)
+                        {{-- Badge if reported --}}
+                        <span class="badge badge-danger ms-2">🚩 Reported</span>
+                    @endif
+                </div>
+
+                <div>
+                    @if (!$report)
+                        {{-- 🚩 زر التبليغ --}}
+                        <button type="button"
+                            class="btn btn-sm btn-warning openReportModalBtn"
+                            data-reportable-type="{{ get_class($review) }}"
+                            data-reportable-id="{{ $review->id }}"
+                            data-target-type="review"
+                            data-report-url="{{ route('reports.send') }}">
+                            🚩 Report
+                        </button>
+                    @else
+                        {{-- ✔️ زر رفع البلاغ --}}
+                        <form action="{{ route('reports.resolve', $report->id) }}" method="POST" style="display: inline;">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-sm btn-success">
+                                ✔️ Resolve Report
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </div>
+
             <div class="review-body">
                 <p>{{ $review->review_text }}</p>
                 <span class="review-rating">Rating: {{ $review->rating }} / 5</span>
             </div>
         </div>
-    @empty
-        <p class="no-reviews">No reviews yet.</p>
-    @endforelse
+    @endforeach
 
     @if ($reviews->lastPage() > 1)
         <div class="pagination-container">
@@ -164,6 +199,7 @@
         </div>
     @endif
 </div>
+
 
 <!-- ======== Fixed Back Button (at Bottom Left) ======== -->
 <a href="{{ route('merchant.products.index') }}" class="btn-back-fixed">
@@ -303,4 +339,5 @@
     const disableProductUrl = "{{ route('merchant.products.disable', $product->id) }}";
    const csrfToken = "{{ csrf_token() }}";
 </script>
+<script src="{{ asset('js/poppReport.js') }}"></script>
 @endsection

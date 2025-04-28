@@ -42,8 +42,14 @@ class Reservation extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function getRouteKeyName()
+   /*  public function getRouteKeyName()
     {
         return 'slug';
-    }
+    } */
+
+    public function reports()
+{
+    return $this->morphMany(\App\Models\Report::class, 'reportable');
+}
+
 }

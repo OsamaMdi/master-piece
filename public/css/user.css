@@ -644,7 +644,6 @@ small.text-danger {
     align-items: center;
 }
 
-
 .custom-status {
     padding: 6px 12px;
     border-radius: 8px;
@@ -654,6 +653,7 @@ small.text-danger {
     text-align: center;
 }
 
+/* Product Statuses */
 .custom-status.available {
     background-color: #d4edda;
     color: #155724;
@@ -676,4 +676,37 @@ small.text-danger {
     background-color: #d1d1d1;
     color: #333;
     border: 1px solid #bcbcbc;
+}
+
+
+
+/* Reservation Statuses */
+.custom-status.not-started {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.custom-status.in-progress {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+.custom-status.completed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.custom-status.cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.custom-status.reported {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
 }

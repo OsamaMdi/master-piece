@@ -143,3 +143,11 @@ Route::prefix('merchant')->name('merchant.')->middleware(['auth', 'block.check',
     Route::patch('/products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
 });
 
+
+
+
+
+// Public Routes (for users and merchants)
+Route::post('/reports', [ReportsController::class, 'sendReport'])->name('reports.send');
+Route::patch('/reports/{report}/resolve', [ReportsController::class, 'resolveReport'])->name('reports.resolve');
+

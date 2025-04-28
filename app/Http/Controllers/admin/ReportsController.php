@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class ReportsController extends Controller
 {
@@ -69,4 +71,53 @@ class ReportsController extends Controller
 
         return redirect()->route('admin.reports.index')->with('success', 'Report deleted successfully.');
     }
+
+    public function sendReport(Request $request)
+    {
+        $validated = $request->validate([
+            'reportable_type' => 'required|string',
+            'reportable_id' => 'required|integer',
+            'target_type' => 'required|in:reservation,product,review,general',
+            'message' => 'required|string|min:10',
+            'subject' => 'nullable|string|max:255',
+        ]);
+
+        Report::create([
+            'user_id' => Auth::id(),
+            'reportable_type' => $validated['reportable_type'],
+            'reportable_id' => $validated['reportable_id'],
+            'target_type' => $validated['target_type'],
+            'subject' => $validated['subject'] ?? null,
+            'message' => $validated['message'],
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report submitted successfully!',
+        ]);
+    }
+
+    /**
+     * Resolve an existing report.
+     */
+    public function resolveReport(Request $request, $reportId)
+{
+    $report = Report::findOrFail($reportId);
+
+    if ($report->status === 'pending') {
+        $report->status = 'resolved';
+
+
+        $oldMessage = $report->message ?? '';
+
+        
+        $report->message = trim($oldMessage) . ' (Report withdrawn)';
+
+        $report->save();
+    }
+
+    return redirect()->back()->with('success', 'Report has been resolved.');
+}
+
 }

@@ -68,15 +68,35 @@
     <div class="container">
         <div class="service-content">
             @foreach ($categories as $category)
-            <a href="{{ route('products.by.category', ['id' => $category->id]) }}"
-                class="single-service text-decoration-none"
-              {{--   style="--hover-color: {{ $category->hover_color ?? '#333' }};" --}}>
-                 {{-- <img src="{{ asset('storage/' . $category->icon_path) }}" alt="{{ $category->name }}"> --}}
-                 <h5>{{ $category->name }}</h5>
-             </a>
+                <a href="{{ route('products.by.category', ['id' => $category->id]) }}"
+                   class="single-service text-decoration-none"
+                   style="
+                       --main-color: {{ $category->color ?? '#ccc' }};
+                       box-shadow: 0 4px 10px {{ $category->color ?? '#ccc' }}40;
+                       border: 2px solid {{ $category->color ?? '#ccc' }};
+                   ">
+
+                    {{-- Icon --}}
+                    @if($category->icon)
+                        <div class="service-icon">
+                            <i class="{{ $category->icon }}"></i>
+                        </div>
+                    @endif
+
+                    {{-- Name --}}
+                    <h5>{{ $category->name }}</h5>
+
+                    {{-- Description --}}
+                    @if($category->description)
+                        <p class="service-description">
+                            {{ Str::limit($category->description, 100) }}
+                        </p>
+                    @endif
+                </a>
             @endforeach
         </div>
     </div>
+
 </section>
 <!-- Testimonials Area Start -->
 

@@ -1971,11 +1971,70 @@ html .ui-button.ui-state-disabled:active {
     margin-bottom: 1rem;
 }
 .service-content {
-  display: flex;
-  flex-wrap: wrap;        /* 👈 يخلي المربعات تلف بسطر جديد */
-  gap: 25px;
-  justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
 }
+
+.single-service {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    width: 220px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.single-service:hover {
+    background: linear-gradient(
+        135deg,
+        var(--main-color) 0%,
+        #ffffff 100%
+    );
+    transform: translateY(-5px);
+}
+
+.service-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: var(--main-color); /* لون الايقونة حسب لون الكاتيجوري */
+    transition: all 0.4s ease;
+}
+
+.single-service:hover .service-icon {
+    color: #ffffff; /* عند hover تصير الايقونة بيضاء */
+    transform: scale(1.2); /* حركة تكبير خفيفة */
+}
+
+.single-service h5 {
+    margin-top: 10px;
+    color: #333;
+    transition: color 0.4s ease;
+}
+
+.single-service:hover h5 {
+    color: #ffffff;
+}
+
+.service-description {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+    transition: color 0.4s ease;
+}
+
+.single-service:hover .service-description {
+    color: #ffffff;
+}
+
 
 .single-service:hover img {
     transform: scale(1.1);
