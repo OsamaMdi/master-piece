@@ -26,35 +26,95 @@
                 @endif
             </div>
         </div>
+<!-- Product Information Side -->
+<div class="product-info-side">
 
-        <!-- Product Information Side -->
-        <div class="product-info-side">
-            <h3>Description:</h3>
-            <p>{{ $product->description }}</p>
+    <div class="info-row">
+        <h3>Slug:</h3>
+        <p>{{ $product->slug }}</p>
+    </div>
 
-            <h3>Price:</h3>
-            <p>{{ number_format($product->price, 2) }} JOD/day</p>
+    <h3>Description:</h3>
+    <p>{{ $product->description }}</p>
 
-            <h3>Quantity:</h3>
-            <p>{{ $product->quantity }}</p>
+    <div class="info-row">
+        <h3>Price:</h3>
+        <p>{{ number_format($product->price, 2) }} JOD/day</p>
+    </div>
 
-            <h3>Category:</h3>
-            <p>{{ $product->category->name }}</p>
+    <div class="info-row">
+        <h3>Quantity:</h3>
+        <p>{{ $product->quantity }}</p>
+    </div>
 
-            <h3>Status:</h3>
-            <p class="product-status-{{ $product->status }}">{{ ucfirst($product->status) }}</p>
+    <div class="info-row">
+        <h3>Category:</h3>
+        <p>{{ $product->category->name }}</p>
+    </div>
 
-            <!-- Edit Buttons -->
-            <div class="edit-product-btn-wrapper" style="margin-top: 20px; display: flex; gap: 10px;">
-                <button id="openEditProductModal" class="btn btn-edit">
-                    ✏️ Edit Product
-                </button>
+    @php
+        $statusClass = match($product->status) {
+            'available' => 'custom-status available',
+            'blocked' => 'custom-status blocked',
+            'maintenance' => 'custom-status maintenance',
+            default => 'custom-status unknown'
+        };
+    @endphp
 
-                <button id="openEditImagesModal" class="btn btn-edit">
-                    📸 Edit Images
-                </button>
-            </div>
-        </div>
+    <div class="info-row">
+        <h3>Status:</h3>
+        <p class="{{ $statusClass }}">{{ ucfirst($product->status ?? 'Unknown') }}</p>
+    </div>
+
+    <div class="info-row">
+        <h3>Deliverable:</h3>
+        <p>{{ $product->is_deliverable ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <h3>Usage Notes:</h3>
+    <p>{{ $product->usage_notes }}</p>
+
+    <div class="info-row">
+        <h3>Created At:</h3>
+        <p>{{ $product->created_at->format('Y-m-d H:i') }}</p>
+    </div>
+
+    <div class="info-row">
+        <h3>Last Updated:</h3>
+        <p>{{ $product->updated_at->format('Y-m-d H:i') }}</p>
+    </div>
+
+<!-- Edit Buttons -->
+<div class="edit-product-btn-wrapper" style="margin-top: 20px; display: flex; gap: 10px;">
+    <button id="openEditProductModal" class="btn btn-edit">
+        ✏️ Edit Product
+    </button>
+
+    <button id="openEditImagesModal" class="btn btn-edit">
+        📸 Edit Images
+    </button>
+
+    @if($product->status === 'available')
+    <button type="button" id="openDisableProductModal" class="btn btn-warning">
+        ❌ Disable Product
+    </button>
+@elseif($product->status === 'maintenance')
+<form action="{{ route('merchant.products.toggleStatus', $product->id) }}" method="POST">
+    @csrf
+    @method('PATCH')
+    <button type="submit" class="btn btn-edit">
+        ✅ Enable Product
+    </button>
+</form>
+@endif
+
+</div>
+
+</div>
+</div>
+
+
+
 
     </div>
 </div>
@@ -74,9 +134,12 @@
     <h3>Reviews ({{ $reviews->total() }})</h3>
 
     @forelse ($reviews as $review)
+   
         <div class="review-card">
             <div class="review-header">
-                <img class="user-avatar" src="{{ asset('storage/' . $review->user->profile_image) }}" alt="{{ $review->user->name }}">
+                <img class="user-avatar"
+    src="{{ $review->user->profile_picture ? asset('storage/' . $review->user->profile_picture) : asset('img/default-user.png') }}"
+    alt="{{ $review->user->name }}">
                 <strong>{{ $review->user->name }}</strong>
                 <span class="review-date">{{ $review->created_at->format('M d, Y') }}</span>
             </div>
@@ -109,7 +172,7 @@
 
 <!-- ======== Edit Product Modal ======== -->
 <div id="editProductModal" class="modal hidden">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
         <!-- Modal Header -->
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3>Edit Product</h3>
@@ -156,24 +219,31 @@
                 </select>
             </div>
 
-            <!-- Status -->
+            <!-- Deliverable Checkbox -->
             <div class="form-group">
-                <label>Status:</label>
-                <select name="status" required>
-                    <option value="available" {{ old('status', $product->status) == 'available' ? 'selected' : '' }}>Available</option>
-                    <option value="reserved" {{ old('status', $product->status) == 'reserved' ? 'selected' : '' }}>Reserved</option>
-                    <option value="unavailable" {{ old('status', $product->status) == 'unavailable' ? 'selected' : '' }}>Unavailable</option>
-                </select>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <input type="checkbox" name="is_deliverable" id="is_deliverable" value="1"
+                        {{ old('is_deliverable', $product->is_deliverable) ? 'checked' : '' }}
+                        style="width: 20px; height: 20px;">
+                    <label for="is_deliverable" style="margin: 0;">Deliverable?</label>
+                </div>
+            </div>
+
+            <!-- Usage Notes -->
+            <div class="form-group">
+                <label>Usage Notes:</label>
+                <textarea name="usage_notes">{{ old('usage_notes', $product->usage_notes) }}</textarea>
             </div>
 
             <!-- Modal Actions -->
-            <div class="modal-actions">
+            <div class="modal-actions d-flex justify-content-end gap-2" style="margin-top: 20px;">
                 <button type="button" id="cancelEditProduct" class="btn btn-cancel">Cancel</button>
                 <button type="submit" class="btn btn-add">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
+
 
 <!-- ======== Edit Images Modal (Fixed) ======== -->
 <div id="editImagesModal" class="modal hidden">
@@ -227,5 +297,10 @@
         <div id="customProgressBar" class="progress-bar"></div>
     </div>
 </div>
+<script src="{{ asset('js/poppDisableProduct.js') }}" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const disableProductUrl = "{{ route('merchant.products.disable', $product->id) }}";
+   const csrfToken = "{{ csrf_token() }}";
+</script>
 @endsection

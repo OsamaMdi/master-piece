@@ -38,7 +38,7 @@ class Kernel extends HttpKernel
     \Illuminate\Routing\Middleware\SubstituteBindings::class,
     \App\Http\Middleware\AutoUnblockUser::class,
     \App\Http\Middleware\AutoUnblockProduct::class,
-   
+
 ],
 
         'api' => [
@@ -67,7 +67,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // ✅ ضيف هون:
+
         'block.check' => \App\Http\Middleware\BlockUserMiddleware::class,
         'admin.only' => \App\Http\Middleware\AdminOnly::class,
         'merchant.only' => \App\Http\Middleware\MerchantOnly::class,

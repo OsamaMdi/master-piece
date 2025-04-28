@@ -69,8 +69,8 @@ class Product extends Model
         return $this->morphMany(Report::class, 'reportable');
     }
 
-    public function getRouteKeyName()
+  /*   public function getRouteKeyName()
     {
         return 'slug';
-    }
+    } */
 }

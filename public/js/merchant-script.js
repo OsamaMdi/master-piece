@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
@@ -77,26 +78,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Modals
-    const addProductModal = document.getElementById('addProductModal');
-    const uploadImageModal = document.getElementById('uploadImageModal');
-    const addProductForm = document.getElementById('addProductForm');
-    const uploadImageForm = document.getElementById('uploadImageForm');
-    const finishUploading = document.getElementById('finishUploading');
 
-    const openAddProductModalBtn = document.getElementById('openAddProductModal');
-    if (openAddProductModalBtn) {
-        openAddProductModalBtn.addEventListener('click', function() {
-            addProductModal.classList.remove('hidden');
-        });
-    }
 
-    const cancelAddProductBtn = document.getElementById('cancelAddProduct');
-    if (cancelAddProductBtn) {
-        cancelAddProductBtn.addEventListener('click', function() {
-            addProductModal.classList.add('hidden');
-        });
-    }
 
     // Check image upload status
     const showUploadModalMeta = document.querySelector('meta[name="show-upload-modal"]');
@@ -113,13 +96,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
    // ===== Finish Uploading Button Logic =====
-if (finishUploading) {
+   if (finishUploading) {
     finishUploading.addEventListener('click', function () {
         const uploadedProductId = document.getElementById('uploadedProductId')?.value;
         const redirectTo = document.getElementById('redirectTo')?.value;
 
         if (!uploadedProductId) {
-            showNotification('❌ Missing product ID!', 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing product!',
+                text: '❌ You must create a product first before uploading images.',
+            });
             return;
         }
 
@@ -135,15 +122,24 @@ if (finishUploading) {
                         window.location.href = redirectUrl;
                     }, 1500);
                 } else {
-                    showNotification('❌ You must upload at least one image before finishing!', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload at least one image!',
+                        text: '❌ You must upload at least one image before finishing!',
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error checking images:', error);
-                showNotification('An error occurred. Please try again.', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'An error occurred',
+                    text: '❌ Please try again.',
+                });
             });
     });
 }
+
 
 
 
@@ -153,41 +149,43 @@ if (finishUploading) {
         addProductForm.addEventListener('submit', function (e) {
             let hasError = false;
 
+            // امسك الحقول
             const nameInput = addProductForm.querySelector('input[name="name"]');
             const descInput = addProductForm.querySelector('textarea[name="description"]');
             const priceInput = addProductForm.querySelector('input[name="price"]');
             const quantityInput = addProductForm.querySelector('input[name="quantity"]');
             const categorySelect = addProductForm.querySelector('select[name="category_id"]');
-            const merchantSelect = addProductForm.querySelector('select[name="merchant_id"]');
+            const usageNotesInput = addProductForm.querySelector('textarea[name="usage_notes"]');
 
-            const name = nameInput.value.trim();
-            const description = descInput.value.trim();
-
+            // احذف أي Errors قديمة
             addProductForm.querySelectorAll('.error-text').forEach(e => e.remove());
 
-            const showError = (el, message) => {
+            // دالة لإظهار الخطأ
+            const showError = (element, message) => {
                 const error = document.createElement('small');
                 error.classList.add('error-text');
                 error.style.color = 'red';
                 error.textContent = message;
-                el.parentElement.appendChild(error);
+                element.parentElement.appendChild(error);
                 hasError = true;
             };
 
-            if (name.length < 4) {
+            // بدء الفلديشن
+            if (!nameInput.value.trim() || nameInput.value.trim().length < 4) {
                 showError(nameInput, 'Name must be at least 4 characters.');
             }
 
-            if (description.length < 20) {
+            if (!descInput.value.trim() || descInput.value.trim().length < 20) {
                 showError(descInput, 'Description must be at least 20 characters.');
             }
 
             const priceValue = parseFloat(priceInput.value);
-            if (!priceInput.value || isNaN(priceValue) || priceValue < 1) {
-                showError(priceInput, 'Price must be 1 JOD or more.');
+            if (!priceInput.value || isNaN(priceValue) || priceValue <= 0) {
+                showError(priceInput, 'Price must be greater than 0 JOD.');
             }
 
-            if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
+            const quantityValue = parseInt(quantityInput.value);
+            if (!quantityInput.value || isNaN(quantityValue) || quantityValue < 1) {
                 showError(quantityInput, 'Quantity must be at least 1.');
             }
 
@@ -195,16 +193,19 @@ if (finishUploading) {
                 showError(categorySelect, 'Please select a category.');
             }
 
-            if (merchantSelect && !merchantSelect.value) {
-                showError(merchantSelect, 'Please select a merchant.');
+
+            if (!usageNotesInput.value.trim()) {
+                showError(usageNotesInput, 'Usage notes are required.');
             }
 
+            // لو فيه خطأ امنع الفورم
             if (hasError) {
                 e.preventDefault();
-                showNotification('❌ Please fix the form errors before submitting.', 'error');
+                showNotification('❌ Please fill all required fields correctly.', 'error');
             }
         });
     }
+
 
     // Notification popup
     window.showNotification = function(message, type = 'success', showActions = false) {
@@ -724,4 +725,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
 

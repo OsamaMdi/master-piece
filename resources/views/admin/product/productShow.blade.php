@@ -28,40 +28,84 @@
             </div>
         </div>
 
-        <!-- Product Information Side -->
-        <div class="product-info-side">
-            <h3>Description:</h3>
-            <p>{{ $product->description }}</p>
+   <!-- Product Information Side -->
+<div class="product-info-side">
+    <h3>Description:</h3>
+    <p>{{ $product->description }}</p>
 
-            <h3>Price:</h3>
-            <p>{{ number_format($product->price, 2) }} JOD/day</p>
+    <h3>Price:</h3>
+    <p>{{ number_format($product->price, 2) }} JOD/day</p>
 
-            <h3>Quantity:</h3>
-            <p>{{ $product->quantity }}</p>
+    <h3>Quantity:</h3>
+    <p>{{ $product->quantity }}</p>
 
-            <h3>Category:</h3>
-            <p>{{ $product->category->name }}</p>
+    <h3>Category:</h3>
+    <p>{{ $product->category->name }}</p>
 
-            <h3>Status:</h3>
-            <p class="product-status-{{ $product->status }}">{{ ucfirst($product->status) }}</p>
 
-            <!-- Edit Buttons -->
-            <div class="edit-product-btn-wrapper" style="margin-top: 20px; display: flex; gap: 10px;">
-                <button id="openEditProductModal" class="btn btn-edit">
-                    ✏️ Edit Product
-                </button>
+    @php
+    $statusClass = match($product->status) {
+        'available' => 'custom-status available',
+        'blocked' => 'custom-status blocked',
+        'maintenance' => 'custom-status maintenance',
+        default => 'custom-status unknown'
+    };
+@endphp
 
-                <!-- Disable Product Button -->
-                <form id="blockProductForm" action="{{ route('admin.products.block', $product->id) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <button type="button" class="btn btn-dark mt-4" id="confirmBlockBtn">
-                        <i class="fas fa-ban me-1" style="color: red"></i> Disable Product
-                    </button>
-                </form>
+<h3>Status:</h3>
+<p class="{{ $statusClass }}">
+    {{ ucfirst($product->status ?? 'Unknown') }}
+</p>
+
+@if($product->status === 'blocked')
+<div class="blocked-info mt-3">
+    <h4>Block Reason:</h4>
+    <p>{{ $product->block_reason ?? 'No reason provided' }}</p>
+
+    <h4>Blocked Until:</h4>
+    <p>
+        @if($product->blocked_until)
+            {{ \Carbon\Carbon::parse($product->blocked_until)->format('d/m/Y H:i') }}
+        @else
+            Permanent Block
+        @endif
+    </p>
+</div>
+@endif
+
+
+    <h3>Deliverable:</h3>
+    <p>{{ $product->is_deliverable ? 'Yes' : 'No' }}</p>
+
+    <h3>Usage Notes:</h3>
+    <p>{{ $product->usage_notes ?? 'No usage notes available' }}</p>
+
+
+         <!-- Edit/Block/Unblock Button -->
+         <div class="mt-4 text-end" style="margin-top: 2rem;">
+    @if ($product->status === 'blocked')
+        <form action="{{ route('admin.products.unblock', $product->id) }}" method="POST" style="display: inline;">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="btn btn-unblock">
+                🔓 Unblock Product
+            </button>
+        </form>
+    @else
+        <button id="openEditProductModal" class="btn btn-block">
+            🚫 Block Product
+        </button>
+    @endif
+
+
+
+
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">← Back to Users</a>
+
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <!-- ======== Reservations Summary ======== -->
@@ -111,32 +155,43 @@
 <div id="editProductModal" class="modal hidden">
     <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>Edit Product</h3>
+            <h3>Block Product</h3>
         </div>
 
-        <form id="editProductForm" action="{{ route('admin.products.update', $product->id) }}" method="POST">
+        <form id="editProductForm" action="{{ route('admin.products.block', $product->id) }}" method="POST">
             @csrf
-            @method('PUT')
+            @method('PATCH')
 
             <!-- Status -->
             <div class="form-group">
-                <label>Status:</label>
-                <select name="status" required>
-                    <option value="available" {{ old('status', $product->status) == 'available' ? 'selected' : '' }}>Available</option>
-                    <option value="reserved" {{ old('status', $product->status) == 'reserved' ? 'selected' : '' }}>Reserved</option>
-                    <option value="unavailable" {{ old('status', $product->status) == 'unavailable' ? 'selected' : '' }}>Unavailable</option>
-                </select>
-            </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Block Duration</label>
+                        <select name="duration" class="form-select" required>
+                            <option value="1">1 Day</option>
+                            <option value="2">2 Days</option>
+                            <option value="7">1 Week</option>
+                            <option value="permanent">Permanent</option>
+                        </select>
+                    </div>
 
-            <div class="modal-actions">
-                <button type="button" id="cancelEditProduct" class="btn btn-cancel">Cancel</button>
-                <button type="submit" class="btn btn-add">Save Changes</button>
+                    <div class="mb-3">
+                        <label class="form-label">Block Reason</label>
+                        <textarea name="reason" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelEditProduct" class="btn btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-add">Save</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- ======== Edit Images Modal (Fixed) ======== -->
+
+{{-- <!-- ======== Edit Images Modal (Fixed) ======== -->
 <div id="editImagesModal" class="modal hidden">
     <div class="modal-content">
         <div style="text-align: center; margin-bottom: 15px;">
@@ -167,13 +222,13 @@
             </div>
         </form>
     </div>
-</div>
+</div> --}}
 
-<!-- ======== Image Preview Modal ======== -->
+{{-- <!-- ======== Image Preview Modal ======== -->
 <div id="imagePreviewModal" class="modal hidden" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;">
     <img id="previewImage" src="" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 20px #000;">
-</div>
-
+</div> --}}
+{{--
 <!-- ======== SweetAlert for Disable Product Confirmation ======== -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -198,7 +253,7 @@
             });
         });
     });
-</script>
+</script> --}}
 
 <!-- Custom Notification Container -->
 <div id="customNotification" class="notification hidden">

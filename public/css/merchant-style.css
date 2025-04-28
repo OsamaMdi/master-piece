@@ -1058,6 +1058,8 @@ body {
     display: flex;
     justify-content: center;
     margin-bottom: 40px;
+    padding: 0 20px;
+    
 }
 
 .product-details-card {
@@ -1097,6 +1099,26 @@ body {
 }
 
 /* Product Info Side */
+/* Info Row: Label and Value side by side */
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* المسافة بين الليبل والقيمة */
+    margin-top: 10px;
+}
+
+.info-row h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #34495e;
+}
+
+.info-row p {
+    margin: 0;
+    font-size: 16px;
+    color: #555;
+}
+
 .product-info-side {
     flex: 0 0 40%;
     max-width: 40%;

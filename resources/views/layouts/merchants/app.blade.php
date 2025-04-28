@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
+
     <meta charset="UTF-8">
     <title>Merchant Dashboard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -27,8 +29,49 @@
 
     <script src="{{ asset('js/merchantSearch.js') }}"></script>
     <!-- JS -->
-    <script src="{{ asset('js/merchant-script.js') }}"></script>
+    <script src="{{ asset('js/merchant-script.js') }}" defer></script>
+
+    <script src="{{ asset('js/poppProductM.js') }}" defer></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @elseif(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @elseif(session('warning'))
+            Swal.fire({
+                icon: 'warning',
+                title: 'Warning!',
+                text: "{{ session('warning') }}",
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @elseif(session('info'))
+            Swal.fire({
+                icon: 'info',
+                title: 'Info',
+                text: "{{ session('info') }}",
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @endif
+    });
+    </script>
 </body>
 </html>

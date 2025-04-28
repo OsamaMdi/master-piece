@@ -15,7 +15,7 @@ class AutoUnblockProduct
             ->whereNotNull('blocked_until')
             ->where('blocked_until', '<=', Carbon::now())
             ->update([
-                'status' => 'active',
+                'status' => 'available',
                 'block_reason' => null,
                 'blocked_until' => null,
             ]);

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\admin;
 
 use Carbon\Carbon;
 use App\Models\User;
+
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Reservation;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -42,6 +44,7 @@ class AdminProductController extends Controller
                 'quantity' => 'required|integer|min:1',
                 'category_id' => 'required|exists:categories,id',
                 'merchant_id' => 'required|exists:users,id',
+                'usage_notes' => 'nullable|string|max:1000',  // إضافة ملاحظات الاستخدام
             ]);
 
             // Extra check just in case
@@ -49,15 +52,20 @@ class AdminProductController extends Controller
                 return redirect()->back()->with('error', 'Merchant is required to assign the product.')->withInput();
             }
 
+            // Generate slug from name
+            $slug = Str::slug($request->name);
+
             // Create product
             $product = Product::create([
                 'name' => $request->name,
+                'slug' => $slug,  // إضافة الـ Slug
                 'description' => $request->description,
                 'price' => $request->price,
                 'quantity' => $request->quantity,
-                'status' => 'available',
+                'status' => 'available',  // الحالة الافتراضية
                 'user_id' => $request->merchant_id,
                 'category_id' => $request->category_id,
+                'usage_notes' => $request->usage_notes,  // إضافة ملاحظات الاستخدام
             ]);
 
             if ($request->wantsJson()) {
@@ -81,6 +89,7 @@ class AdminProductController extends Controller
             return redirect()->back()->with('error', 'Unexpected error occurred.')->withInput();
         }
     }
+
 
 
     public function uploadImage(Request $request)
@@ -146,7 +155,7 @@ class AdminProductController extends Controller
         return view('admin.product.edit', compact('product'));
     }
 
-    public function update(Request $request, string $id)
+   /*  public function update(Request $request, string $id)
     {
         try {
             $product = Product::findOrFail($id);
@@ -188,7 +197,7 @@ class AdminProductController extends Controller
             }
             return redirect()->back()->with('error', 'Unexpected error occurred.');
         }
-    }
+    } */
 
 
 
@@ -213,7 +222,7 @@ class AdminProductController extends Controller
     }
 }
 
-    public function updateImages(Request $request, string $id)
+  /*   public function updateImages(Request $request, string $id)
     {
         try {
             $product = Product::findOrFail($id);
@@ -276,12 +285,9 @@ class AdminProductController extends Controller
 
             return redirect()->back()->with('error', 'Error updating images.');
         }
-    }
+    } */
 
-
-
-
-    public function blockWithCancel($id)
+   /*  public function blockWithCancel($id)
     {
         $product = Product::with('reservations')->findOrFail($id);
         $product->status = 'blocked';
@@ -295,7 +301,43 @@ class AdminProductController extends Controller
             ->update(['status' => 'cancelled']);
 
         return redirect()->back()->with('success', 'Product blocked and all future reservations cancelled.');
-    }
+    } */
 
+              // Block a product with a reason and duration
+
+    public function block(Request $request, Product $product)
+    {
+       
+        $request->validate([
+            'duration' => 'required',
+            'reason' => 'required|string|max:255',
+        ]);
+
+        if ($request->duration == 'permanent') {
+            $blockedUntil = null;
+        } else {
+            $blockedUntil = now()->addDays((int) $request->duration);
+        }
+
+        $product->update([
+            'status' => 'blocked',
+            'block_reason' => $request->reason,
+            'blocked_until' => $blockedUntil,
+        ]);
+
+        return redirect()->back()->with('success', 'Product blocked successfully.');
+    }
+    // Unblock a product
+
+public function unblock(Product $product)
+{
+    $product->update([
+        'status' => 'available',
+        'block_reason' => null,
+        'blocked_until' => null,
+    ]);
+
+    return redirect()->back()->with('success', 'Product unblocked successfully.');
+}
 
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SystemCheckController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\merchants\ProductController;
 use App\Http\Controllers\admin\AdminProductController;
@@ -63,7 +64,7 @@ Route::view('/room', 'users.room')->name('room');
 Route::view('/about', 'users.about')->name('about');
 Route::view('/contact', 'users.contact')->name('contact');
 Route::get('/products/{id}', [UserFrontendController::class, 'showProduct'])->name('user.products.show');
-Route::post('/products/{id}/reviews', [UserFrontendController::class, 'storeReview'])->name('user.products.reviews.store');
+Route::post('/products/{id}/reviews', [UserFrontendController::class, 'storeReview'])->name('user.products.reviews.store')->middleware('auth');;
 Route::get('/user-feedback', [UserFrontendController::class, 'userFeedback'])->name('user.feedback');
 Route::post('/website-reviews/store', [UserFrontendController::class, 'storeWebsiteReview'])
     ->name('user.websiteReview.store')
@@ -89,7 +90,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'block.check', 'admi
     Route::get('/reservations', [AdminReservationController::class, 'showReservations'])->name('reservations');
     Route::get('/reservation/{id}/details', [AdminReservationController::class, 'showReservationDetails'])->name('reservation.details');
     Route::post('products/upload-image', [AdminProductController::class, 'uploadImage'])->name('products.uploadImage');
-    Route::patch('products/{id}/block', [AdminProductController::class, 'blockWithCancel'])->name('products.block');
+    Route::patch('products/{id}/cancel', [AdminProductController::class, 'blockWithCancel'])->name('products.cancel');
+    Route::patch('products/{product}/block', [AdminProductController::class, 'block'])->name('products.block');   // << جديد
+    Route::patch('products/{product}/unblock', [AdminProductController::class, 'unblock'])->name('products.unblock'); // << جديد
     Route::get('/search', [SearchController::class, 'adminSearch'])->name('search');
     Route::resource('users', UserController::class);
     Route::post('users/upload-identity', [UserController::class, 'uploadIdentity'])->name('users.upload.identity');
@@ -103,9 +106,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'block.check', 'admi
         ]);
     });
     Route::patch('users/{user}/block', [UserController::class, 'block'])->name('users.block');
-Route::patch('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
-
+    Route::patch('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
+    Route::resource('reports', ReportsController::class)->only(['index', 'show', 'destroy']);
+    Route::patch('reports/{report}/status', [ReportsController::class, 'updateStatus'])->name('reports.updateStatus');
 });
+
 
 
 /*
@@ -134,5 +139,7 @@ Route::prefix('merchant')->name('merchant.')->middleware(['auth', 'block.check',
 
 
     Route::view('/under-review', 'merchants.under_review')->name('under_review');
+    Route::patch('/{product}/disable', [ProductController::class, 'disableProduct'])->name('products.disable');
+    Route::patch('/products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
 });
 

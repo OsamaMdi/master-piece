@@ -31,13 +31,13 @@
         @endphp
 
         @if ($user->user_type === 'admin')
-            @include('layouts.admin.navbar')
-            @include('layouts.admin.sidebar')
+            @include('admin.partials.navbar')
+            @include('admin.partials.sidebar')
 
         @elseif ($user->user_type === 'merchant')
             @if (Auth::user()->status === 'active')
-                @include('layouts.merchant.navbar')
-                @include('layouts.merchant.sidebar')
+                @include('merchants.partials.navbar')
+                @include('merchants.partials.sidebar')
             @else
                 @include('users.navbar')
             @endif

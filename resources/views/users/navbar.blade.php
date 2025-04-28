@@ -149,19 +149,31 @@
             border: 1px solid #ddd;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             border-radius: 6px;
-            min-width: 160px;
+            min-width: 200px;
             padding: 10px;
             z-index: 1000;
         ">
-            <a href="{{ route('profile') }}" style="display: block; padding: 8px;">👤 Profile</a>
-            <a href="#" style="display: block; padding: 8px;">❓ Help</a>
+            <a href="{{ route('profile') }}" style="display: block;width: 100%; padding: 8px;">👤 Profile</a>
+
+
+            @if (Auth::user()->user_type === 'admin')
+                <a href="{{ route('admin.dashboard') }}" style="display: block; width: 100%; padding: 8px;">🔧 Admin Dashboard</a>
+            @elseif (Auth::user()->user_type === 'merchant')
+                <a href="{{ route('merchant.dashboard') }}" style="display: block; width: 100%;  padding: 8px;">🛒 Merchant Dashboard</a>
+            @endif
+
+            <a href="#" style="display: block; width: 100%; padding: 8px;">❓ Help</a>
+
             <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
                 @csrf
-                <button type="submit" style="display: block; width: 100%; padding: 8px; text-align: left;">🚪 Logout</button>
+                <button type="submit" style="display: block; width: 100%; padding: 8px; text-align: left; background: none; border: none; color: inherit; font: inherit; cursor: pointer;">
+                    🚪 Logout
+                </button>
             </form>
         </div>
     </div>
     @endauth
+
 
     @guest
     <div style="margin-left: 15px;">

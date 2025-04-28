@@ -36,7 +36,12 @@
                 <i class="fas fa-comment-dots"></i> Website Reviews
             </a>
         </li>
+        <li>
+            <a href="{{ route('admin.reports.index') }}" class="{{ Route::is('admin.reports.*') ? 'active' : '' }}">
+                <i class="fas fa-flag"></i> Reports
+            </a>
+        </li>
 
-        
+
     </ul>
 </div>
