@@ -71,5 +71,6 @@ class Kernel extends HttpKernel
         'block.check' => \App\Http\Middleware\BlockUserMiddleware::class,
         'admin.only' => \App\Http\Middleware\AdminOnly::class,
         'merchant.only' => \App\Http\Middleware\MerchantOnly::class,
+        'user.only' => \App\Http\Middleware\UserOnly::class,
     ];
 }

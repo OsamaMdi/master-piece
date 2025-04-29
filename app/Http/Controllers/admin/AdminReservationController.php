@@ -14,24 +14,27 @@ use App\Models\ReservationStatus;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-
+use App\Traits\ReservationStatusTrait;
 class AdminReservationController extends Controller
 {
+    use ReservationStatusTrait;
 
     public function showReservationDetails(string $reservationId)
-    {
-        $reservation = Reservation::with(['user', 'product'])->findOrFail($reservationId);
+{
+    $reservation = Reservation::with(['user', 'product.images'])->findOrFail($reservationId);
 
-        $reviews = collect();
-        if ($reservation->user && $reservation->product) {
-            $reviews = $reservation->product->reviews()
-                ->where('user_id', $reservation->user->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
+    $reviews = collect();
 
-        return view('admin.reservation.productReservationDetails', compact('reservation', 'reviews'));
+    if ($reservation->user && $reservation->product) {
+        $reviews = $reservation->product->reviews()
+            ->where('user_id', $reservation->user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
+
+    return view('admin.reservation.productReservationDetails', compact('reservation', 'reviews'));
+}
+
     //   Show rof on product reservations
     public function showProductReservations(string $productId)
     {
@@ -42,20 +45,31 @@ class AdminReservationController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(30);
 
+
+             // Check and update status for each reservation
+          foreach ($reservations as $reservation) {
+            $this->checkAndUpdateStatus($reservation);
+        }
+
         return view('admin.reservation.productReservations', compact('product', 'reservations'));
     }
 
       // Show all reservations for the current user
       public function showReservations()
       {
-          $reservations = Reservation::with(['user', 'product.reviews', 'product.user']) // 👈 أضفنا product.user
+          $reservations = Reservation::with(['user', 'product.reviews', 'product.user', 'reports'])
               ->orderBy('created_at', 'desc')
               ->paginate(20);
+
+          // Check and update status for each reservation
+          foreach ($reservations as $reservation) {
+              $this->checkAndUpdateStatus($reservation);
+          }
 
           return view('admin.reservation.reservations', compact('reservations'));
       }
 
-    
+
 }
 
 

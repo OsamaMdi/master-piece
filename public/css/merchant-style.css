@@ -1059,7 +1059,7 @@ body {
     justify-content: center;
     margin-bottom: 40px;
     padding: 0 20px;
-    
+
 }
 
 .product-details-card {
@@ -1692,6 +1692,16 @@ body {
     font-size: 16px;
     text-align: center;
 }
+.reservation-info-detail-custom p {
+    color: #2c3e50 !important;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.reservation-info-detail-custom strong {
+    font-weight: bold;
+    color: #34495e;
+}
 
 /* ======== Cancel Button ======== */
 .btn-cancel-reservation {
@@ -1779,7 +1789,7 @@ body {
 /* ======== Reservations Grid Layout ======== */
 .reservations-grid-custom {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     max-width: 1800px;
     margin: 30px auto;

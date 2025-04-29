@@ -29,28 +29,52 @@
                          class="product-image-detail-custom"
                          alt="{{ $reservation->product->name }}">
                 @else
-                    <img src="{{ asset('images/default-product.png') }}"
+                    <img src="{{ asset('img/logo.png') }}"
                          class="product-image-detail-custom"
                          alt="Default Product Image">
                 @endif
             </div>
 
             {{-- Product Text Content --}}
-            <div class="product-text-content">
-                <h3>{{ $reservation->product->name }}</h3>
-                {{-- Reservation Information --}}
-                <div class="reservation-info-detail-custom">
-                    <h4>Reservation Info:</h4>
-                    <p><strong>From:</strong> {{ \Carbon\Carbon::parse($reservation->start_date)->format('M d, Y') }}</p>
-                    <p><strong>To:</strong> {{ \Carbon\Carbon::parse($reservation->end_date)->format('M d, Y') }}</p>
-                    <p><strong>Status:</strong>
-                        <span class="status-badge status-{{ $reservation->status }}">
-                            {{ ucfirst($reservation->status) }}
-                        </span>
-                    </p>
-                    <p><strong>Reserved At:</strong> {{ \Carbon\Carbon::parse($reservation->created_at)->format('M d, Y H:i') }}</p>
-                </div>
-            </div>
+<div class="product-text-content">
+    <h3>{{ $reservation->product->name }}</h3>
+
+    {{-- Reservation Information --}}
+    <div class="reservation-info-detail-custom">
+        <h4>Reservation Info:</h4>
+        <p><strong>From:</strong> {{ \Carbon\Carbon::parse($reservation->start_date)->format('M d, Y') }}</p>
+        <p><strong>To:</strong> {{ \Carbon\Carbon::parse($reservation->end_date)->format('M d, Y') }}</p>
+
+
+        @php
+        $statusClass = match($reservation->status) {
+            'not_started' => 'custom-status not-started',
+            'in_progress' => 'custom-status in-progress',
+            'completed' => 'custom-status completed',
+            'cancelled' => 'custom-status cancelled',
+            'reported' => 'custom-status reported',
+            default => 'custom-status unknown'
+        };
+    @endphp
+
+        <p><strong>Status:</strong>
+            <span class="{{ $statusClass }}">
+                {{ ucfirst(str_replace('_', ' ', $reservation->status ?? 'Unknown')) }}
+            </span>
+        </p>
+
+        <p><strong>Reserved At:</strong> {{ \Carbon\Carbon::parse($reservation->created_at)->format('M d, Y H:i') }}</p>
+
+        <p><strong>Total Price:</strong> {{ number_format($reservation->total_price, 2) }} JOD</p>
+        <p><strong>Paid Amount:</strong> {{ number_format($reservation->paid_amount, 2) }} JOD</p>
+        <p><strong>Platform Fee (5%):</strong> {{ number_format($reservation->platform_fee, 2) }} JOD</p>
+
+        @if ($reservation->comment)
+            <p><strong>Client Comment:</strong> {{ $reservation->comment }}</p>
+        @endif
+    </div>
+</div>
+
         </div>
     </div>
 

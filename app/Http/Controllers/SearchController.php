@@ -86,6 +86,7 @@ public function adminSearch(Request $request)
 
     // 🔎 المستخدمين (Users)
     $users = User::whereNull('deleted_at')
+    ->where('id', '!=', auth()->id()) 
     ->where(function ($q) use ($query) {
         $q->where('name', 'like', "%{$query}%")
           ->orWhere('user_type', 'like', "%{$query}%")
@@ -98,7 +99,7 @@ public function adminSearch(Request $request)
             'name' => $user->name,
             'user_type' => $user->user_type,
             'status' => $user->status,
-            'role' => $user->role ,
+            'role' => $user->role,
             'image' => $user->profile_picture
                 ? asset('storage/' . $user->profile_picture)
                 : asset('/img/logof.png'),

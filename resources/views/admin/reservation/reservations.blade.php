@@ -45,7 +45,12 @@
             <!-- Product Info + Owner -->
             <td>
                 <div class="d-flex flex-column">
-                    <span>{{ $reservation->product->name }}</span>
+                    <span>
+                        {{ $reservation->product->name }}
+                        @if($reservation->reports->count() > 0)
+                            <span title="This reservation has reports">🚩</span>
+                        @endif
+                    </span>
                     <small class="text-muted">by {{ $reservation->product->user->name ?? 'Unknown' }}</small>
                 </div>
             </td>
@@ -56,12 +61,18 @@
 
             <!-- Status -->
             <td>
-                <span class="badge bg-{{
-                    $reservation->status === 'pending' ? 'secondary' :
-                    ($reservation->status === 'approved' ? 'success' :
-                    ($reservation->status === 'cancelled' ? 'danger' : 'warning text-dark'))
-                }}">
-                    {{ ucfirst($reservation->status) }}
+                @php
+                    $statusClass = match($reservation->status) {
+                        'not_started' => 'custom-status not-started',
+                        'in_progress' => 'custom-status in-progress',
+                        'completed' => 'custom-status completed',
+                        'cancelled' => 'custom-status cancelled',
+                        'reported' => 'custom-status reported',
+                        default => 'custom-status unknown'
+                    };
+                @endphp
+                <span class="{{ $statusClass }}">
+                    {{ ucfirst(str_replace('_', ' ', $reservation->status ?? 'Unknown')) }}
                 </span>
             </td>
 

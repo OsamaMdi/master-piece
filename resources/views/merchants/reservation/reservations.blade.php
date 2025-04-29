@@ -26,7 +26,20 @@
                 <p><strong>Product:</strong> {{ $reservation->product->name }}</p>
                 <p><strong>From:</strong> {{ \Carbon\Carbon::parse($reservation->start_date)->format('M d, Y') }}</p>
                 <p><strong>To:</strong> {{ \Carbon\Carbon::parse($reservation->end_date)->format('M d, Y') }}</p>
-                <p><strong>Status:</strong> {{ ucfirst($reservation->status) }}</p>
+
+                @php
+                $statusClass = match($reservation->status) {
+                    'not_started' => 'custom-status not-started',
+                    'in_progress' => 'custom-status in-progress',
+                    'completed' => 'custom-status completed',
+                    'cancelled' => 'custom-status cancelled',
+                    'reported' => 'custom-status reported',
+                    default => 'custom-status unknown'
+                };
+            @endphp
+                <p class="{{ $statusClass }}">
+                    {{ ucfirst(str_replace('_', ' ', $reservation->status ?? 'Unknown')) }}
+                </p>
             </div>
 
             <!-- View Details Button -->

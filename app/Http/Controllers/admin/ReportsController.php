@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Report;
-use App\Models\Product;
-use App\Models\Review;
 use App\Models\User;
+use App\Models\Report;
+use App\Models\Review;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+
 
 
 class ReportsController extends Controller
 {
+
 
     public function index(Request $request)
     {
@@ -111,7 +113,7 @@ class ReportsController extends Controller
 
         $oldMessage = $report->message ?? '';
 
-        
+
         $report->message = trim($oldMessage) . ' (Report withdrawn)';
 
         $report->save();

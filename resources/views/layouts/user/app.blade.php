@@ -6,6 +6,7 @@
 
   @stack('scripts')
 
+
   @include('users.footer')
 
 

@@ -1981,70 +1981,61 @@ html .ui-button.ui-state-disabled:active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    background: #fff;
+    justify-content: center;
+    padding: 25px 20px;
+    background: #f9f9f9;
     border-radius: 12px;
     width: 220px;
     text-align: center;
     text-decoration: none;
     color: inherit;
+    border: 2px solid transparent;
     transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .single-service:hover {
-    background: linear-gradient(
-        135deg,
-        var(--main-color) 0%,
-        #ffffff 100%
-    );
-    transform: translateY(-5px);
+    border-color: var(--main-color);
+    background: #fff;
+    transform: translateY(-7px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .service-icon {
-    font-size: 40px;
-    margin-bottom: 10px;
-    color: var(--main-color); /* لون الايقونة حسب لون الكاتيجوري */
+    font-size: 48px;
+    margin-bottom: 12px;
+    color: var(--main-color);
     transition: all 0.4s ease;
 }
 
 .single-service:hover .service-icon {
-    color: #ffffff; /* عند hover تصير الايقونة بيضاء */
-    transform: scale(1.2); /* حركة تكبير خفيفة */
+    color: var(--main-color);
+    transform: scale(1.15);
 }
 
 .single-service h5 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
     margin-top: 10px;
-    color: #333;
     transition: color 0.4s ease;
 }
 
 .single-service:hover h5 {
-    color: #ffffff;
+    color: var(--main-color);
 }
 
 .service-description {
     font-size: 14px;
-    color: #666;
+    color: #6b7280;
     margin-top: 8px;
     transition: color 0.4s ease;
 }
 
 .single-service:hover .service-description {
-    color: #ffffff;
-}
-
-
-.single-service:hover img {
-    transform: scale(1.1);
-}
-
-.single-service h5 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
+    color: #374151;
 }
 
 /* ==== Animation Keyframe ==== */
@@ -3209,4 +3200,40 @@ input:checked + .slider:before {
     font-weight: 600;
     color: #1a1a1a;
     margin: 0;
+}
+
+
+
+
+
+
+
+
+.favorite-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff5e5e;
+    font-size: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.favorite-btn:hover {
+    background: #ffe5e5;
+}
+.favorite-btn i.fa-heart {
+    color: #e63946;
+}
+.favorite-btn i.fa-heart-o {
+    color: #ccc;
 }

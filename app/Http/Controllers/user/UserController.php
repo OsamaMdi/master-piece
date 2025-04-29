@@ -2,16 +2,25 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Models\Report;
 use App\Models\Review;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Favorite;
+use App\Models\Reservation;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\WebsiteReview;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\ReservationStatusTrait;
 
 class UserController extends Controller
 {
+
+    use ReservationStatusTrait;
     //                   index page
 
     public function home()
@@ -35,12 +44,19 @@ class UserController extends Controller
 
     //                   show products by category
 
-   public function showByCategory($id)
+    public function showByCategory($id)
 {
     $category = Category::findOrFail($id);
 
-    $products = Product::with(['images', 'reviews'])
+    $products = Product::with(['images', 'reviews', 'favoredBy'])
         ->where('category_id', $id)
+        ->where('status', '!=', 'blocked')
+        ->whereHas('user', function ($query) {
+            $query->where('status', '!=', 'blocked');
+        })
+        ->withCount(['favoredBy as is_favorited' => function ($query) {
+            $query->where('user_id', auth()->id())->whereNull('favorites.deleted_at');
+        }])
         ->latest()
         ->paginate(15);
 
@@ -51,15 +67,25 @@ class UserController extends Controller
 
 
 
+
 public function allTools()
 {
     $categories = Category::orderBy('name')->get();
-    $products = Product::with(['images', 'category', 'reviews'])
+
+    $products = Product::with(['images', 'category', 'reviews', 'favoredBy'])
+        ->where('status', '!=', 'blocked')
+        ->whereHas('user', function ($query) {
+            $query->where('status', '!=', 'blocked');
+        })
+        ->withCount(['favoredBy as is_favorited' => function ($query) {
+            $query->where('user_id', auth()->id())->whereNull('favorites.deleted_at');
+        }])
         ->latest()
         ->paginate(15);
 
     return view('users.tools', compact('products', 'categories'));
 }
+
 
 //                   show tool Details
 public function showProduct($id)
@@ -115,7 +141,7 @@ public function userFeedback()
 {
     $allReviews = WebsiteReview::with('user')
         ->latest()
-        ->take(18) 
+        ->take(18)
         ->get();
 
     $page = request()->get('page', 1);
@@ -148,6 +174,174 @@ public function storeWebsiteReview(Request $request)
 
     return back()->with('success', 'Thank you for your feedback!');
 }
+
+
+
+public function indexActivity()
+{
+    $userId = auth()->id();
+
+    // Fetch user reservations ordered by status and start date
+    $reservations = Reservation::with(['product', 'reports'])
+        ->where('user_id', $userId)
+        ->orderByRaw("
+            CASE
+                WHEN status = 'in_progress' THEN 1
+                WHEN status = 'not_started' THEN 2
+                WHEN status = 'completed' THEN 3
+                WHEN status = 'cancelled' THEN 4
+                ELSE 5
+            END
+        ")
+        ->orderBy('start_date', 'asc')
+        ->paginate(5);
+
+    // Update reservation status if necessary
+    foreach ($reservations as $reservation) {
+        $this->checkAndUpdateStatus($reservation);
+    }
+
+    // Fetch user product reviews
+    $productReviews = Review::with('product')
+        ->where('user_id', $userId)
+        ->latest()
+        ->paginate(5);
+
+    // Fetch user website reviews
+    $websiteReviews = WebsiteReview::where('user_id', $userId)
+        ->latest()
+        ->paginate(5);
+
+    // Fetch all user-submitted reports
+    $reports = \App\Models\Report::where('user_id', $userId)
+        ->latest()
+        ->paginate(5);
+
+   // Fetch all user favorites with related product information (paginated)
+$favorites = \App\Models\Favorite::with(['product.images', 'product.category', 'product.user', 'product.reviews'])
+->where('user_id', $userId)
+->orderBy('updated_at', 'desc')
+->paginate(5);
+
+    return view('users.my-activity', compact(
+        'reservations',
+        'productReviews',
+        'websiteReviews',
+        'reports',
+        'favorites'
+    ));
+}
+
+
+// Handle cancelling a reservation
+public function cancelReservation($id)
+{
+    $reservation = Reservation::where('id', $id)
+        ->where('user_id', auth()->id())
+        ->where('status', 'not_started')
+        ->firstOrFail();
+
+    $now = now();
+    $startDate = Carbon::parse($reservation->start_date);
+
+    $diffInHours = $now->diffInHours($startDate, false);
+
+    if ($diffInHours <= 48) {
+        // ⏳ Late cancellation (less than 48 hours)
+
+        if ($reservation->paid_amount == $reservation->total_price) {
+
+            $reservation->paid_amount = round($reservation->total_price * 0.10, 2);
+        }
+
+    } else {
+        // ⏰ Early cancellation (more than 48 hours)
+
+
+        $reservation->paid_amount = 0;
+
+        $reservation->platform_fee = 0;
+    }
+
+    // Set status as cancelled
+    $reservation->status = 'cancelled';
+    $reservation->save();
+
+    return back()->with('success', 'Reservation cancelled successfully.');
+}
+
+// Handle reporting a reservation
+public function Report(Request $request)
+{
+    $request->validate([
+        'type' => 'required|in:reservation,product,general',
+        'message' => 'required|string|min:10',
+        'subject' => 'nullable|string|max:255',
+        'target_id' => 'nullable|integer',
+    ]);
+
+    $reportableType = null;
+    $reportableId = null;
+
+    if ($request->type === 'reservation') {
+        $reportableType = \App\Models\Reservation::class;
+        $reportableId = $request->target_id;
+    } elseif ($request->type === 'product') {
+        $reportableType = \App\Models\Product::class;
+        $reportableId = $request->target_id;
+    } elseif ($request->type === 'general') {
+        $reportableType = null;
+        $reportableId = null;
+    }
+
+    Report::create([
+        'user_id'         => auth()->id(),
+        'reportable_type' => $reportableType,
+        'reportable_id'   => $reportableId,
+        'target_type'     => $request->type,
+        'subject'         => $request->subject,
+        'message'         => $request->message,
+        'status'          => 'pending',
+    ]);
+
+    return back()->with('success', 'Your report has been submitted successfully.');
+}
+
+
+public function toggle(Product $product)
+{
+    $user = auth()->user();
+
+
+    $favorite = Favorite::withTrashed()
+        ->where('user_id', $user->id)
+        ->where('product_id', $product->id)
+        ->first();
+
+    if ($favorite) {
+        if ($favorite->trashed()) {
+
+            $favorite->restore();
+
+            return back()->with('success', 'Added to favorites successfully.');
+        } else {
+
+            $favorite->delete();
+
+            return back()->with('warning', 'Removed from favorites.');
+        }
+    } else {
+
+        Favorite::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'slug' => Str::uuid(),
+        ]);
+
+        return back()->with('success', 'Added to favorites successfully.');
+    }
+}
+
 }
 
 /*

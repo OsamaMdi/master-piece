@@ -152,7 +152,7 @@
     @endforelse
 
     <!-- Leave Feedback Button -->
-    <div class="col-12 text-center mt-3">
+    <div class="col-12 text-center mt-3" style="margin-bottom: 50px;">
         <a href="#" class="btn btn-sm navbar-feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal">
             Leave Feedback
        </a>

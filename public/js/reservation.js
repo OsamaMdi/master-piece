@@ -178,8 +178,10 @@ document.addEventListener("DOMContentLoaded", function () {
     cardForm?.addEventListener("submit", function (e) {
         e.preventDefault();
 
+        // امسح الأخطاء القديمة أولاً
         ["cardName", "cardNumber", "expiry", "cvv", "popupPaymentOption"].forEach(clearFieldError);
 
+        // اجلب القيم من الحقول
         const name = document.getElementById("cardName")?.value.trim();
         const number = document.getElementById("cardNumber")?.value.trim();
         const expiry = document.getElementById("expiry")?.value.trim();
@@ -188,14 +190,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let valid = true;
 
-        if (!name) showFieldError("cardName", "Name on card is required."), valid = false;
-        if (!number) showFieldError("cardNumber", "Card number is required."), valid = false;
-        if (!expiry) showFieldError("expiry", "Expiration date is required."), valid = false;
-        if (!cvv) showFieldError("cvv", "CVV is required."), valid = false;
-        if (!paymentOption) showFieldError("popupPaymentOption", "Please choose a payment option."), valid = false;
+        // تحقق من أن الحقول ليست فارغة
+        if (!name) {
+            showFieldError("cardName", "Name on card is required.");
+            valid = false;
+        }
+        if (!number) {
+            showFieldError("cardNumber", "Card number is required.");
+            valid = false;
+        }
+        if (!expiry) {
+            showFieldError("expiry", "Expiration date is required.");
+            valid = false;
+        }
+        if (!cvv) {
+            showFieldError("cvv", "CVV is required.");
+            valid = false;
+        }
+        if (!paymentOption) {
+            showFieldError("popupPaymentOption", "Please choose a payment option.");
+            valid = false;
+        }
 
-        if (!valid) return;
+        // ✅ تحقق إضافي لصحة معلومات البطاقة فقط لو الحقول مش فاضية
+        if (number && !/^(4[0-9]{15}|5[1-5][0-9]{14})$/.test(number.replace(/\s+/g, ''))) {
+            showFieldError("cardNumber", "Invalid Visa or MasterCard number format.");
+            valid = false;
+        }
 
+        if (expiry && !isValidExpiry(expiry)) {
+            showFieldError("expiry", "Invalid or expired expiry date (MM/YY).");
+            valid = false;
+        }
+
+        if (cvv && !/^[0-9]{3,4}$/.test(cvv)) {
+            showFieldError("cvv", "Invalid CVV (should be 3 or 4 digits).");
+            valid = false;
+        }
+
+        if (!valid) return; // لو في أخطاء لا تكمل
+
+        // إنشاء hidden fields لحفظ بيانات الدفع
         const hiddenPayment = document.createElement("input");
         hiddenPayment.type = "hidden";
         hiddenPayment.name = "payment_type";
@@ -217,10 +252,27 @@ document.addEventListener("DOMContentLoaded", function () {
         form.appendChild(hiddenPayment);
         form.appendChild(hiddenAmount);
 
+        // إغلاق مودال البطاقة وإرسال النموذج
         cardModal?.hide();
         setTimeout(() => {
             console.log("✅ Submitting form now...");
             form.submit();
         }, 300);
     });
+    function isValidExpiry(expiry) {
+        const [month, year] = expiry.split('/');
+        if (!month || !year) return false;
+
+        const expMonth = parseInt(month.trim(), 10);
+        const expYear = parseInt('20' + year.trim(), 10);
+
+        if (isNaN(expMonth) || isNaN(expYear)) return false;
+        if (expMonth < 1 || expMonth > 12) return false;
+
+        const now = new Date();
+        const expiryDate = new Date(expYear, expMonth - 1, 1);
+
+        return expiryDate >= new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
 });

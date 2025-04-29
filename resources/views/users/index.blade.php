@@ -62,23 +62,18 @@
 
 <!-- Welcome Area End -->
 <section class="roberto-service-area">
-    <h2 class="section-title">Our Services</h2>
-    <p class="section-subtitle">Explore the range of premium services we provide to enhance your experience.</p>
+    <h2 class="section-title">Categories</h2>
+    <p class="section-subtitle">Choose from our available categories to explore our offerings.</p>
 
     <div class="container">
         <div class="service-content">
             @foreach ($categories as $category)
                 <a href="{{ route('products.by.category', ['id' => $category->id]) }}"
-                   class="single-service text-decoration-none"
-                   style="
-                       --main-color: {{ $category->color ?? '#ccc' }};
-                       box-shadow: 0 4px 10px {{ $category->color ?? '#ccc' }}40;
-                       border: 2px solid {{ $category->color ?? '#ccc' }};
-                   ">
+                   class="single-service text-decoration-none">
 
                     {{-- Icon --}}
                     @if($category->icon)
-                        <div class="service-icon">
+                        <div class="service-icon" style="color: {{ $category->color ?? '#ccc' }};">
                             <i class="{{ $category->icon }}"></i>
                         </div>
                     @endif
@@ -96,9 +91,9 @@
             @endforeach
         </div>
     </div>
-
 </section>
 <!-- Testimonials Area Start -->
+
 
 @if($reviews->isNotEmpty())
 <section class="roberto-testimonials-area section-padding-100-0">
@@ -121,8 +116,12 @@
             <!-- التقييمات -->
             <div class="col-12 col-md-6">
                 <div class="section-heading">
-                    <h6>Testimonials</h6>
-                    <h2>Our Guests Love Us</h2>
+                    <h6>
+                        <a href="{{ route('about') }}" style="text-decoration: none; color: inherit;">
+                            Customer Feedback
+                        </a>
+                    </h6>
+                    <h2>What Our Clients Are Saying</h2>
                 </div>
 
                 <div class="testimonial-slides owl-carousel mb-100">
@@ -151,90 +150,5 @@
 
 
 
-
-<!-- Testimonials Area End -->
-
-
-<!-- Subscription Plans Section -->
-<section class="subscription-plans">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Choose Your Plan</h2>
-            <p class="section-subtitle">Flexible pricing for continuous access</p>
-            <div class="billing-toggle">
-                <span>Billed Monthly</span>
-                <label class="switch">
-                    <input type="checkbox">
-                    <span class="slider"></span>
-                </label>
-                <span>Billed Yearly <em>(Save 20%)</em></span>
-            </div>
-        </div>
-
-        <div class="plan-cards">
-            <!-- Starter Plan -->
-            <div class="plan-card">
-                <div class="plan-header">
-                    <h3 class="plan-name">Starter</h3>
-                    <div class="plan-price">
-                        <sup>$</sup>19<span>/mo</span>
-                    </div>
-                    <p class="plan-desc">Perfect for individual users</p>
-                </div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Single User Account</li>
-                    <li><i class="fas fa-check"></i> Basic Analytics</li>
-                    <li><i class="fas fa-check"></i> 5GB Storage</li>
-                    <li><i class="fas fa-check"></i> Email Support</li>
-                </ul>
-                <button class="plan-cta">Start Free Trial</button>
-                <div class="plan-notice">7-day free trial</div>
-            </div>
-
-            <!-- Professional Plan (Featured) -->
-            <div class="plan-card featured">
-                <div class="plan-badge">Most Popular</div>
-                <div class="plan-header">
-                    <h3 class="plan-name">Professional</h3>
-                    <div class="plan-price">
-                        <sup>$</sup>49<span>/mo</span>
-                    </div>
-                    <p class="plan-desc">For growing teams</p>
-                </div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Up to 5 Users</li>
-                    <li><i class="fas fa-check"></i> Advanced Analytics</li>
-                    <li><i class="fas fa-check"></i> 25GB Storage</li>
-                    <li><i class="fas fa-check"></i> Priority Support</li>
-                </ul>
-                <button class="plan-cta">Start Free Trial</button>
-                <div class="plan-notice">14-day free trial</div>
-            </div>
-
-            <!-- Enterprise Plan -->
-            <div class="plan-card">
-                <div class="plan-header">
-                    <h3 class="plan-name">Enterprise</h3>
-                    <div class="plan-price">
-                        <sup>$</sup>99<span>/mo</span>
-                    </div>
-                    <p class="plan-desc">For large organizations</p>
-                </div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Unlimited Users</li>
-                    <li><i class="fas fa-check"></i> Custom Analytics</li>
-                    <li><i class="fas fa-check"></i> 100GB Storage</li>
-                    <li><i class="fas fa-check"></i> 24/7 Support</li>
-                </ul>
-                <button class="plan-cta">Contact Sales</button>
-                <div class="plan-notice">Custom plans available</div>
-            </div>
-        </div>
-
-        <div class="plan-footer">
-            <p>All plans include: <span>Secure hosting</span> • <span>Regular updates</span> • <span>99.9% uptime</span></p>
-        </div>
-    </div>
-</section>
 
 @endsection

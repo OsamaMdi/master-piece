@@ -46,7 +46,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 });
+Route::middleware(['auth', 'block.check', 'user.only'])->group(function () {
+    Route::get('/my-activity', [UserFrontendController::class, 'indexActivity'])->name('user.activity');
+    Route::post('/reservations/{id}/cancel', [UserFrontendController::class, 'cancelReservation'])->name('reservations.cancel');
+    Route::post('/reservations/{id}/report', [UserFrontendController::class, 'report'])->name('reservations.report');
+    Route::patch('/reports/{report}/resolve', [ReportsController::class, 'resolveReport'])->name('reports.resolve');
+});
+
 
 // Auth routes (Login, Register, Forgot Password, etc)
 require __DIR__.'/auth.php';
@@ -56,19 +64,20 @@ require __DIR__.'/auth.php';
 | Public Website Routes - User Views
 |--------------------------------------------------------------------------
 */
+Route::post('/favorites/{product}/toggle', [UserFrontendController::class, 'toggle'])->name('favorites.toggle')->middleware('auth');
 Route::get('/', [UserFrontendController::class, 'home'])->name('home');
 Route::get('/tools', [UserFrontendController::class, 'allTools'])->name('tools.all');
 Route::get('/products/category/{id}', [UserFrontendController::class, 'showByCategory'])->name('products.by.category');
 Route::get('/products/show/{id}', [UserFrontendController::class, 'showByCategory'])->name('products.show');
-Route::view('/room', 'users.room')->name('room');
-Route::view('/about', 'users.about')->name('about');
+/* Route::view('/room', 'users.room')->name('room'); */
+/* Route::view('/about', 'users.about')->name('about'); */
 Route::view('/contact', 'users.contact')->name('contact');
 Route::get('/products/{id}', [UserFrontendController::class, 'showProduct'])->name('user.products.show');
 Route::post('/products/{id}/reviews', [UserFrontendController::class, 'storeReview'])->name('user.products.reviews.store')->middleware('auth');;
-Route::get('/user-feedback', [UserFrontendController::class, 'userFeedback'])->name('user.feedback');
+Route::get('/user-feedback', [UserFrontendController::class, 'userFeedback'])->name('about');
 Route::post('/website-reviews/store', [UserFrontendController::class, 'storeWebsiteReview'])
     ->name('user.websiteReview.store')
-    ->middleware('auth');
+    /* ->middleware('auth') */;
 
     Route::get('/live-search', [SearchController::class, 'liveSearch'])->name('live.search');
 

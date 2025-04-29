@@ -13,9 +13,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\ReservationStatusTrait;
 
 class ReservationController extends Controller
 {
+    use ReservationStatusTrait;
+    
     public function cancel(string $reservationId)
     {
         try {
@@ -107,7 +110,7 @@ class ReservationController extends Controller
     /**
      * Check and update the reservation status based on dates (only for daily reservations)
      */
-    private function checkAndUpdateStatus(Reservation $reservation)
+    /* private function checkAndUpdateStatus(Reservation $reservation)
     {
         if (in_array($reservation->status, ['cancelled', 'reported', 'completed'])) {
             // If cancelled, reported, or already completed ➔ do not change anything
@@ -134,6 +137,6 @@ class ReservationController extends Controller
         }
 
         $reservation->save();
-    }
+    } */
 
 }

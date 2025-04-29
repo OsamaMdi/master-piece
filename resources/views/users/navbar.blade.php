@@ -94,7 +94,7 @@
                             <ul id="nav" class="me-auto">
                                 <li class="active"><a href="{{ route('home') }}">Home</a></li>
                                 <li><a href="{{ route('tools.all') }}">All Tools</a></li>
-                                <li><a href="{{ route('user.feedback') }}">About Us</a></li>
+                                <li><a href="{{ route('about') }}">About Us</a></li>
                                 @auth
                                 <li><a href="#">Categories</a>
                                     <ul class="dropdown">
@@ -162,11 +162,24 @@
                 <a href="{{ route('merchant.dashboard') }}" style="display: block; width: 100%;  padding: 8px;">🛒 Merchant Dashboard</a>
             @endif
 
-            <a href="#" style="display: block; width: 100%; padding: 8px;">❓ Help</a>
-
-            <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+            @if (auth()->user()->user_type === 'user')
+            <a href="{{ route('user.activity')  }} " style="display: block; width: 100%; padding: 8px;">📋 My Activity</a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
                 @csrf
-                <button type="submit" style="display: block; width: 100%; padding: 8px; text-align: left; background: none; border: none; color: inherit; font: inherit; cursor: pointer;">
+                <button type="submit"
+                    style="
+                        display: block;
+                        width: 100%;
+                        padding: 8px;
+                        text-align: left;
+                        background: none;
+                        border: none;
+                        color: inherit;
+                        font: inherit;
+                        text-decoration: none;
+                        cursor: pointer;
+                    ">
                     🚪 Logout
                 </button>
             </form>

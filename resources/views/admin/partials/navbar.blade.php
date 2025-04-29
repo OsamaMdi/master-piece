@@ -12,11 +12,8 @@
 
     <!-- Center Section -->
     <div class="search-container position-relative" style="width: 600px;">
-        <input type="text"
-               id="adminSearchInput"
-               class="search-input"
-               placeholder="Search properties, users..."
-               autocomplete="off">
+        <input type="text" id="adminSearchInput" class="search-input" placeholder="Search properties, users..."
+            autocomplete="off">
 
         <button type="submit" class="search-btn">
             <i class="fas fa-search"></i>
@@ -24,39 +21,41 @@
         <ul id="adminSearchResults" class="search-results"></ul>
     </div>
 
-<div class="navbar-right d-flex align-items-center gap-4 position-relative">
-    <!-- Notifications -->
-    <div class="notification-badge position-relative">
-        <i class="fas fa-bell fs-5 text-dark"></i>
-        <span class="badge">5</span>
-    </div>
+    <div class="navbar-right d-flex align-items-center gap-4 position-relative">
+        <!-- Notifications -->
+        <div class="notification-badge position-relative">
+            <i class="fas fa-bell fs-5 text-dark"></i>
+            <span class="badge">5</span>
+        </div>
 
-    <!-- Profile Dropdown -->
-    <div class="profile-dropdown position-relative">
-        <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('img/default-user.png') }}"
-             alt="Profile"
-             class="rounded-circle"
-             style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
-             id="profileButton">
+        <!-- Profile Dropdown -->
+        <div class="profile-dropdown position-relative">
+            <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('img/default-user.png') }}"
+                alt="Profile" class="rounded-circle"
+                style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" id="profileButton">
 
-        <div class="dropdown-menu bg-white shadow-sm rounded py-2 px-2 position-absolute end-0 mt-2 d-none"
-             id="profileMenu"
-             style="min-width: 160px; z-index: 1052;">
+                <div class="dropdown-menu bg-white shadow-sm rounded py-2 px-2 position-absolute end-0 mt-2 d-none"
+                id="profileMenu" style="min-width: 160px; z-index: 1052;">
 
-            {{-- زر Profile --}}
-            <a href="{{ route('profile') }}" class="dropdown-item py-2">👤 Profile</a>
+               {{-- Profile --}}
+               <a href="{{ route('profile') }}" class="dropdown-item py-2">👤 Profile</a>
 
-            {{-- زر الصفحة الرئيسية --}}
-            <a href="{{ route('home') }}" class="dropdown-item py-2">🏠 Home</a>
+               {{-- Home --}}
+               <a href="{{ route('home') }}" class="dropdown-item py-2">🏠 Home</a>
 
-            {{-- زر Logout --}}
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="dropdown-item py-2 w-100 text-start">🚪 Logout</button>
-            </form>
+               {{-- Logout --}}
+               <form method="POST" action="{{ route('logout') }}">
+                   @csrf
+                   <button type="submit"
+                   class="dropdown-item py-2 text-start w-100"
+                   style="background: none; border: none; font-weight: bold;">
+               🚪 Logout
+           </button>
+
+               </form>
+           </div>
 
         </div>
-    </div>
 
-</div>
+    </div>
 </nav>
