@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\User;
 
+
+
+
+
+
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\Product;
@@ -11,10 +16,12 @@ use App\Models\Reservation;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\WebsiteReview;
+use App\Mail\BookingConfirmed;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Traits\ReservationStatusTrait;
 
 class UserController extends Controller
@@ -114,7 +121,6 @@ public function showProduct($id)
 
     return view('users.show-product', compact('product', 'mainImage', 'reviews', 'categories'));
 }
-
 
 //          store review
 

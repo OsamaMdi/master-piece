@@ -1,10 +1,14 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
+use App\Models\User;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CategoryCreatedNotification;
+use App\Mail\CategoryDeletedNotification;
 
 class CategoryController extends Controller
 {
@@ -19,6 +23,7 @@ class CategoryController extends Controller
         return view('admin.categories.create');
     }
 
+
     public function store(Request $request)
     {
         $request->validate([
@@ -28,8 +33,7 @@ class CategoryController extends Controller
             'icon' => 'nullable|string|max:255',
         ]);
 
-        // إنشاء الكاتيجوري مع توليد السلاق بشكل تلقائي
-        Category::create([
+        $category = Category::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'description' => $request->description,
@@ -37,7 +41,14 @@ class CategoryController extends Controller
             'icon' => $request->icon,
         ]);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Category created successfully.');
+
+        $merchants = User::where('user_type', 'merchant')->get();
+
+        foreach ($merchants as $merchant) {
+            Mail::to($merchant->email)->send(new CategoryCreatedNotification($category));
+        }
+
+        return redirect()->route('admin.categories.index')->with('success', 'Category created and all merchants notified.');
     }
 
     public function show(Category $category)
@@ -71,9 +82,20 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
     }
 
+
     public function destroy(Category $category)
     {
+        // إرسال الإيميل للتجار قبل حذف الكاتيجوري
+        $merchants = User::where('user_type', 'merchant')->get();
+
+        foreach ($merchants as $merchant) {
+            Mail::to($merchant->email)->send(new CategoryDeletedNotification($category));
+        }
+
+
         $category->delete();
-        return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
+
+        return redirect()->route('admin.categories.index')->with('success', 'Category deleted and all merchants notified.');
     }
+
 }

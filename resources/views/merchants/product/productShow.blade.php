@@ -84,31 +84,32 @@
         <p>{{ $product->updated_at->format('Y-m-d H:i') }}</p>
     </div>
 
-<!-- Edit Buttons -->
-<div class="edit-product-btn-wrapper" style="margin-top: 20px; display: flex; gap: 10px;">
-    <button id="openEditProductModal" class="btn btn-edit">
-        ✏️ Edit Product
-    </button>
+    @if($product->status !== 'blocked')
+    <div class="edit-product-btn-wrapper" style="margin-top: 20px; display: flex; gap: 10px;">
+        <button id="openEditProductModal" class="btn btn-edit">
+            ✏️ Edit Product
+        </button>
 
-    <button id="openEditImagesModal" class="btn btn-edit">
-        📸 Edit Images
-    </button>
+        <button id="openEditImagesModal" class="btn btn-edit">
+            📸 Edit Images
+        </button>
 
-    @if($product->status === 'available')
-    <button type="button" id="openDisableProductModal" class="btn btn-warning">
-        ❌ Disable Product
-    </button>
-@elseif($product->status === 'maintenance')
-<form action="{{ route('merchant.products.toggleStatus', $product->id) }}" method="POST">
-    @csrf
-    @method('PATCH')
-    <button type="submit" class="btn btn-edit">
-        ✅ Enable Product
-    </button>
-</form>
-@endif
+        @if($product->status === 'available')
+            <button type="button" id="openDisableProductModal" class="btn btn-warning">
+                ❌ Disable Product
+            </button>
+        @elseif($product->status === 'maintenance')
+            <form action="{{ route('merchant.products.toggleStatus', $product->id) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn btn-edit">
+                    ✅ Enable Product
+                </button>
+            </form>
+        @endif
+    </div>
+    @endif
 
-</div>
 
 </div>
 </div>

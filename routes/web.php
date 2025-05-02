@@ -3,6 +3,7 @@
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\MerchantController;
@@ -28,6 +29,11 @@ use App\Http\Controllers\merchants\ReservationController as MerchantReservationC
 Route::get('/blocked', function () {
     return view('users.blocked');
 })->name('blocked.page');
+
+
+Route::get('/reservation/approve-delay/{id}', [ProductController::class, 'approveDelay'])->name('reservation.approve_delay');
+Route::get('/reservation/reject-delay/{id}', [ProductController::class, 'rejectDelay'])->name('reservation.reject_delay');
+
 
 
 // Check if Google Credentials file exists (Moved to SystemCheckController)
@@ -64,8 +70,9 @@ require __DIR__.'/auth.php';
 | Public Website Routes - User Views
 |--------------------------------------------------------------------------
 */
-Route::post('/favorites/{product}/toggle', [UserFrontendController::class, 'toggle'])->name('favorites.toggle')->middleware('auth');
 Route::get('/', [UserFrontendController::class, 'home'])->name('home');
+Route::post('/contact/send', [ContactController::class, 'send'])->name('contact.send');
+Route::post('/favorites/{product}/toggle', [UserFrontendController::class, 'toggle'])->name('favorites.toggle')->middleware('auth');
 Route::get('/tools', [UserFrontendController::class, 'allTools'])->name('tools.all');
 Route::get('/products/category/{id}', [UserFrontendController::class, 'showByCategory'])->name('products.by.category');
 Route::get('/products/show/{id}', [UserFrontendController::class, 'showByCategory'])->name('products.show');

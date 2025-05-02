@@ -8,13 +8,23 @@ use App\Models\Category;
 use App\Models\Reservation;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Mail\BookingConfirmed;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\ReservationActionLog;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SuggestDelayWithApproval;
+use App\Traits\ReservationStatusTrait;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\ReservationCancelledWithSuggestions;
+
 
 class ProductController extends Controller
 {
+    use ReservationStatusTrait;
+
     public function index()
     {
         $categories = Category::all();
@@ -290,37 +300,292 @@ class ProductController extends Controller
     }
 
     public function disableProduct(Request $request, Product $product)
-{
-    $request->validate([
-        'from_date' => 'required|date|after_or_equal:today',
-        'to_date' => 'required|date|after:from_date',
-        'reason' => 'required|string|min:5',
-    ]);
-
-    // Update product status to maintenance
-    $product->update([
-        'status' => 'maintenance',
-    ]);
-
-    // Cancel all reservations within the date range
-    Reservation::where('product_id', $product->id)
-        ->whereDate('start_date', '>=', $request->from_date)
-        ->whereDate('end_date', '<=', $request->to_date)
-        ->update([
-            'status' => 'cancelled',
+    {
+        $request->validate([
+            'from_date' => 'required|date|after_or_equal:today',
+            'to_date' => 'required|date|after:from_date',
+            'reason' => 'required|string|min:5',
         ]);
 
-    return response()->json(['message' => 'Product disabled and reservations cancelled successfully.']);
-}
+        $fromDate = Carbon::parse($request->from_date)->startOfDay();
+        $toDate = Carbon::parse($request->to_date)->endOfDay();
+
+        $product->update([
+            'status' => 'maintenance',
+            'maintenance_from' => $fromDate,
+            'maintenance_to' => $toDate,
+        ]);
 
 
-public function toggleStatus(Product $product)
-{
-    if ($product->status === 'maintenance') {
-        $product->update(['status' => 'available']);
+
+        // جلب الحجوزات المرتبطة
+        $reservations = Reservation::where('product_id', $product->id)
+            ->where('status', '!=', 'cancelled')
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->get();
+
+        // تحديث حالة كل حجز أولاً
+        foreach ($reservations as $reservation) {
+            $this->checkAndUpdateStatus($reservation);
+        }
+
+        // إعادة تحميل الحجوزات التي status = not_started وتبدأ خلال فترة التعطيل
+        $affectedReservations = Reservation::with('user')
+            ->where('product_id', $product->id)
+            ->where('status', 'not_started')
+            ->whereDate('start_date', '>=', $fromDate)
+            ->whereDate('start_date', '<=', $toDate)
+            ->get();
+
+        foreach ($affectedReservations as $reservation) {
+            $startDate = Carbon::parse($reservation->start_date);
+            $endDate = Carbon::parse($reservation->end_date);
+            $diff = $startDate->diffInDays($toDate);
+
+            // عدد الأيام المطلوبة
+            $daysNeeded = $endDate->diffInDays($startDate) + 1;
+
+            if ($diff <= 5) {
+                // محاولة إيجاد أقرب فترة بديلة
+                $nextAvailable = $this->getNextAvailablePeriod($product, $toDate->copy()->addDays(2), $daysNeeded);
+
+
+                // إرسال إيميل للمستخدم يحتوي على رابط الموافقة أو الإلغاء
+                Mail::to($reservation->user->email)->send(new SuggestDelayWithApproval(
+                    $reservation,
+                    $product,
+                    $nextAvailable,
+                    $request->reason
+                ));
+            } else {
+                // إلغاء الحجز
+                $reservation->update(['status' => 'cancelled']);
+
+                // جلب أدوات مشابهة
+                $suggestedProducts = Product::where('category_id', $product->category_id)
+                    ->where('id', '!=', $product->id)
+                    ->where('status', 'available')
+                    ->where('name', 'like', '%' . $product->name . '%')
+                    ->limit(3)
+                    ->get();
+
+                // إرسال إيميل اعتذار مع اقتراحات
+                Mail::to($reservation->user->email)->send(new ReservationCancelledWithSuggestions(
+                    $reservation,
+                    $product,
+                    $suggestedProducts
+                ));
+            }
+        }
+
+        return response()->json(['message' => 'Product disabled and all affected reservations processed.']);
     }
 
-    return redirect()->back()->with('success', 'Product status updated successfully!');
-}
+
+
+    public function getNextAvailablePeriod(Product $product, Carbon $startFrom, int $daysNeeded): ?array
+    {
+        $reservations = Reservation::where('product_id', $product->id)
+            ->where('status', '!=', 'cancelled')
+            ->where('end_date', '>=', Carbon::today())
+            ->get();
+
+        $dateCounts = [];
+
+        foreach ($reservations as $res) {
+            $resStart = Carbon::parse($res->start_date);
+            $resEnd = Carbon::parse($res->end_date);
+
+            for ($date = $resStart->copy(); $date->lte($resEnd); $date->addDay()) {
+                $key = $date->toDateString();
+                $dateCounts[$key] = ($dateCounts[$key] ?? 0) + $res->quantity;
+            }
+        }
+
+        $checkDate = $startFrom->copy();
+
+        while (true) {
+            $candidateStart = $checkDate->copy();
+            $candidateEnd = $candidateStart->copy()->addDays($daysNeeded - 1);
+            $isAvailable = true;
+
+            for ($date = $candidateStart->copy(); $date->lte($candidateEnd); $date->addDay()) {
+                $key = $date->toDateString();
+                $reserved = $dateCounts[$key] ?? 0;
+
+                if (
+                    $product->maintenance_start && $product->maintenance_end &&
+                    $date->between(Carbon::parse($product->maintenance_start), Carbon::parse($product->maintenance_end))
+                ) {
+                    $isAvailable = false;
+                    break;
+                }
+
+                if ($reserved >= $product->quantity) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+
+            if ($isAvailable) {
+                return [
+                    'start_date' => $candidateStart->toDateString(),
+                    'end_date'   => $candidateEnd->toDateString(),
+                ];
+            }
+
+            $checkDate->addDay();
+
+            if ($checkDate->diffInDays($startFrom) > 180) {
+                break;
+            }
+        }
+
+        return null;
+    }
+
+
+
+    public function toggleStatus(Product $product)
+    {
+        if ($product->status === 'maintenance') {
+            $product->update([
+                'status' => 'available',
+                'maintenance_start' => null,
+                'maintenance_end' => null,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Product status updated successfully!');
+    }
+
+
+
+
+
+    public function approveDelay(Request $request, $id)
+    {
+        $reservation = Reservation::findOrFail($id);
+        $product = $reservation->product;
+
+        $token = $request->query('token');
+
+        // ✅ التحقق من وجود التوكن وعدم استخدامه
+        $actionLog = ReservationActionLog::where('token', $token)->first();
+
+        if (!$actionLog || $actionLog->used_at) {
+            return response()->view('sweet', [
+                'type' => 'error',
+                'title' => 'Unauthorized Action',
+                'message' => 'This link has already been used or is no longer valid.',
+            ]);
+
+        }
+
+        $start = $request->query('start_date');
+        $end = $request->query('end_date');
+
+        if (!$start || !$end) {
+            abort(400, 'Missing suggested dates.');
+        }
+
+        $daysNeeded = Carbon::parse($end)->diffInDays(Carbon::parse($start)) + 1;
+        $recheck = $this->getNextAvailablePeriod($product, Carbon::parse($start), $daysNeeded);
+
+        if (!$recheck || $recheck['start_date'] !== $start || $recheck['end_date'] !== $end) {
+            $suggested = Product::where('category_id', $product->category_id)
+                ->where('id', '!=', $product->id)
+                ->where('status', 'available')
+                ->where('name', 'like', '%' . $product->name . '%')
+                ->limit(3)
+                ->get();
+
+            $reservation->update(['status' => 'cancelled']);
+
+            // ✅ حرق التوكن وتسجيله كمرفوض تلقائي
+            $actionLog->update([
+                'action' => 'rejected',
+                'used_at' => now(),
+            ]);
+
+            Mail::to($reservation->user->email)->send(new ReservationCancelledWithSuggestions(
+                $reservation, $product, $suggested
+            ));
+
+            return response()->view('sweet', [
+                'type' => 'warning',
+                'title' => 'No Longer Available',
+                'message' => 'The suggested dates are no longer available. Your reservation has been cancelled.',
+            ]);
+        }
+
+        // ✅ تحديث الحجز
+        $reservation->update([
+            'start_date' => $start,
+            'end_date' => $end,
+        ]);
+
+        // ✅ تحديث التوكن كمستخدم
+        $actionLog->update([
+            'action' => 'approved',
+            'used_at' => now(),
+        ]);
+
+        Mail::to($reservation->user->email)->send(new BookingConfirmed(
+            $reservation->user, $product, $reservation
+        ));
+
+        return response()->view('sweet', [
+            'type' => 'success',
+            'title' => 'Reservation Updated!',
+            'message' => 'Your reservation has been updated to the new dates.',
+        ]);
+    }
+
+    public function rejectDelay(Request $request, $id)
+    {
+        $reservation = Reservation::findOrFail($id);
+        $product = $reservation->product;
+        $token = $request->query('token');
+
+        $actionLog = ReservationActionLog::where('token', $token)->first();
+
+        if (!$actionLog || $actionLog->used_at) {
+            return response()->view('sweet', [
+                'type' => 'error',
+                'title' => 'Unauthorized Action',
+                'message' => 'This link has already been used or is no longer valid.',
+            ]);
+
+        }
+
+        $reservation->update([
+            'status' => 'cancelled',
+            'app_fee' => 0,
+        ]);
+
+        $actionLog->update([
+            'action' => 'rejected',
+            'used_at' => now(),
+        ]);
+
+        $suggested = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('status', 'available')
+            ->where('name', 'like', '%' . $product->name . '%')
+            ->limit(3)
+            ->get();
+
+        Mail::to($reservation->user->email)->send(new ReservationCancelledWithSuggestions(
+            $reservation, $product, $suggested
+        ));
+
+        return response()->view('sweet', [
+            'type' => 'error',
+            'title' => 'Reservation Cancelled!',
+            'message' => 'Your reservation has been cancelled as requested.',
+        ]);
+    }
+
 
 }

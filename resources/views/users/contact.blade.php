@@ -90,7 +90,7 @@
                     @endif
 
                     {{-- Route will be enabled later --}}
-                    <form method="POST" action="#">
+                    <form method="POST" action="{{ route('contact.send') }}">
                         {{-- action="{{ route('contact.send') }}" --}}
                         @csrf
                         <div class="row">

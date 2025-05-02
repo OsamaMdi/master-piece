@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\merchants;
 
+
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Image;
@@ -14,16 +15,17 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ReservationStatusTrait;
+use App\Mail\ReservationCancelledWithSuggestions;
+use Illuminate\Support\Facades\Mail;
 
 class ReservationController extends Controller
 {
     use ReservationStatusTrait;
-    
+
     public function cancel(string $reservationId)
     {
         try {
             $reservation = Reservation::findOrFail($reservationId);
-
             $startDate = \Carbon\Carbon::parse($reservation->start_date);
             $now = now();
 
@@ -34,8 +36,22 @@ class ReservationController extends Controller
                     $reservation->status = 'cancelled';
                     $reservation->save();
 
+                    // 📨 إرسال إيميل اعتذار مع مقترحات
+                    $product = $reservation->product;
+
+                    $suggested = \App\Models\Product::where('category_id', $product->category_id)
+                        ->where('id', '!=', $product->id)
+                        ->where('status', 'available')
+                        ->where('name', 'like', '%' . $product->name . '%')
+                        ->limit(3)
+                        ->get();
+
+                    Mail::to($reservation->user->email)->send(
+                        new ReservationCancelledWithSuggestions($reservation, $product, $suggested)
+                    );
+
                     return redirect()->route('merchant.reservation.details', $reservationId)
-                        ->with('success', 'Reservation cancelled successfully!');
+                        ->with('success', 'Reservation cancelled and email sent.');
                 } else {
                     return redirect()->route('merchant.reservation.details', $reservationId)
                         ->with('error', 'You cannot cancel this reservation within 48 hours of the start date.');
@@ -51,6 +67,7 @@ class ReservationController extends Controller
                 ->with('error', 'An error occurred while cancelling the reservation.');
         }
     }
+
 
 
     public function showReservationDetails(string $reservationId)

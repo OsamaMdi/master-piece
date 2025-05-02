@@ -15,6 +15,13 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\BlockProductNotification;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DeleteProductNotification;
+
+
+
+
 
 class AdminProductController extends Controller
 {
@@ -202,25 +209,28 @@ class AdminProductController extends Controller
 
 
     public function destroy(string $id)
-{
-    try {
-        $product = Product::findOrFail($id);
+    {
+        try {
+            $product = Product::with('user', 'images')->findOrFail($id);
 
-        foreach ($product->images as $image) {
-            if (Storage::disk('public')->exists($image->image_url)) {
-                Storage::disk('public')->delete($image->image_url);
+            foreach ($product->images as $image) {
+                if (Storage::disk('public')->exists($image->image_url)) {
+                    Storage::disk('public')->delete($image->image_url);
+                }
+                $image->delete();
             }
-            $image->delete();
+
+            // إرسال الإيميل قبل حذف المنتج
+            Mail::to($product->user->email)->send(new DeleteProductNotification($product));
+
+            $product->delete();
+
+            return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error while deleting product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while deleting the product.');
         }
-
-        $product->delete();
-
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
-    } catch (\Exception $e) {
-        Log::error('Error while deleting product: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'An error occurred while deleting the product.');
     }
-}
 
   /*   public function updateImages(Request $request, string $id)
     {
@@ -305,28 +315,39 @@ class AdminProductController extends Controller
 
               // Block a product with a reason and duration
 
-    public function block(Request $request, Product $product)
-    {
-       
-        $request->validate([
-            'duration' => 'required',
-            'reason' => 'required|string|max:255',
-        ]);
 
-        if ($request->duration == 'permanent') {
-            $blockedUntil = null;
-        } else {
-            $blockedUntil = now()->addDays((int) $request->duration);
-        }
+public function block(Request $request, Product $product)
+{
+    $request->validate([
+        'duration' => 'required',
+        'reason' => 'required|string|max:255',
+    ]);
 
-        $product->update([
-            'status' => 'blocked',
-            'block_reason' => $request->reason,
-            'blocked_until' => $blockedUntil,
-        ]);
-
-        return redirect()->back()->with('success', 'Product blocked successfully.');
+    // تحديد المدة
+    if ($request->duration == 'permanent') {
+        $blockedUntil = null;
+        $durationText = 'Permanent';
+    } else {
+        $blockedUntil = now()->addDays((int) $request->duration);
+        $durationText = ((int) $request->duration === 1 ? '1 day' : ((int) $request->duration === 7 ? '1 week' : $request->duration . ' days'));
     }
+
+    // تحديث بيانات المنتج
+    $product->update([
+        'status' => 'blocked',
+        'block_reason' => $request->reason,
+        'blocked_until' => $blockedUntil,
+    ]);
+
+    // إرسال الإيميل إلى صاحب المنتج
+    Mail::to($product->user->email)->send(new BlockProductNotification(
+        $product,
+        $request->reason,
+        $durationText
+    ));
+
+    return redirect()->back()->with('success', 'Product blocked successfully.');
+}
     // Unblock a product
 
 public function unblock(Product $product)

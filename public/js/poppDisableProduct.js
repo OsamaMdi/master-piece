@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (formValues) {
                 try {
+                    disableButton.disabled = true;
+                    disableButton.textContent = 'Disabling...';
                     const response = await fetch(disableProductUrl, {
                         method: "PATCH",
                         headers: {
@@ -78,13 +80,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     Swal.fire({
+
                         icon: 'success',
                         title: 'Done!',
                         text: result.message || 'Product disabled successfully!',
                         timer: 2000,
                         showConfirmButton: false
+
                     }).then(() => {
+                        disableButton.disabled = false;
+                        disableButton.textContent = '❌ Disable Product';
                         location.reload();
+
                     });
 
                 } catch (error) {
@@ -92,7 +99,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         icon: 'error',
                         title: 'Error',
                         html: error.message,
-                    });
+                    }).then(() => {
+                        disableButton.disabled = false;
+                        disableButton.textContent = '❌ Disable Product';
+                    });;
                 }
 
             }

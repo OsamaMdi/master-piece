@@ -10,6 +10,8 @@ use App\Models\WebsiteReview;
 use App\Helpers\IdentityHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserBlockedNotification;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -235,8 +237,20 @@ class UserController extends Controller
 
         $user->save();
 
+        // إرسال إيميل للمستخدم
+        $durationText = $request->duration === 'permanent'
+            ? 'Permanent'
+            : ((int) $request->duration === 1 ? '1 day' : ((int) $request->duration === 7 ? '1 week' : $request->duration . ' days'));
+
+        Mail::to($user->email)->send(new UserBlockedNotification(
+            $user,
+            $request->reason,
+            $durationText
+        ));
+
         return redirect()->back()->with('status', 'User has been blocked successfully.');
     }
+
     public function unblock(User $user)
     {
         $user->status = 'active';

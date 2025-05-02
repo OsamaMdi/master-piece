@@ -51,7 +51,12 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'slug' => Str::slug($validated['name']) . '-' . Str::random(5),
-            'email' => $validated['email'],
+            'email' => [
+            'required',
+            'string',
+            'email',
+            'max:255',
+            'regex:/@(gmail\.com|hotmail\.com|yahoo\.com)$/i'],
             'password' => Hash::make($validated['password']),
             'identity_number' => $validated['identity_number'],
             'identity_image' => $identityImagePath,
