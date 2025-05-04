@@ -14,10 +14,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Mail\BlockProductNotification;
 use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
+use App\Mail\BlockProductNotification;
 use App\Mail\DeleteProductNotification;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -51,7 +52,7 @@ class AdminProductController extends Controller
                 'quantity' => 'required|integer|min:1',
                 'category_id' => 'required|exists:categories,id',
                 'merchant_id' => 'required|exists:users,id',
-                'usage_notes' => 'nullable|string|max:1000',  // إضافة ملاحظات الاستخدام
+                'usage_notes' => 'nullable|string|max:1000',
             ]);
 
             // Extra check just in case
@@ -65,14 +66,14 @@ class AdminProductController extends Controller
             // Create product
             $product = Product::create([
                 'name' => $request->name,
-                'slug' => $slug,  // إضافة الـ Slug
+                'slug' => $slug,  
                 'description' => $request->description,
                 'price' => $request->price,
                 'quantity' => $request->quantity,
-                'status' => 'available',  // الحالة الافتراضية
+                'status' => 'available',
                 'user_id' => $request->merchant_id,
                 'category_id' => $request->category_id,
-                'usage_notes' => $request->usage_notes,  // إضافة ملاحظات الاستخدام
+                'usage_notes' => $request->usage_notes,
             ]);
 
             if ($request->wantsJson()) {
@@ -220,8 +221,18 @@ class AdminProductController extends Controller
                 $image->delete();
             }
 
-            // إرسال الإيميل قبل حذف المنتج
+            // 📨 إرسال إيميل للمستخدم
             Mail::to($product->user->email)->send(new DeleteProductNotification($product));
+
+            // 🛎️ إرسال إشعار لصاحب المنتج
+            NotificationService::send(
+                $product->user->id,
+                'Your product "' . $product->name . '" was deleted by an admin.',
+                'product_deleted',
+                null,
+                'important',
+                auth()->id()
+            );
 
             $product->delete();
 
@@ -231,6 +242,7 @@ class AdminProductController extends Controller
             return redirect()->back()->with('error', 'An error occurred while deleting the product.');
         }
     }
+
 
   /*   public function updateImages(Request $request, string $id)
     {
@@ -316,14 +328,14 @@ class AdminProductController extends Controller
               // Block a product with a reason and duration
 
 
-public function block(Request $request, Product $product)
+              public function block(Request $request, Product $product)
 {
     $request->validate([
         'duration' => 'required',
         'reason' => 'required|string|max:255',
     ]);
 
-    // تحديد المدة
+
     if ($request->duration == 'permanent') {
         $blockedUntil = null;
         $durationText = 'Permanent';
@@ -332,22 +344,33 @@ public function block(Request $request, Product $product)
         $durationText = ((int) $request->duration === 1 ? '1 day' : ((int) $request->duration === 7 ? '1 week' : $request->duration . ' days'));
     }
 
-    // تحديث بيانات المنتج
+
     $product->update([
         'status' => 'blocked',
         'block_reason' => $request->reason,
         'blocked_until' => $blockedUntil,
     ]);
 
-    // إرسال الإيميل إلى صاحب المنتج
     Mail::to($product->user->email)->send(new BlockProductNotification(
         $product,
         $request->reason,
         $durationText
     ));
 
+
+    NotificationService::send(
+        $product->user->id,
+        'Your product "' . $product->name . '" was blocked by an admin for: ' . $durationText . '. Reason: ' . $request->reason,
+        'product_blocked',
+        url('/merchant/products/' . $product->id),
+        'important',
+        auth()->id()
+    );
+
     return redirect()->back()->with('success', 'Product blocked successfully.');
 }
+
+
     // Unblock a product
 
 public function unblock(Product $product)

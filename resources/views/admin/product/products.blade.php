@@ -47,18 +47,28 @@
                 @if($product->images->isNotEmpty())
                     <img src="{{ asset('storage/' . $product->images->sortByDesc('created_at')->first()->image_url) }}" alt="{{ $product->name }}" class="product-img">
                 @else
-                    <img src="{{ asset('images/default-product.png') }}" alt="No Image" class="product-img">
+                    <img src="{{ asset('img/logo.png') }}" alt="No Image" class="product-img">
                 @endif
             </td>
+
             <td>{{ $product->name }}</td>
             <td>{{ $product->user->name ?? 'N/A' }}</td>
             <td>{{ number_format($product->price, 2) }}</td>
             <td>{{ $product->quantity }}</td>
-            <td>
-                <span class="badge bg-{{ $product->status === 'available' ? 'success' : ($product->status === 'rented' ? 'warning text-dark' : 'danger') }}">
-                    {{ ucfirst($product->status) }}
-                </span>
-            </td>
+            @php
+                    $statusClass = match($product->status) {
+                        'available' => 'custom-status available',
+                        'blocked' => 'custom-status blocked',
+                        'maintenance' => 'custom-status maintenance',
+                        default => 'custom-status unknown'
+                    };
+                @endphp
+                <td>
+                    <span class="{{ $statusClass }}">
+                        {{ ucfirst($product->status ?? 'Unknown') }}
+                    </span>
+                </td>
+
             <td class="text-center">
                 <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
                 <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirmDelete(event)">

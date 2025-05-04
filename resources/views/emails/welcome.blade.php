@@ -22,23 +22,32 @@
                         <td style="padding: 30px;">
                             <h2 style="color: #333;">Hi {{ $user->name }},</h2>
 
-                            <p style="font-size: 16px; color: #555;">
-                                We're thrilled to have you on board with <strong>Rentify</strong> — your trusted tool rental platform!
-                            </p>
+                            @if ($user->user_type === 'merchant')
+                                <p style="font-size: 16px; color: #555;">
+                                    Thank you for registering as a <strong>merchant</strong> on <strong>Rentify</strong>.
+                                </p>
 
-                            <p style="font-size: 16px; color: #555;">
-                                You can now explore hundreds of tools, book what you need, and manage your reservations with ease.
-                            </p>
+                                <p style="font-size: 16px; color: #555;">
+                                    Your account is currently <strong>under review</strong>. We will contact you shortly after verifying your details to activate your account.
+                                </p>
+                            @else
+                                <p style="font-size: 16px; color: #555;">
+                                    We're thrilled to have you on board with <strong>Rentify</strong> — your trusted tool rental platform!
+                                </p>
+
+                                <p style="font-size: 16px; color: #555;">
+                                    You can now explore hundreds of tools, book what you need, and manage your reservations with ease.
+                                </p>
+                            @endif
 
                             <p style="font-size: 16px; color: #555;">
                                 Need help? Just reply to this email and our support team will be happy to assist you.
                             </p>
 
                             <div style="margin: 30px 0; text-align: center;">
-                                <a href="{{ url('/') }}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Start Browsing Tools 🔍</a>
+                                <a href="{{ url('/') }}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Visit Rentify</a>
                             </div>
 
-                            <p style="font-size: 16px; color: #555;">We're glad you're here!</p>
                             <p style="font-size: 16px; color: #555;">— The Rentify Team</p>
                         </td>
                     </tr>

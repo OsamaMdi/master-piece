@@ -14,9 +14,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
 use App\Traits\ReservationStatusTrait;
 use App\Mail\ReservationCancelledWithSuggestions;
-use Illuminate\Support\Facades\Mail;
 
 class ReservationController extends Controller
 {
@@ -26,7 +27,7 @@ class ReservationController extends Controller
     {
         try {
             $reservation = Reservation::findOrFail($reservationId);
-            $startDate = \Carbon\Carbon::parse($reservation->start_date);
+            $startDate = Carbon::parse($reservation->start_date);
             $now = now();
 
             if ($startDate->isFuture()) {
@@ -49,6 +50,17 @@ class ReservationController extends Controller
                     Mail::to($reservation->user->email)->send(
                         new ReservationCancelledWithSuggestions($reservation, $product, $suggested)
                     );
+                    $admins = User::where('user_type', 'admin')->get();
+                    foreach ($admins as $admin) {
+                     NotificationService::send(
+                     $admin->id,
+                    'The reservation for product "' . $product->name . '" was cancelled by merchant ' . Auth::user()->name,
+                    'reservation_cancelled',
+                     url('/admin/reservations/' . $reservationId),
+                    'normal',
+                       Auth::id()
+    );
+}
 
                     return redirect()->route('merchant.reservation.details', $reservationId)
                         ->with('success', 'Reservation cancelled and email sent.');

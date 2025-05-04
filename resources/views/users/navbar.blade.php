@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta charset="UTF-8">
     <meta name="description" content="">
@@ -24,7 +24,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap 5 JS (with Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   {{--  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
 
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -110,6 +110,7 @@
                             @endauth
 
                                 <li><a href="{{ route('contact') }}">Contact</a></li>
+
                             </ul>
 
 
@@ -164,6 +165,21 @@
 
             @if (auth()->user()->user_type === 'user')
             <a href="{{ route('user.activity')  }} " style="display: block; width: 100%; padding: 8px;">📋 My Activity</a>
+                <button type="button" data-bs-toggle="modal"  data-bs-target="#generalReportModal"
+                    style="
+                        display: block;
+                        width: 100%;
+                        padding: 8px;
+                        text-align: left;
+                        background: none;
+                        border: none;
+                        color: inherit;
+                        font: inherit;
+                        text-decoration: none;
+                        cursor: pointer;
+                    ">
+                    🚩 Report
+                </button>
             @endif
             <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
                 @csrf
@@ -204,7 +220,52 @@
             </div>
         </div>
     </div>
+
+
+
 </header>
 <!-- Header Area End -->
 
 
+
+
+
+                            {{--  General Report Modal --}}
+
+                            <div class="modal fade" id="generalReportModal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <form method="POST" action="{{ route('reservations.report', 0) }}">
+                                        @csrf
+                                        <input type="hidden" name="type" value="general">
+                                        <input type="hidden" name="target_id" value="">
+
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title">📝 General Report</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <p class="mb-2 text-muted">
+                                                    Please describe the issue or feedback you want to report about the platform or experience.
+                                                </p>
+
+                                                <div class="mb-3">
+                                                    <label for="subject" class="form-label">Subject (Optional)</label>
+                                                    <input type="text" name="subject" class="form-control" placeholder="e.g. Bug in booking system">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="message" class="form-label">Describe the issue</label>
+                                                    <textarea name="message" class="form-control" rows="4" required placeholder="Please explain the problem..."></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-danger">Submit Report</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>

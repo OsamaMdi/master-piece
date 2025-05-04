@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
 
 
 
@@ -62,8 +63,21 @@ class ReportsController extends Controller
             'status' => $request->status
         ]);
 
+        // إذا تم حل المشكلة والمرسل هو تاجر، نرسل له إشعار
+        if ($request->status === 'resolved' && $report->user && $report->user->user_type === 'merchant') {
+            NotificationService::send(
+                $report->user->id,
+                'Your submitted report has been marked as resolved. Thank you for your feedback.',
+                'report_resolved',
+                url('/merchant/reports/' . $report->id), // لو عندك صفحة عرض تقارير للتاجر
+                'normal',
+                auth()->id()
+            );
+        }
+
         return redirect()->back()->with('success', 'Report status updated successfully.');
     }
+
 
 
     public function destroy($id)
@@ -84,7 +98,8 @@ class ReportsController extends Controller
             'subject' => 'nullable|string|max:255',
         ]);
 
-        Report::create([
+        // 1. Create the report
+        $report = Report::create([
             'user_id' => Auth::id(),
             'reportable_type' => $validated['reportable_type'],
             'reportable_id' => $validated['reportable_id'],
@@ -94,11 +109,32 @@ class ReportsController extends Controller
             'status' => 'pending',
         ]);
 
+        // 2. Build message & URL
+        $reportType = ucfirst($validated['target_type']);
+        $reportMessage = "A new {$reportType} report has been submitted by " . auth()->user()->name;
+        $reportUrl = url('/admin/reports/' . $report->id);
+
+        // 3. Send notification to all admins
+        $admins = User::where('user_type', 'admin')->get();
+
+        foreach ($admins as $admin) {
+            NotificationService::send(
+                $admin->id,
+                $reportMessage,
+                'report',
+                $reportUrl,
+                'important',
+                auth()->id()
+            );
+        }
+
+        // 4. Return JSON response
         return response()->json([
             'success' => true,
             'message' => 'Report submitted successfully!',
         ]);
     }
+
 
     /**
      * Resolve an existing report.
@@ -121,5 +157,19 @@ class ReportsController extends Controller
 
     return redirect()->back()->with('success', 'Report has been resolved.');
 }
+
+
+public function myReports(Request $request)
+{
+    $reports = Report::where('user_id', auth()->id())
+        ->when(in_array($request->target_type, ['reservation', 'review']), function ($query) use ($request) {
+            $query->where('target_type', $request->target_type);
+        })
+        ->latest()
+        ->paginate(10);
+
+    return view('merchants.reports', compact('reports'));
+}
+
 
 }

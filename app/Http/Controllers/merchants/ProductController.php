@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\merchants;
 
+use App\Models\User;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Category;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ReservationActionLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
 use App\Mail\SuggestDelayWithApproval;
 use App\Traits\ReservationStatusTrait;
 use Illuminate\Support\Facades\Storage;
@@ -46,34 +48,50 @@ class ProductController extends Controller
                 'price' => 'required|numeric|min:0.01',
                 'quantity' => 'required|integer|min:1',
                 'category_id' => 'required|exists:categories,id',
-                'is_deliverable' => 'nullable|boolean', // ✅ checkbox
+                'is_deliverable' => 'nullable|boolean',
                 'usage_notes' => 'required|string|min:5',
             ]);
 
-            // 2. Create the product first WITHOUT slug
+            // 2. Create product without slug first
             $product = Product::create([
                 'name' => $validated['name'],
-                'slug' => '', // placeholder slug
+                'slug' => '',
                 'description' => $validated['description'],
                 'price' => $validated['price'],
                 'quantity' => $validated['quantity'],
                 'status' => 'available',
                 'user_id' => Auth::id(),
                 'category_id' => $validated['category_id'],
-                'is_deliverable' => $validated['is_deliverable'] ?? 0, // if not checked = 0
+                'is_deliverable' => $validated['is_deliverable'] ?? 0,
                 'usage_notes' => $validated['usage_notes'],
             ]);
 
-            // 3. Generate slug with ID after creation
+            // 3. Update slug with product ID
             $slug = Str::slug($validated['name']) . '-' . $product->id;
             $product->update(['slug' => $slug]);
 
-            // 4. Response based on request type
+            // ✅ 4. Notify all admins
+            $category = Category::find($validated['category_id']);
+            $admins = User::where('user_type', 'admin')->get();
+
+            foreach ($admins as $admin) {
+                NotificationService::send(
+                    $admin->id,
+                    'A new product "' . $product->name . '" was added by ' . auth()->user()->name . ' in category "' . $category->name . '".',
+                    'new_product',
+                    url('/admin/products/' . $product->id),
+                    'normal',
+                    auth()->id()
+                );
+            }
+
+            // 5. Return response
             if ($request->wantsJson()) {
                 return response()->json(['newProductId' => $product->id]);
             }
 
             session(['newProductId' => $product->id]);
+
             return redirect()->route('merchant.products.index')
                              ->with('success', 'Product added successfully!')
                              ->with('showUploadModal', true);
@@ -86,11 +104,9 @@ class ProductController extends Controller
             Log::error('Validation Error: ' . $e->getMessage());
             return redirect()->back()->withErrors($e->errors());
         } catch (\Exception $e) {
-            // Catch any other exceptions
             Log::error('Error while adding product: ' . $e->getMessage());
             return back()->with('error', 'Something went wrong while adding the product. Please try again.');
         }
-
     }
 
 
@@ -316,7 +332,18 @@ class ProductController extends Controller
             'maintenance_to' => $toDate,
         ]);
 
-
+        // 🔔 Send notification to all admins
+        $adminIds = User::where('user_type', 'admin')->pluck('id');
+        foreach ($adminIds as $adminId) {
+            NotificationService::send(
+                $adminId,
+                "The product '{$product->name}' by merchant '{$product->user->name}' has been set to maintenance from {$fromDate->format('Y-m-d')} to {$toDate->format('Y-m-d')}.",
+                'product_maintenance',
+                url("/admin/products/{$product->id}"),
+                'normal',
+                auth()->id()
+            );
+        }
 
         // جلب الحجوزات المرتبطة
         $reservations = Reservation::where('product_id', $product->id)
@@ -342,15 +369,14 @@ class ProductController extends Controller
             $endDate = Carbon::parse($reservation->end_date);
             $diff = $startDate->diffInDays($toDate);
 
-            // عدد الأيام المطلوبة
+
             $daysNeeded = $endDate->diffInDays($startDate) + 1;
 
             if ($diff <= 5) {
-                // محاولة إيجاد أقرب فترة بديلة
+
                 $nextAvailable = $this->getNextAvailablePeriod($product, $toDate->copy()->addDays(2), $daysNeeded);
 
-
-                // إرسال إيميل للمستخدم يحتوي على رابط الموافقة أو الإلغاء
+           
                 Mail::to($reservation->user->email)->send(new SuggestDelayWithApproval(
                     $reservation,
                     $product,
@@ -358,10 +384,9 @@ class ProductController extends Controller
                     $request->reason
                 ));
             } else {
-                // إلغاء الحجز
+
                 $reservation->update(['status' => 'cancelled']);
 
-                // جلب أدوات مشابهة
                 $suggestedProducts = Product::where('category_id', $product->category_id)
                     ->where('id', '!=', $product->id)
                     ->where('status', 'available')
@@ -369,7 +394,7 @@ class ProductController extends Controller
                     ->limit(3)
                     ->get();
 
-                // إرسال إيميل اعتذار مع اقتراحات
+
                 Mail::to($reservation->user->email)->send(new ReservationCancelledWithSuggestions(
                     $reservation,
                     $product,
@@ -380,6 +405,7 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Product disabled and all affected reservations processed.']);
     }
+
 
 
 

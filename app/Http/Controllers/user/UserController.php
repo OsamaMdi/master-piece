@@ -7,6 +7,7 @@ namespace App\Http\Controllers\User;
 
 
 
+use App\Models\User;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\Product;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
 use App\Traits\ReservationStatusTrait;
 
 class UserController extends Controller
@@ -111,8 +113,14 @@ public function showProduct($id)
 
     $categories = Category::all();
     $product = Product::with(['user', 'category', 'images'])->findOrFail($id);
-    $mainImage = $product->images->sortByDesc('created_at')->first()?->image_url ?? 'images/default-product.png';
+    $mainImage = $product->images->sortByDesc('created_at')->first()?->image_url;
+
+if ($mainImage) {
     $mainImage = asset('storage/' . $mainImage);
+} else {
+    $mainImage = asset('img/logo.png'); 
+}
+
 
     $reviews = Review::with('user')
         ->where('product_id', $product->id)
@@ -131,15 +139,29 @@ public function storeReview(Request $request, $productId)
         'review_text' => 'required|string|max:1000',
     ]);
 
-    Review::create([
+    $review = Review::create([
         'user_id' => auth()->id(),
         'product_id' => $productId,
         'rating' => $request->rating,
         'review_text' => $request->review_text,
     ]);
 
+    $product = Product::with('user')->findOrFail($productId);
+
+    if ($product && $product->user) {
+        NotificationService::send(
+            $product->user->id,
+            'You received a new review on your product "' . $product->name . '"',
+            'product_review',
+            url('/merchant/products/' . $product->id),
+            'normal',
+            auth()->id()
+        );
+    }
+
     return redirect()->route('user.products.show', $productId)->with('success', 'Review submitted successfully!');
 }
+
 
 
 //                   user feedback for this website
@@ -165,6 +187,7 @@ public function userFeedback()
 }
 
 
+//                  creat feedback for user
 public function storeWebsiteReview(Request $request)
 {
     $request->validate([
@@ -172,14 +195,29 @@ public function storeWebsiteReview(Request $request)
         'review_text' => 'required|string|max:1000',
     ]);
 
-    WebsiteReview::create([
+    $review = WebsiteReview::create([
         'user_id' => auth()->id(),
         'rating' => $request->rating,
         'review_text' => $request->review_text,
     ]);
 
+    // Get all admin users
+    $adminUsers = \App\Models\User::where('user_type', 'admin')->get();
+
+    foreach ($adminUsers as $admin) {
+        \App\Services\NotificationService::send(
+            $admin->id,
+            'A new website review was submitted by ' . auth()->user()->name,
+            'website_review',
+            route('admin.website-reviews.show', $review->id),
+            'normal',
+            auth()->id()
+        );
+    }
+
     return back()->with('success', 'Thank you for your feedback!');
 }
+
 
 
 
@@ -242,39 +280,42 @@ $favorites = \App\Models\Favorite::with(['product.images', 'product.category', '
 // Handle cancelling a reservation
 public function cancelReservation($id)
 {
-    $reservation = Reservation::where('id', $id)
+    $reservation = Reservation::with('product.user')->where('id', $id)
         ->where('user_id', auth()->id())
         ->where('status', 'not_started')
         ->firstOrFail();
 
     $now = now();
     $startDate = Carbon::parse($reservation->start_date);
-
     $diffInHours = $now->diffInHours($startDate, false);
 
     if ($diffInHours <= 48) {
-        // ⏳ Late cancellation (less than 48 hours)
-
         if ($reservation->paid_amount == $reservation->total_price) {
-
             $reservation->paid_amount = round($reservation->total_price * 0.10, 2);
         }
-
     } else {
-        // ⏰ Early cancellation (more than 48 hours)
-
-
         $reservation->paid_amount = 0;
-
         $reservation->platform_fee = 0;
     }
 
-    // Set status as cancelled
     $reservation->status = 'cancelled';
     $reservation->save();
 
+    // 📨 Send notification to the merchant
+    if ($reservation->product && $reservation->product->user) {
+        \App\Services\NotificationService::send(
+            $reservation->product->user->id,
+            'A reservation for your product "' . $reservation->product->name . '" was cancelled by the user ' . auth()->user()->name,
+            'reservation_cancelled',
+            url('/merchant/reservations/' . $reservation->id),
+            'normal',
+            auth()->id()
+        );
+    }
+
     return back()->with('success', 'Reservation cancelled successfully.');
 }
+
 
 // Handle reporting a reservation
 public function Report(Request $request)
@@ -296,11 +337,11 @@ public function Report(Request $request)
         $reportableType = \App\Models\Product::class;
         $reportableId = $request->target_id;
     } elseif ($request->type === 'general') {
-        $reportableType = null;
+        $reportableType = 'general';
         $reportableId = null;
     }
 
-    Report::create([
+    $report = Report::create([
         'user_id'         => auth()->id(),
         'reportable_type' => $reportableType,
         'reportable_id'   => $reportableId,
@@ -309,6 +350,19 @@ public function Report(Request $request)
         'message'         => $request->message,
         'status'          => 'pending',
     ]);
+
+    // 🔔 Notify all admins
+    $admins = User::where('user_type', 'admin')->get();
+    foreach ($admins as $admin) {
+        NotificationService::send(
+            $admin->id,
+            'New report submitted by ' . auth()->user()->name . ' regarding ' . $request->type,
+            'report',
+            url('/admin/reports/' . $report->id),
+            'important',
+            auth()->id()
+        );
+    }
 
     return back()->with('success', 'Your report has been submitted successfully.');
 }

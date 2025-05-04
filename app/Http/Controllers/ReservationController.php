@@ -10,108 +10,115 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\BookingConfirmed;
 use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
 
 class ReservationController extends Controller
 {
     public function store(Request $request)
-{
-    $request->validate([
-        'product_id'   => 'required|exists:products,id',
-        'start_date'   => 'required|date|after:today',
-        'end_date'     => 'required|date|after_or_equal:start_date',
-        'note'         => 'nullable|string|max:1000',
-        'amount_paid'  => 'required|numeric|min:0',
-    ]);
+    {
+        $request->validate([
+            'product_id'   => 'required|exists:products,id',
+            'start_date'   => 'required|date|after:today',
+            'end_date'     => 'required|date|after_or_equal:start_date',
+            'note'         => 'nullable|string|max:1000',
+            'amount_paid'  => 'required|numeric|min:0',
+        ]);
 
-    $product = Product::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->product_id);
 
-    if ($product->status === 'blocked') {
-        return back()->withErrors(['product_id' => 'This product is currently blocked.'])->withInput();
-    }
+        if ($product->status === 'blocked') {
+            return back()->withErrors(['product_id' => 'This product is currently blocked.'])->withInput();
+        }
 
-    $start = Carbon::parse($request->start_date);
-    $end = Carbon::parse($request->end_date);
+        $start = Carbon::parse($request->start_date);
+        $end = Carbon::parse($request->end_date);
 
-    if ($product->maintenance_from && $product->maintenance_to) {
-        $maintenanceStart = Carbon::parse($product->maintenance_from);
-        $maintenanceEnd   = Carbon::parse($product->maintenance_to);
+        if ($product->maintenance_from && $product->maintenance_to) {
+            $maintenanceStart = Carbon::parse($product->maintenance_from);
+            $maintenanceEnd = Carbon::parse($product->maintenance_to);
 
-        if (
-            $start->lte($maintenanceEnd) &&
-            $end->gte($maintenanceStart)
-        ) {
+            if ($start->lte($maintenanceEnd) && $end->gte($maintenanceStart)) {
+                return back()->withErrors([
+                    'start_date' => 'This product is under maintenance during the selected period.',
+                ])->withInput();
+            }
+        }
+
+        $comment = $request->input('note');
+        $amountPaid = (float) $request->input('amount_paid');
+        $quantityRequested = 1;
+
+        $reservations = Reservation::where('product_id', $product->id)
+            ->where('status', '!=', 'cancelled')
+            ->whereDate('end_date', '>=', Carbon::today())
+            ->get();
+
+        $conflictingReservation = $reservations->first(function ($res) use ($start, $end) {
+            $existingStart = Carbon::parse($res->start_date);
+            $existingEnd = Carbon::parse($res->end_date);
+            return $start <= $existingEnd && $end >= $existingStart;
+        });
+
+        $dateCounts = [];
+
+        foreach ($reservations as $res) {
+            $resStart = Carbon::parse($res->start_date);
+            $resEnd = Carbon::parse($res->end_date);
+            for ($date = $resStart->copy(); $date->lte($resEnd); $date->addDay()) {
+                $key = $date->toDateString();
+                $dateCounts[$key] = ($dateCounts[$key] ?? 0) + $res->quantity;
+            }
+        }
+
+        $conflictDates = [];
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $key = $date->toDateString();
+            $reserved = $dateCounts[$key] ?? 0;
+            if ($reserved + $quantityRequested > $product->quantity) {
+                $conflictDates[] = $key;
+            }
+        }
+
+        if (!empty($conflictDates)) {
             return back()->withErrors([
-                'start_date' => 'This product is under maintenance during the selected period.',
+                'start_date' => 'This product is fully booked on these dates: ' . implode(', ', $conflictDates),
             ])->withInput();
         }
-    }
 
-    $comment = $request->input('note');
-    $amountPaid = (float) $request->input('amount_paid');
-    $quantityRequested = 1;
+        $diffDays = $end->diffInDays($start) + 1;
+        $totalPrice = $diffDays > 0 ? $product->price * $diffDays : 0;
 
-    $reservations = Reservation::where('product_id', $product->id)
-        ->where('status', '!=', 'cancelled')
-        ->whereDate('end_date', '>=', Carbon::today())
-        ->get();
+        $reservation = Reservation::create([
+            'user_id'          => auth()->id(),
+            'product_id'       => $product->id,
+            'slug'             => Str::uuid(),
+            'reservation_type' => 'daily',
+            'start_date'       => $start->toDateString(),
+            'end_date'         => $end->toDateString(),
+            'total_price'      => $totalPrice,
+            'paid_amount'      => $amountPaid,
+            'platform_fee'     => ($totalPrice * 0.05),
+            'quantity'         => 1,
+            'status'           => 'not_started',
+            'comment'          => $comment,
+        ]);
 
-    $conflictingReservation = $reservations->first(function ($res) use ($start, $end) {
-        $existingStart = Carbon::parse($res->start_date);
-        $existingEnd = Carbon::parse($res->end_date);
+        Mail::to(auth()->user()->email)->send(new BookingConfirmed(auth()->user(), $product, $reservation));
 
-        return $start <= $existingEnd && $end >= $existingStart;
-    });
-
-    $dateCounts = [];
-
-    foreach ($reservations as $res) {
-        $resStart = Carbon::parse($res->start_date);
-        $resEnd = Carbon::parse($res->end_date);
-
-        for ($date = $resStart->copy(); $date->lte($resEnd); $date->addDay()) {
-            $key = $date->toDateString();
-            $dateCounts[$key] = ($dateCounts[$key] ?? 0) + $res->quantity;
+        if ($product->user) {
+            NotificationService::send(
+                $product->user->id,
+                'A new reservation has been made for your product "' . $product->name . '" by ' . auth()->user()->name,
+                'new_reservation',
+                url('/merchant/reservation/' . $reservation->id . '/details'),
+                'normal',
+                auth()->id()
+            );
         }
+
+        return redirect()->back()->with('success', 'Reservation submitted successfully!');
     }
 
-    $conflictDates = [];
-    for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-        $key = $date->toDateString();
-        $reserved = $dateCounts[$key] ?? 0;
-
-        if ($reserved + $quantityRequested > $product->quantity) {
-            $conflictDates[] = $key;
-        }
-    }
-
-    if (!empty($conflictDates)) {
-        return back()->withErrors([
-            'start_date' => 'This product is fully booked on these dates: ' . implode(', ', $conflictDates),
-        ])->withInput();
-    }
-
-    $diffDays = $end->diffInDays($start) + 1;
-    $totalPrice = $diffDays > 0 ? $product->price * $diffDays : 0;
-
-    $reservation = Reservation::create([
-        'user_id'          => auth()->id(),
-        'product_id'       => $product->id,
-        'slug'             => Str::uuid(),
-        'reservation_type' => 'daily',
-        'start_date'       => $start->toDateString(),
-        'end_date'         => $end->toDateString(),
-        'total_price'      => $totalPrice,
-        'paid_amount'      => $amountPaid,
-        'platform_fee'     => ($totalPrice * 0.05),
-        'quantity'         => 1,
-        'status'           => 'not_started',
-        'comment'          => $comment,
-    ]);
-
-    Mail::to(auth()->user()->email)->send(new BookingConfirmed(auth()->user(), $product, $reservation));
-
-    return redirect()->back()->with('success', 'Reservation submitted successfully!');
-}
 
 
 

@@ -11,7 +11,13 @@ class Notification extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'message', 'priority', 'is_read'
+        'user_id',
+        'from_user_id',
+        'message',
+        'type',
+        'url',
+        'priority',
+        'is_read',
     ];
 
     protected $dates = ['deleted_at'];

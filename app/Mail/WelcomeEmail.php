@@ -19,8 +19,19 @@ class WelcomeEmail extends Mailable
     }
 
     public function build()
-    {
-        return $this->subject('Welcome to Rentify!')
-                    ->view('emails.welcome');
-    }
+{
+    $isMerchant = $this->user->user_type === 'merchant';
+
+    $subject = $isMerchant
+        ? 'Welcome to Rentify - Account Under Review'
+        : 'Welcome to Rentify!';
+
+    return $this->subject($subject)
+                ->view('emails.welcome')
+                ->with([
+                    'name' => $this->user->name,
+                    'isMerchant' => $isMerchant,
+                ]);
+}
+
 }

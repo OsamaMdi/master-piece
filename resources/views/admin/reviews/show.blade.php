@@ -1,7 +1,7 @@
 @extends('layouts.admin.app')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/show-shared.css') }}">
+
 
 <div class="container py-4">
     <div class="card p-4">

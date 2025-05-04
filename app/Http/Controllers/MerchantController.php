@@ -27,47 +27,57 @@ class MerchantController extends Controller
         return view('merchants.partials.dashboard', compact('totalProducts', 'totalReservations', 'rentedTools'));
     }
 
-
     public function adminDashboard()
     {
         $totalReservations = DB::table('reservations')->count();
         $totalProducts = DB::table('products')->count();
+
         $rentedTools = DB::table('reservations')
             ->where('status', 'approved')
             ->distinct('product_id')
             ->count('product_id');
+
         $cancelledReservations = DB::table('reservations')
             ->where('status', 'cancelled')
             ->count();
+
         $totalUsers = DB::table('users')->where('user_type', 'user')->count();
         $totalMerchants = DB::table('users')->where('user_type', 'merchant')->count();
 
-        // ✨ New stats
-        $totalRevenue = DB::table('reservations')->whereNotNull('total_price')->sum('total_price');
+        $totalRevenue = DB::table('reservations')
+            ->whereNotNull('total_price')
+            ->sum('total_price');
+
         $averageRating = DB::table('website_reviews')->avg('rating') ?? 0;
 
+        $usersThisWeek = DB::table('users')
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->count();
 
-        // === مقارنة المستخدمين
-        $usersThisWeek = DB::table('users')->where('created_at', '>=', now()->startOfWeek())->count();
-        $usersLastWeek = DB::table('users')->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])->count();
+        $usersLastWeek = DB::table('users')
+            ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])
+            ->count();
 
-        // === مقارنة المنتجات
-        $productsThisWeek = DB::table('products')->where('created_at', '>=', now()->startOfWeek())->count();
-        $productsLastWeek = DB::table('products')->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])->count();
+        $productsThisWeek = DB::table('products')
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->count();
 
-        // === Daily Reservations
+        $productsLastWeek = DB::table('products')
+            ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])
+            ->count();
+
         $dailyReservationsRaw = DB::table('reservations')
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->where('created_at', '>=', now()->subDays(6))
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+
         $dailyReservations = [
             'labels' => $dailyReservationsRaw->pluck('date')->toArray(),
             'data' => $dailyReservationsRaw->pluck('count')->toArray()
         ];
 
-        // === Reservations by Category
         $reservationsByCategoryRaw = DB::table('reservations')
             ->where('reservations.created_at', '>=', now()->startOfWeek())
             ->join('products', 'reservations.product_id', '=', 'products.id')
@@ -76,22 +86,21 @@ class MerchantController extends Controller
             ->groupBy('categories.name')
             ->orderByDesc('count')
             ->get();
+
         $reservationsByCategory = [
             'labels' => $reservationsByCategoryRaw->pluck('category')->toArray(),
             'data' => $reservationsByCategoryRaw->pluck('count')->toArray()
         ];
 
-        // === Top Users
         $topUsers = DB::table('users')
-        ->leftJoin('reservations', 'users.id', '=', 'reservations.user_id')
-        ->where('users.user_type', 'user')
-        ->select('users.id', 'users.name', 'users.email', DB::raw('COUNT(reservations.id) as reservations_count'))
-        ->groupBy('users.id', 'users.name', 'users.email')
-        ->orderByDesc('reservations_count')
-        ->take(5)
-        ->get();
+            ->leftJoin('reservations', 'users.id', '=', 'reservations.user_id')
+            ->where('users.user_type', 'user')
+            ->select('users.id', 'users.name', 'users.email', DB::raw('COUNT(reservations.id) as reservations_count'))
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderByDesc('reservations_count')
+            ->take(5)
+            ->get();
 
-        // === Top Rated Products
         $topRatedProducts = DB::table('products')
             ->join('reviews', 'products.id', '=', 'reviews.product_id')
             ->join('users', 'products.user_id', '=', 'users.id')
@@ -126,5 +135,8 @@ class MerchantController extends Controller
             'topRatedProducts'
         ));
     }
+
+
+
 
 }

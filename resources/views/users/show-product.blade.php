@@ -42,26 +42,38 @@
                 <!-- Left Column: Product Info -->
                 <div class="col-12 col-lg-8">
                     <div class="single-room-details-area mb-50">
-                        @if ($product->images->count())
-                            <div class="room-thumbnail-slides mb-50">
-                                <div id="room-thumbnail--slide" class="carousel slide" data-ride="carousel">
-                                    <div class="carousel-inner">
+                        <div class="room-thumbnail-slides mb-50">
+                            <div id="room-thumbnail--slide" class="carousel slide" data-ride="carousel">
+                                <div class="carousel-inner">
+                                    @if($product->images->isNotEmpty())
                                         @foreach ($product->images as $key => $image)
                                             <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                                                 <img src="{{ asset('storage/' . $image->image_url) }}" class="d-block w-100" alt="Product Image">
                                             </div>
                                         @endforeach
-                                    </div>
-                                    <ol class="carousel-indicators">
+                                    @else
+                                        <div class="carousel-item active">
+                                            <img src="{{ asset('img/logo.png') }}" class="d-block w-100" alt="Default Image">
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <ol class="carousel-indicators">
+                                    @if($product->images->isNotEmpty())
                                         @foreach ($product->images as $key => $image)
                                             <li data-target="#room-thumbnail--slide" data-slide-to="{{ $key }}" class="{{ $key == 0 ? 'active' : '' }}">
                                                 <img src="{{ asset('storage/' . $image->image_url) }}" class="d-block w-100" alt="Thumbnail">
                                             </li>
                                         @endforeach
-                                    </ol>
-                                </div>
+                                    @else
+                                        <li data-target="#room-thumbnail--slide" data-slide-to="0" class="active">
+                                            <img src="{{ asset('img/logo.png') }}" class="d-block w-100" alt="Default Thumbnail">
+                                        </li>
+                                    @endif
+                                </ol>
                             </div>
-                        @endif
+                        </div>
+
 
                         <!-- Basic Info -->
                         <div class="room-features-area mb-50">
@@ -77,9 +89,16 @@
                         <div class="mb-5">
                             <h4 class="mb-4">About This Tool</h4>
                             <p class="text-dark">{{ $product->description }}</p>
+
                         </div>
 
-
+              <!-- Report Product Button -->
+<!-- Report Product Button (aligned right) -->
+<div class="mb-5 text-end">
+    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#productReportModal">
+        🚩 Report this Product
+    </button>
+</div>
 
                       <!-- Reviews -->
 <div class="room-review-area">
@@ -296,6 +315,59 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+                              {{--  Product Report Modal --}}
+
+
+<div class="modal fade" id="productReportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('reservations.report', $product->id) }}">
+            @csrf
+
+            <!-- hidden fields -->
+            <input type="hidden" name="type" value="product">
+            <input type="hidden" name="target_id" value="{{ $product->id }}">
+
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">📝 Report Product - {{ $product->name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-2 text-muted">
+                        You are reporting an issue with the product:
+                        <strong>{{ $product->name }}</strong>
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject (Optional)</label>
+                        <input type="text" name="subject" class="form-control" placeholder="e.g. Misleading pictures">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Describe the issue</label>
+                        <textarea name="message" class="form-control" required placeholder="Please explain the problem..." rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Submit Report</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 @endsection
 

@@ -22,11 +22,37 @@
     </div>
 
     <div class="navbar-right d-flex align-items-center gap-4 position-relative">
-        <!-- Notifications -->
-        <div class="notification-badge position-relative">
-            <i class="fas fa-bell fs-5 text-dark"></i>
-            <span class="badge">5</span>
-        </div>
+ <!-- Notifications -->
+<div class="notification-wrapper position-relative" id="notification-wrapper">
+    <i class="fas fa-bell fs-5 text-dark"></i>
+
+    @if ($unreadCount > 0)
+        <span class="badge" id="notification-count">{{ $unreadCount }}</span>
+    @else
+        <span class="badge d-none" id="notification-count">0</span>
+    @endif
+
+    <div class="notification-dropdown position-absolute bg-white rounded shadow-sm" id="notification-dropdown">
+        <ul id="notification-list" class="list-unstyled m-0 p-2 small">
+            @forelse ($notifications as $notification)
+                <li>
+                    <a href="{{ $notification->url ?? '#' }}" class="d-block text-decoration-none py-1 px-2 {{ !$notification->is_read ? 'fw-bold' : '' }}">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-bell me-2 text-primary"></i>
+                            <div class="flex-grow-1">
+                                {{ $notification->message }}
+                                <div class="text-muted small">{{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}</div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            @empty
+                <li><div class="text-center text-muted small py-2">No notifications yet</div></li>
+            @endforelse
+        </ul>
+    </div>
+</div>
+
 
         <!-- Profile Dropdown -->
         <div class="profile-dropdown position-relative">
@@ -45,13 +71,13 @@
 
                {{-- Logout --}}
                <form method="POST" action="{{ route('logout') }}">
-                   @csrf
-                   <button type="submit"
-                   class="dropdown-item py-2 text-start w-100"
-                   style="background: none; border: none; font-weight: bold;">
-               🚪 Logout
-           </button>
-
+                @csrf
+                <button type="submit"
+                    class="dropdown-item py-2 text-start w-100"
+                    style="background: none; border: none; font-weight: bold; font-size: 1.1rem; width: 100%;">
+                    🚪 Logout
+                </button>
+            </form>
                </form>
            </div>
 

@@ -211,20 +211,19 @@ body {
     gap: 1.5rem;
     min-width: 220px;
     justify-content: flex-end;
-}
 
-.notification-badge {
-    position: relative;
-    font-size: 1.4rem;
-    color: #64748b;
+}
+.notification-wrapper {
     cursor: pointer;
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
+/* الشارة فوق الجرس */
 .badge {
     position: absolute;
     top: -4px;
@@ -240,6 +239,71 @@ body {
     justify-content: center;
     padding: 0;
     line-height: 1;
+    z-index: 1;
+}
+
+/* قائمة الإشعارات */
+.notification-dropdown {
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    position: absolute;
+    top: 110%; /* تنزل تحت الجرس مباشرة */
+    right: 0; /* بجانب الجرس مباشرة */
+    z-index: 1050;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+.notification-dropdown.show {
+    display: block;
+}
+
+/* محتوى الإشعارات */
+#notification-list li {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 0.5rem 0;
+}
+
+#notification-list li:last-child {
+    border-bottom: none;
+}
+
+#notification-list a {
+    color: #334155 !important;
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+    display: block;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+#notification-list a:hover {
+    background: #f8fafc;
+}
+
+/* Notification Items */
+#notification-list li {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 0.5rem 0;
+}
+
+#notification-list li:last-child {
+    border-bottom: none;
+}
+
+#notification-list a {
+    color: #334155 !important;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+#notification-list a:hover {
+    background: #f8fafc;
 }
 
 .profile-dropdown {
@@ -2242,3 +2306,5 @@ body {
     background-color: #e5f0ff;
     color: #1d4ed8;
 }
+
+

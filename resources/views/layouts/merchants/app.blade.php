@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js" defer></script>
     <!-- CSS -->
 
+    @vite('resources/js/app.js')
+
 <!-- Favicon -->
 <link rel="icon" href="{{ asset('img/logo.png') }}">
 
@@ -27,6 +29,7 @@
         @yield('content')
     </main>
 
+
     <script src="{{ asset('js/merchantSearch.js') }}"></script>
     <!-- JS -->
     <script src="{{ asset('js/merchant-script.js') }}" defer></script>
@@ -34,6 +37,9 @@
     <script src="{{ asset('js/poppProductM.js') }}" defer></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.userId = {{ auth()->id() }};
+    </script>
 
 
     <script>

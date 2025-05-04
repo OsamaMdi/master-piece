@@ -13,8 +13,13 @@
         <li>
             <a href="{{ route('merchant.reservations') }}"><i class="fas fa-calendar-check"></i> Reservations</a>
         </li>
+
         <li>
-            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            <a href="{{ route('merchant.notifications.index') }}" class="{{ Route::is('merchants.notifications.index') ? 'active' : '' }}">
+                <i class="fas fa-bell"></i> Notifications
+            </a>
         </li>
+
+
     </ul>
 </div>

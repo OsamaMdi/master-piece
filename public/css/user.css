@@ -710,3 +710,28 @@ small.text-danger {
     color: #856404;
     border: 1px solid #ffeeba;
 }
+/* Notification Priorities */
+.custom-status.normal {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.custom-status.important {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+
+.custom-status.read {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.custom-status.unread {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}

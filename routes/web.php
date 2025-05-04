@@ -11,6 +11,7 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SystemCheckController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\merchants\ProductController;
@@ -52,6 +53,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
 });
 Route::middleware(['auth', 'block.check', 'user.only'])->group(function () {
@@ -120,14 +123,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'block.check', 'admi
         return response()->json([
             'count' => $product->images()->count(),
         ]);
+
     });
     Route::patch('users/{user}/block', [UserController::class, 'block'])->name('users.block');
     Route::patch('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
     Route::resource('reports', ReportsController::class)->only(['index', 'show', 'destroy']);
     Route::patch('reports/{report}/status', [ReportsController::class, 'updateStatus'])->name('reports.updateStatus');
+    Route::get('notifications', [NotificationController::class, 'adminIndex'])->name('notifications.index');
+    Route::delete('/notifications/clearrr', [NotificationController::class, 'adminClearAll'])->name('notifications.clear');
+
 });
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -157,6 +162,9 @@ Route::prefix('merchant')->name('merchant.')->middleware(['auth', 'block.check',
     Route::view('/under-review', 'merchants.under_review')->name('under_review');
     Route::patch('/{product}/disable', [ProductController::class, 'disableProduct'])->name('products.disable');
     Route::patch('/products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
+    Route::get('notifications', [NotificationController::class, 'merchantIndex'])->name('notifications.index');
+      Route::delete('/notifications/clearrr', [NotificationController::class, 'adminClearAll'])->name('notifications.clear');
+      Route::get('/my-reports', [ReportsController::class, 'myReports'])->name('reports.mine');
 });
 
 
