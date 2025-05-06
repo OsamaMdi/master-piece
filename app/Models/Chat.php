@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Chat extends Model
 {
@@ -16,19 +17,25 @@ class Chat extends Model
         'status',
     ];
 
+    protected $casts = [
+        'deleted_at' => 'datetime',
+    ];
+
+    
     public function messages()
-    {
-        return $this->hasMany(Message::class);
-    }
-
-    public function sender()
-    {
-        return $this->morphTo(__FUNCTION__, 'sender_type', 'sender_id');
-    }
-
-    public function receiver()
-    {
-        return $this->morphTo(__FUNCTION__, 'receiver_type', 'receiver_id');
-    }
+{
+    return $this->hasMany(Message::class)->orderBy('id'); // ✅ ترتيب دائم
 }
 
+
+    // الطرف المُرسل (يمكن أن يكون User أو Merchant)
+    public function sender(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function receiver(): MorphTo
+    {
+        return $this->morphTo();
+    }
+}

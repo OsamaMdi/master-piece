@@ -50,3 +50,4 @@ window.Echo = new Echo({
         }
     }
 });
+

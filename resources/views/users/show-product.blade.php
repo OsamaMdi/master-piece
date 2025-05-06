@@ -92,13 +92,22 @@
 
                         </div>
 
-              <!-- Report Product Button -->
-<!-- Report Product Button (aligned right) -->
-<div class="mb-5 text-end">
+ <!-- Start Chat with Seller & Report Buttons -->
+<div class="mb-5 text-end d-flex justify-content-end gap-2">
+    <!-- Start Chat Button -->
+    <form method="POST" action="{{ route('chat.fromProduct', $product->id) }}">
+        @csrf
+        <button type="submit" class="btn btn-sm btn-primary">
+            💬 Chat with Seller
+        </button>
+    </form>
+
+    <!-- Report Button -->
     <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#productReportModal">
         🚩 Report this Product
     </button>
 </div>
+
 
                       <!-- Reviews -->
 <div class="room-review-area">

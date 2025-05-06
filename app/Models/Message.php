@@ -17,13 +17,21 @@ class Message extends Model
         'read', 'read_at',
     ];
 
+    protected $casts = [
+        'read' => 'boolean',
+        'read_at' => 'datetime',
+    ];
+
+    // العلاقة مع الشات
     public function chat()
     {
         return $this->belongsTo(Chat::class);
     }
 
+    // العلاقة مع المرسل (يوزر أو تاجر)
     public function sender()
     {
-        return $this->morphTo(__FUNCTION__, 'sender_type', 'sender_id');
+        return $this->morphTo();
+
     }
 }

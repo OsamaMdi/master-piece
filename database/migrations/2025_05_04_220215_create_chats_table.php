@@ -1,21 +1,19 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    public function up()
+return new class extends Migration {
+    public function up(): void
     {
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
 
             $table->unsignedBigInteger('sender_id');
-            $table->string('sender_type'); // 🔄 بدل enum بـ string
+            $table->string('sender_type'); // App\Models\User أو App\Models\Merchant
 
             $table->unsignedBigInteger('receiver_id');
-            $table->string('receiver_type'); // 🔄 بدل enum بـ string
+            $table->string('receiver_type'); // App\Models\User أو App\Models\Merchant
 
             $table->enum('status', ['open', 'closed'])->default('open');
 

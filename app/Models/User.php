@@ -29,24 +29,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-/*     public function getRouteKeyName()
-    {
-        return 'slug';
-    } */
-
+    // علاقات عامة
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
-    }
-
-    public function chats()
-    {
-        return $this->hasMany(Chat::class);
-    }
-
-    public function messages()
-    {
-        return $this->hasMany(Message::class);
     }
 
     public function subscriptions()
@@ -57,11 +43,6 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class);
-    }
-
-    public function chatNotifications()
-    {
-        return $this->hasMany(ChatNotification::class);
     }
 
     public function reviews()
@@ -96,4 +77,36 @@ class User extends Authenticatable
     {
         return $this->hasMany(Report::class);
     }
+
+
+    public function sentChats()
+    {
+        return $this->morphMany(Chat::class, 'sender');
+    }
+
+    public function receivedChats()
+    {
+        return $this->morphMany(Chat::class, 'receiver');
+    }
+
+    public function messages()
+    {
+        return $this->morphMany(Message::class, 'sender');
+    }
+    public function getMorphClass()
+{
+    return self::class;
+}
+
+public function getAllChatsAttribute()
+{
+    return \App\Models\Chat::where(function ($q) {
+        $q->where('sender_id', $this->id)
+          ->where('sender_type', get_class($this));
+    })->orWhere(function ($q) {
+        $q->where('receiver_id', $this->id)
+          ->where('receiver_type', get_class($this));
+    })->get();
+}
+
 }

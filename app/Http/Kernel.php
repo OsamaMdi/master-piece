@@ -38,8 +38,7 @@ class Kernel extends HttpKernel
     \Illuminate\Routing\Middleware\SubstituteBindings::class,
     \App\Http\Middleware\AutoUnblockUser::class,
     \App\Http\Middleware\AutoUnblockProduct::class,
-
-],
+    ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
@@ -72,5 +71,6 @@ class Kernel extends HttpKernel
         'admin.only' => \App\Http\Middleware\AdminOnly::class,
         'merchant.only' => \App\Http\Middleware\MerchantOnly::class,
         'user.only' => \App\Http\Middleware\UserOnly::class,
+        
     ];
 }

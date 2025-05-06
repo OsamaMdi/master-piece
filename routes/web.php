@@ -2,6 +2,7 @@
 
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProfileController;
@@ -48,6 +49,11 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/chat/unread-count', [ChatController::class, 'unreadCount'])
+    ->middleware(['auth'])
+    ->name('chat.unreadCount');
+
+
 // Profile routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -56,7 +62,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+    Route::post('/chat/from-product/{product}', [ChatController::class, 'startFromProduct'])->name('chat.fromProduct');
+    Route::get('/chat/{id}/fetch', [ChatController::class, 'fetchNewMessages'])->name('chat.fetch');
+
 });
+Route::post('/chat/mark-as-read', [ChatController::class, 'markAsRead'])
+    ->middleware(['auth', 'verified']);
+
+    Route::post('/chat/mark-delivered', [ChatController::class, 'markDelivered'])
+    ->middleware(['auth', 'verified']);
+
 Route::middleware(['auth', 'block.check', 'user.only'])->group(function () {
     Route::get('/my-activity', [UserFrontendController::class, 'indexActivity'])->name('user.activity');
     Route::post('/reservations/{id}/cancel', [UserFrontendController::class, 'cancelReservation'])->name('reservations.cancel');
@@ -163,9 +181,12 @@ Route::prefix('merchant')->name('merchant.')->middleware(['auth', 'block.check',
     Route::patch('/{product}/disable', [ProductController::class, 'disableProduct'])->name('products.disable');
     Route::patch('/products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggleStatus');
     Route::get('notifications', [NotificationController::class, 'merchantIndex'])->name('notifications.index');
-      Route::delete('/notifications/clearrr', [NotificationController::class, 'adminClearAll'])->name('notifications.clear');
-      Route::get('/my-reports', [ReportsController::class, 'myReports'])->name('reports.mine');
-});
+    Route::delete('/notifications/clearrr', [NotificationController::class, 'adminClearAll'])->name('notifications.clear');
+    Route::get('/my-reports', [ReportsController::class, 'myReports'])->name('reports.mine');
+
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+      Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show'); // ممكن تستخدم نفس show
+    });
 
 
 
@@ -174,4 +195,8 @@ Route::prefix('merchant')->name('merchant.')->middleware(['auth', 'block.check',
 // Public Routes (for users and merchants)
 Route::post('/reports', [ReportsController::class, 'sendReport'])->name('reports.send');
 Route::patch('/reports/{report}/resolve', [ReportsController::class, 'resolveReport'])->name('reports.resolve');
+
+
+
+
 

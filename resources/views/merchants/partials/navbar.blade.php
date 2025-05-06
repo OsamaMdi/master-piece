@@ -26,14 +26,24 @@
 
     <div class="navbar-right d-flex align-items-center gap-4 position-relative">
 
+<!-- Chat Icon -->
+<div class="notification-wrapper position-relative">
+    <a href="{{ route('merchant.chat.index') }}" class="text-decoration-none position-relative">
+        <i class="fas fa-comment-dots fs-5 text-dark" style="color:black;"></i>
+        <span id="chat-unread-count" class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill d-none">
+            0
+        </span>
+    </a>
+</div>
+
         <!-- Notifications -->
 <div class="notification-wrapper position-relative" id="notification-wrapper">
-    <i class="fas fa-bell fs-5 text-dark"></i>
+    <i class="fas fa-bell fs-5 text-dark" style="color:black;"></i>
 
     @if ($unreadCount > 0)
         <span class="badge" id="notification-count">{{ $unreadCount }}</span>
     @else
-        <span class="badge d-none" id="notification-count">0</span>
+        <span class="badge d-none" id="notification-count" >0</span>
     @endif
 
     <div class="notification-dropdown position-absolute bg-white rounded shadow-sm" id="notification-dropdown">

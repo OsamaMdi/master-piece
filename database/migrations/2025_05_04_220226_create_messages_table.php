@@ -1,12 +1,10 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    public function up()
+return new class extends Migration {
+    public function up(): void
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
@@ -14,7 +12,7 @@ return new class extends Migration
             $table->foreignId('chat_id')->constrained()->onDelete('cascade');
 
             $table->unsignedBigInteger('sender_id');
-            $table->string('sender_type'); // 🔄 بدل enum بـ string
+            $table->string('sender_type'); // App\Models\User أو App\Models\Merchant
 
             $table->text('message')->nullable();
             $table->string('image_url')->nullable();
