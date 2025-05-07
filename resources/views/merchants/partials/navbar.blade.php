@@ -4,7 +4,7 @@
         <button id="toggleSidebar" class="toggle-sidebar-btn">
             <i class="fas fa-bars"></i>
         </button>
-        <a class="nav-brand" href="{{ route('merchant.dashboard') }}">
+        <a class="nav-brand" href="{{ route('home') }}">
             <img src="{{ asset('img/logof.png') }}" alt="Rentify Logo" class="logo-img">
         </a>
     </div>
