@@ -54,49 +54,63 @@ class UserController extends Controller
     }
 
     public function store(Request $request): RedirectResponse
-{
+    {
+        $validated = $request->validate([
+            'name' => ['nullable', 'string', 'min:2', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'phone' => ['nullable', 'regex:/^[0-9]{8,10}$/'],
+            'status' => ['required', 'in:active,blocked,under_review'],
+            'user_type' => ['required', 'in:user,merchant,admin,delivery'],
+            'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'identity_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'identity_number' => ['nullable', 'string', 'min:8', 'max:20'],
+            'identity_country' => ['nullable', 'in:Jordan,Other'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string', 'max:255'],
+        ]);
 
-    $validated = $request->validate([
-        'name' => ['required', 'string', 'min:2', 'max:255'],
-        'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-        'password' => ['required', 'string', 'min:8'],
-        'phone' => ['nullable', 'regex:/^[0-9]{8,10}$/'],
-        'status' => ['required', 'in:active,blocked,under_review'],
-        'user_type' => ['required', 'in:user,merchant,admin,delivery'],
-        'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-        'identity_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-        'identity_number' => ['nullable', 'string', 'min:8', 'max:20'],
-        'identity_country' => ['nullable', 'in:Jordan,Other'],
-        'city' => ['nullable', 'string', 'max:100'],
-        'address' => ['nullable', 'string', 'max:255'],
-    ]);
+        $profilePicturePath = $request->hasFile('profile_picture')
+            ? $request->file('profile_picture')->store('profile_pictures', 'public')
+            : null;
 
-    $profilePicturePath = $request->hasFile('profile_picture')
-        ? $request->file('profile_picture')->store('profile_pictures', 'public')
-        : null;
+        $identityImagePath = null;
+        $identityData = [];
+        $detectedCity = null;
 
-    $identityImagePath = $request->hasFile('identity_image')
-        ? $request->file('identity_image')->store('identity_images', 'public')
-        : null;
+        if ($request->hasFile('identity_image')) {
+            $identityImagePath = $request->file('identity_image')->store('identity_images', 'public');
+            $fullPath = storage_path('app/public/' . $identityImagePath);
 
-    User::create([
-        'name' => $validated['name'],
-        'slug' => Str::slug($validated['name']) . '-' . Str::random(5),
-        'email' => $validated['email'],
-        'password' => Hash::make($validated['password']),
-        'phone' => $validated['phone'] ?? null,
-        'status' => $validated['status'],
-        'user_type' => $validated['user_type'],
-        'profile_picture' => $profilePicturePath,
-        'identity_image' => $identityImagePath,
-        'identity_number' => $validated['identity_number'] ?? null,
-        'identity_country' => $validated['identity_country'] ?? null,
-        'city' => $validated['city'] ?? null,
-        'address' => $validated['address'] ?? null,
-    ]);
+            $identityText = \App\Helpers\IdentityHelper::scanIdentity($fullPath);
 
-    return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
-}
+            if (!Str::contains($identityText, ['الرقم الوطني', 'Name', 'National', 'الجنسية'])) {
+                Storage::disk('public')->delete($identityImagePath);
+                return back()->withErrors(['identity_image' => 'Please upload a valid national ID image.'])->withInput();
+            }
+
+            $identityData = \App\Helpers\IdentityHelper::extractDataFromText($identityText);
+            $detectedCity = \App\Helpers\IdentityHelper::extractCity($identityText);
+        }
+
+        User::create([
+            'name' => $validated['name'] ?? $identityData['name'] ?? 'Unnamed User',
+            'slug' => Str::slug($validated['name'] ?? $identityData['name'] ?? 'user') . '-' . Str::random(5),
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'] ?? null,
+            'status' => $validated['status'],
+            'user_type' => $validated['user_type'],
+            'profile_picture' => $profilePicturePath,
+            'identity_image' => $identityImagePath,
+            'identity_number' => $validated['identity_number'] ?? $identityData['national_id'] ?? null,
+            'identity_country' => $validated['identity_country'] ?? 'Jordan',
+            'city' => $validated['city'] ?? $detectedCity ?? null,
+            'address' => $validated['address'] ?? null,
+        ]);
+
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+    }
 
 
     public function show(User $user)
@@ -124,6 +138,8 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
+
+
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
@@ -145,7 +161,28 @@ class UserController extends Controller
         }
 
         if ($request->hasFile('identity_image')) {
-            $user->identity_image = $request->file('identity_image')->store('identity_images', 'public');
+            $identityImagePath = $request->file('identity_image')->store('identity_images', 'public');
+            $fullPath = storage_path('app/public/' . $identityImagePath);
+
+            $identityText = \App\Helpers\IdentityHelper::scanIdentity($fullPath);
+
+            if (!Str::contains($identityText, ['الرقم الوطني', 'Name', 'National', 'الجنسية'])) {
+                Storage::disk('public')->delete($identityImagePath);
+                return back()->withErrors(['identity_image' => 'Please upload a valid national ID image.'])->withInput();
+            }
+
+            $identityData = \App\Helpers\IdentityHelper::extractDataFromText($identityText);
+            $detectedCity = \App\Helpers\IdentityHelper::extractCity($identityText);
+
+            $user->identity_image = $identityImagePath;
+
+            if (!empty($identityData['national_id'])) {
+                $user->identity_number = $identityData['national_id'];
+            }
+
+            if ($detectedCity) {
+                $user->city = $detectedCity;
+            }
         }
 
         $user->update([
@@ -154,12 +191,14 @@ class UserController extends Controller
             'phone' => $validated['phone'] ?? null,
             'user_type' => $validated['user_type'],
             'status' => $validated['status'],
-            'identity_number' => $validated['identity_number'] ?? null,
-            'city' => $validated['city'] ?? null,
+            'identity_number' => $user->identity_number,
+            'city' => $user->city,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
+
+
 
     public function destroy(string $id)
     {

@@ -7,22 +7,22 @@
 <div class="card card-body">
     <h2 class="form-title mb-4">➕ Add New Category</h2>
 
-    <form method="POST" action="{{ route('admin.categories.store') }}">
+    <form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data">
         @csrf
 
         <div class="form-row">
 
             <div class="form-col">
                 <label class="form-label">Name</label>
-                <input type="text" name="name" class="review-select review-search" required>
+                <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
                 @error('name') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
 
 
             <div class="form-col">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="review-select review-search" rows="3"></textarea>
-                @error('description') <small class="text-danger">{{ $message }}</small> @enderror
+                <label class="form-label">Category Image</label>
+                <input type="file" name="image" accept="image/*" class="form-control">
+                @error('image') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
         </div>
 
@@ -81,10 +81,17 @@
             </div>
 
         </div>
+        <div class="form-col">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+            @error('description') <small class="text-danger">{{ $message }}</small> @enderror
+        </div>
+
 
         <div class="mt-4 d-flex justify-content-between">
-            <button type="submit" class="btn btn-primary">Save Category</button>
             <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">← Back</a>
+            <button type="submit" class="btn btn-primary">Save Category</button>
+
         </div>
     </form>
 </div>

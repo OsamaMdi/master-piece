@@ -63,38 +63,32 @@
                         <option value="user" {{ old('user_type', $user->user_type) == 'user' ? 'selected' : '' }}>User</option>
                         <option value="merchant" {{ old('user_type', $user->user_type) == 'merchant' ? 'selected' : '' }}>Merchant</option>
                         <option value="admin" {{ old('user_type', $user->user_type) == 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="delivery" {{ old('user_type', $user->user_type) == 'delivery' ? 'selected' : '' }}>Delivery</option>
                     </select>
                     @error('user_type') <small class="text-danger">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-col">
-                    <label for="identity_number" class="form-label">Identity Number</label>
-                    <input type="text" class="form-control" id="identity_number" name="identity_number" value="{{ old('identity_number', $user->identity_number) }}">
-                    @error('identity_number') <small class="text-danger">{{ $message }}</small> @enderror
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-col">
                     <label for="city" class="form-label">City</label>
                     <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $user->city) }}">
                     @error('city') <small class="text-danger">{{ $message }}</small> @enderror
                 </div>
-
-                <div class="form-col">
-                    <label for="profile_picture" class="form-label">Profile Picture (optional)</label>
-                    <input type="file" name="profile_picture" class="form-control">
-                    @error('profile_picture') <small class="text-danger">{{ $message }}</small> @enderror
-                </div>
             </div>
 
             <div class="form-row">
+
+
+                <div class="form-col">
+                    <label for="profile_picture" class="form-label">Profile Picture (optional)</label>
+                    <input type="file" name="profile_picture" class="form-control" accept="image/*">
+                    @error('profile_picture') <small class="text-danger">{{ $message }}</small> @enderror
+                </div>
+
                 <div class="form-col">
                     <label for="identity_image" class="form-label">Identity Image (optional)</label>
                     <input type="file" name="identity_image" class="form-control" id="identity_image">
                     @error('identity_image') <small class="text-danger">{{ $message }}</small> @enderror
                 </div>
+
             </div>
 
             <div class="mt-4">

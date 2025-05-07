@@ -1,28 +1,51 @@
 @extends('layouts.admin.app')
 
 @section('content')
-<div class="card card-body">
-    <h2 class="form-title mb-4">📄 Category Details</h2>
+<!-- ======== Page Title ======== -->
+<div class="product-page-header">
+    <h1 class="page-title">{{ $category->name }}</h1>
+</div>
 
-    <div class="form-row">
-        <div class="form-col">
-            <!-- عرض الاسم مع الأيقونة واللون -->
-            <p><strong>Name:</strong>
-                <span style="display: inline-block; background-color: {{ $category->color }}; padding: 5px 10px; border-radius: 50%; margin-right: 10px;">
-                    <i class="{{ $category->icon }}" style="color: white; font-size: 14px;"></i>
+<!-- ======== Category Card with Image + Details Inside ======== -->
+<div class="product-card-container">
+    <div class="product-details-card">
+
+        <!-- Category Image Side -->
+        <div class="product-image-side">
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <img src="{{ $category->image ? asset('storage/' . $category->image) : asset('img/default-category.jpg') }}"
+                             alt="{{ $category->name }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Information Side -->
+        <div class="product-info-side">
+            <h3>Description:</h3>
+            <p>{{ $category->description ?? 'No description provided.' }}</p>
+
+            <h3>Color:</h3>
+            <p>
+                <span style="display: inline-block; background: {{ $category->color }}; color: white; padding: 0.25rem 0.75rem; border-radius: 5px;">
+                    {{ $category->color }}
                 </span>
-                {{ $category->name }}
             </p>
-        </div>
-        <div class="form-col">
-            <p><strong>Description:</strong> {{ $category->description ?? '—' }}</p>
-        </div>
-    </div>
 
-    <p><strong>Created At:</strong> {{ $category->created_at->format('Y-m-d H:i') }}</p>
+            <h3>Icon:</h3>
+            <p><i class="{{ $category->icon }}"></i> {{ $category->icon }}</p>
 
-    <div class="mt-4 text-end">
-        <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">← Back to Categories</a>
+            <h3>Created At:</h3>
+            <p>{{ $category->created_at->format('Y-m-d H:i') }}</p>
+
+            <!-- Back Button -->
+            <div class="mt-4 text-end" style="margin-top: 2rem;">
+                <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">← Back</a>
+            </div>
+        </div>
     </div>
 </div>
+
 @endsection

@@ -10,6 +10,30 @@
     </p>
 </div>
 
+<!-- ✅ Unified Filter Row -->
+<div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <!-- Status Filter -->
+        <select name="status" class="review-select">
+            <option value="">All Statuses</option>
+            <option value="not_started" {{ request('status') == 'not_started' ? 'selected' : '' }}>Not Started</option>
+            <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+        </select>
+
+        <!-- From Date -->
+        <input type="date" name="from_date" class="review-select" value="{{ request('from_date') }}">
+
+        <!-- To Date -->
+        <input type="date" name="to_date" class="review-select" value="{{ request('to_date') }}">
+
+        <!-- Submit -->
+        <button type="submit" class="review-filter-btn">🔍 Filter</button>
+    </form>
+</div>
+
+
 <!-- Reservations Table -->
 @if($reservations->count())
 <table class="table table-bordered">

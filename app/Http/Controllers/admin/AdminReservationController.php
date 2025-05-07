@@ -55,19 +55,35 @@ class AdminReservationController extends Controller
     }
 
       // Show all reservations for the current user
-      public function showReservations()
+      public function showReservations(Request $request)
       {
-          $reservations = Reservation::with(['user', 'product.reviews', 'product.user', 'reports'])
-              ->orderBy('created_at', 'desc')
-              ->paginate(20);
+          $query = Reservation::with(['user', 'product.reviews', 'product.user', 'reports'])
+              ->orderBy('created_at', 'desc');
 
-          // Check and update status for each reservation
+          // Apply filters if present
+          if ($request->filled('status')) {
+              $query->where('status', $request->status);
+          }
+
+          if ($request->filled('from_date')) {
+              $query->whereDate('start_date', '>=', $request->from_date);
+          }
+
+          if ($request->filled('to_date')) {
+              $query->whereDate('end_date', '<=', $request->to_date);
+          }
+
+          $reservations = $query->paginate(20);
+
+          // Update status if needed
           foreach ($reservations as $reservation) {
               $this->checkAndUpdateStatus($reservation);
           }
 
           return view('admin.reservation.reservations', compact('reservations'));
       }
+
+
 
 
 }

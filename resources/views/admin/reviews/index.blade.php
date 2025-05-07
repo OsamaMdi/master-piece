@@ -60,13 +60,14 @@
                 {{-- <a href="{{ route('admin.reviews.edit', $review->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
                     <i class="fas fa-edit"></i>
                 </a> --}}
-                <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this review?')">
+                <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" class="delete-form" style="display:inline-block;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </form>
+
             </td>
         </tr>
         @endforeach
@@ -82,3 +83,33 @@
 @endif
 
 @endsection
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteForms = document.querySelectorAll('.delete-form');
+
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+    title: 'Are you sure?',
+    text: "This review will be permanently deleted.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true
+}).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endpush

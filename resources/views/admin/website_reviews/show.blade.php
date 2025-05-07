@@ -2,51 +2,51 @@
 
 @section('content')
 
+<!-- ======== Page Title ======== -->
+<div class="product-page-header">
+    <h1 class="page-title">Website Review by "{{ $review->user->name }}"</h1>
+</div>
 
-<div class="container py-4">
-    <div class="card p-4">
+<!-- ======== Review Details Card Layout ======== -->
+<div class="product-card-container">
+    <div class="product-details-card">
 
-        <!-- Header -->
-        <div class="custom-grid gap-2">
-            <div class="flex-shrink-0">
-                <img
-                    src="{{ $review->user->profile_picture ? asset('storage/' . $review->user->profile_picture) : asset('img/default-user.png') }}"
-                    class="rounded-circle"
-                    style="width: 90px; height: 70px;">
-            </div>
-            <div class="flex-grow-1">
-                <h2 class="m-0">🌐 Website Review</h2>
-            </div>
+        <!-- Left: User Image -->
+        <div class="product-image-side">
+            <img src="{{ $review->user->profile_picture ? asset('storage/' . $review->user->profile_picture) : asset('img/default-user.png') }}"
+                 alt="{{ $review->user->name }}"
+                 class="img-fluid rounded-circle"
+                 style="max-height: 250px; width: auto;">
         </div>
 
-        <!-- Reviewer Info -->
-        <div class="form-row mt-4">
-            <div class="form-col">
-                <p><strong>Reviewer:</strong> {{ $review->user->name }}</p>
-            </div>
-            <div class="form-col">
-                <p><strong>Email:</strong> {{ $review->user->email }}</p>
-            </div>
-        </div>
+        <!-- Right: Review Info -->
+        <div class="product-info-side">
+            <h3>Reviewer:</h3>
+            <p>{{ $review->user->name }}</p>
 
-        <div class="mt-2">
-            <a href="{{ route('admin.users.show',  $review->user->id) }}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-1">
-                <i class="fas fa-user"></i> View User
-            </a>
-        </div>
+            <h3>Email:</h3>
+            <p>{{ $review->user->email }}</p>
 
-        <!-- Review Content -->
-        <div class="mt-4">
-            <p><strong>Rating:</strong> {{ $review->rating }} / 5</p>
-            <p><strong>Comment:</strong></p>
+            <h3>Rating:</h3>
+            <p>{{ $review->rating }} / 5</p>
+
+            <h3>Comment:</h3>
             <div class="p-3 border rounded bg-light">
                 {{ $review->review_text }}
             </div>
+
+            <p class="text-muted mt-3"><strong>Submitted At:</strong> {{ $review->created_at->format('Y-m-d H:i') }}</p>
+
+            <div class="mt-4 d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.website-reviews.index') }}" class="btn btn-secondary">
+                    ← Back to Website Reviews
+                </a>
+                <a href="{{ route('admin.users.show', $review->user->id) }}" class="btn btn-outline-info">
+                    👤 View User
+                </a>
+            </div>
         </div>
-
-        <p class="text-muted mt-3"><strong>Submitted At:</strong> {{ $review->created_at->format('Y-m-d H:i') }}</p>
-
-        <a href="{{ route('admin.website-reviews.index') }}" class="btn btn-secondary mt-4">← Back to Website Reviews</a>
     </div>
 </div>
+
 @endsection

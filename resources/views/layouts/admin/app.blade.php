@@ -41,7 +41,7 @@
     <main id="main-content" class="main-content transition-all duration-300">
         @yield('content')
     </main>
-
+    @stack('scripts')
     <!-- JS -->
     <script src="{{ asset('js/merchant-script.js') }}"></script>
     <script src="{{ asset('js/user.js') }}"></script>
@@ -55,7 +55,6 @@
         window.userId = {{ auth()->id() }};
     </script>
 
-        <!-- SweetAlert Notification -->
 @if(session('success'))
 <script>
     Swal.fire({
@@ -65,6 +64,11 @@
         timer: 2000,
         showConfirmButton: false
     });
+
+    // إزالة بيانات الجلسة من history بعد عرض الرسالة
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
 </script>
 @endif
 
@@ -75,6 +79,11 @@
         title: 'Error',
         text: "{{ session('error') }}",
     });
+
+    // إزالة بيانات الجلسة من history بعد عرض الرسالة
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
 </script>
 @endif
 

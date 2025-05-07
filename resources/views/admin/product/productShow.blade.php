@@ -83,6 +83,7 @@
 
          <!-- Edit/Block/Unblock Button -->
          <div class="mt-4 text-end" style="margin-top: 2rem;">
+            <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
     @if ($product->status === 'blocked')
         <form action="{{ route('admin.products.unblock', $product->id) }}" method="POST" style="display: inline;">
             @csrf
@@ -100,7 +101,7 @@
 
 
 
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">← Back to Users</a>
+
 
             </div>
         </div>

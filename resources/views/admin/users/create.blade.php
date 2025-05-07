@@ -7,18 +7,6 @@
     }
 </style>
 
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: '{{ session('error') }}',
-        timer: 5000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
 <div class="card card-body">
     <div class="d-flex align-items-center gap-3 mb-4">
         <h2 class="form-title m-0">➕ Create New User</h2>

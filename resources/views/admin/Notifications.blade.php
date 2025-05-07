@@ -1,60 +1,142 @@
-@extends('layouts.merchants.app')
+@extends('layouts.admin.app')
 
 @section('content')
 
-<h2 class="page-title mb-4">🚩 My Reports</h2>
+<!-- Page Header Title -->
+<h2 class="page-title mb-4">🔔 Admin Notifications</h2>
 
-<!-- Filter Section -->
-<div class="review-filter-bar d-flex justify-content-end align-items-center mb-4">
-    <form method="GET" class="d-flex flex-wrap gap-2 m-0">
-        <select name="target_type" class="form-select form-select-sm">
-            <option value="">All Types</option>
-            <option value="reservation" {{ request('target_type') == 'reservation' ? 'selected' : '' }}>Reservation</option>
-            <option value="review" {{ request('target_type') == 'review' ? 'selected' : '' }}>Review</option>
+<!-- ✅ Filter + Delete All -->
+<div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <select name="priority" class="review-select" onchange="this.form.submit()">
+            <option value="">All Priorities</option>
+            <option value="normal" {{ request('priority') == 'normal' ? 'selected' : '' }}>Normal</option>
+            <option value="important" {{ request('priority') == 'important' ? 'selected' : '' }}>Important</option>
         </select>
-        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
     </form>
+
+</div>
+<div class="filter-header">
+<form id="clearAllForm" method="POST" action="{{ route('admin.notifications.clear') }}">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="btn btn-danger force-right" onclick="return confirmClearAll(event)">
+        <i class="fas fa-trash-alt me-1"></i> Clear All Notifications
+    </button>
+</form>
 </div>
 
-@if($reports->count())
+@if($notifications->count())
 <table class="table table-bordered">
     <thead class="table-light">
         <tr>
             <th>#</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Subject</th>
             <th>Message</th>
-            <th>Submitted At</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($reports as $report)
-        @php
-            $statusClass = match($report->status) {
-                'pending' => 'custom-status active',
-                'reviewed' => 'custom-status review',
-                'resolved' => 'custom-status blocked',
-                default => 'custom-status unknown'
-            };
-        @endphp
+        @foreach($notifications as $notification)
         <tr>
-            <td>{{ $loop->iteration + ($reports->currentPage() - 1) * $reports->perPage() }}</td>
-            <td>{{ ucfirst($report->target_type) }}</td>
-            <td><span class="{{ $statusClass }}">{{ ucfirst($report->status) }}</span></td>
-            <td>{{ $report->subject ?? '-' }}</td>
-            <td>{{ Str::limit($report->message, 80) }}</td>
-            <td>{{ $report->created_at->format('Y-m-d') }}</td>
+            <td>{{ $loop->iteration + ($notifications->currentPage() - 1) * $notifications->perPage() }}</td>
+            <td class="fw-semibold">{{ $notification->message }}</td>
+            <td>{{ ucfirst(str_replace('_', ' ', $notification->type)) }}</td>
+            <td>
+                @php
+                    $fromUser = \App\Models\User::find($notification->from_user_id);
+                @endphp
+                {{ $fromUser ? $fromUser->name : 'System' }}
+            </td>
+            <td>
+                <span class="custom-status {{ $notification->priority }}">
+                    {{ ucfirst($notification->priority) }}
+                </span>
+            </td>
+            <td>
+                <span class="custom-status {{ $notification->is_read ? 'read' : 'unread' }}">
+                    {{ $notification->is_read ? 'Read' : 'Unread' }}
+                </span>
+            </td>
+            <td>{{ $notification->created_at->format('Y-m-d') }}</td>
+            <td class="text-center">
+                @if($notification->url)
+                    <a href="{{ $notification->url }}" class="btn btn-sm btn-outline-primary" title="Go to">
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                @endif
+                <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="display:inline-block;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </form>
+            </td>
         </tr>
         @endforeach
     </tbody>
 </table>
 
+
+<!-- Pagination -->
 <div class="mt-4">
-    {{ $reports->withQueryString()->links() }}
+    {{ $notifications->withQueryString()->links() }}
 </div>
 @else
-<div class="alert alert-info">You haven’t submitted any reports yet.</div>
+<div class="alert alert-info">No notifications found.</div>
 @endif
 
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This notification will be permanently deleted.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('form').submit();
+            }
+        });
+        return false;
+    }
+
+    function confirmClearAll(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Clear All Notifications?',
+            text: 'This will delete all your notifications permanently.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, clear all!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('clearAllForm').submit();
+            }
+        });
+        return false;
+    }
+
+    // Attach SweetAlert to delete buttons
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', confirmDelete);
+        });
+    });
+</script>
+@endpush

@@ -23,16 +23,16 @@ class CreateReservationsTable extends Migration
             $table->dateTime('start_datetime')->nullable();
             $table->dateTime('end_datetime')->nullable();
 
-            $table->decimal('total_price', 10, 2)->nullable(); // السعر الكلي
-            $table->decimal('paid_amount', 10, 2)->nullable(); // المدفوع (10% أو كامل)
-            $table->decimal('platform_fee', 10, 2)->nullable(); // نسبة 5% من total_price
+            $table->decimal('total_price', 10, 2)->nullable(); 
+            $table->decimal('paid_amount', 10, 2)->nullable();
+            $table->decimal('platform_fee', 10, 2)->nullable();
 
             $table->enum('status', [
-                'not_started',  // ✅ الحجز لم يبدأ بعد (default)
-                'cancelled',    // تم الإلغاء
-                'in_progress',  // الحجز حالياً عند الزبون
-                'completed',    // الحجز انتهى
-                'reported'      // عليه بلاغ
+                'not_started',
+                'cancelled',
+                'in_progress',
+                'completed',
+                'reported'
             ])->default('not_started');
 
             $table->text('comment')->nullable();

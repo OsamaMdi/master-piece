@@ -28,113 +28,160 @@ class MerchantController extends Controller
     }
 
     public function adminDashboard()
-    {
-        $totalReservations = DB::table('reservations')->count();
-        $totalProducts = DB::table('products')->count();
+{
+    $totalReservations = DB::table('reservations')->count();
+    $totalProducts = DB::table('products')->count();
+    $totalUsers = DB::table('users')->where('user_type', 'user')->count();
+    $totalMerchants = DB::table('users')->where('user_type', 'merchant')->count();
 
-        $rentedTools = DB::table('reservations')
-            ->where('status', 'approved')
-            ->distinct('product_id')
-            ->count('product_id');
+    // ⬇️ الشهر الحالي
+    $startOfCurrentMonth = now()->startOfMonth();
+    $endOfCurrentMonth = now()->endOfMonth();
 
-        $cancelledReservations = DB::table('reservations')
-            ->where('status', 'cancelled')
-            ->count();
+    $currentMonthProfit = DB::table('reservations')
+        ->where('status', 'completed')
+        ->whereBetween('start_date', [$startOfCurrentMonth, $endOfCurrentMonth])
+        ->sum('platform_fee');
 
-        $totalUsers = DB::table('users')->where('user_type', 'user')->count();
-        $totalMerchants = DB::table('users')->where('user_type', 'merchant')->count();
+    $totalRevenue = DB::table('reservations')
+        ->whereNotNull('total_price')
+        ->whereBetween('start_date', [$startOfCurrentMonth, $endOfCurrentMonth])
+        ->sum('total_price');
 
-        $totalRevenue = DB::table('reservations')
-            ->whereNotNull('total_price')
-            ->sum('total_price');
+    $currentMonthName = now()->format('F Y');
 
-        $averageRating = DB::table('website_reviews')->avg('rating') ?? 0;
+    // ⬇️ تقييم الموقع (نجوم)
+    $rawAverage = DB::table('website_reviews')->avg('rating') ?? 0;
+    $averageRating = round($rawAverage * 2) / 2;
 
-        $usersThisWeek = DB::table('users')
-            ->where('created_at', '>=', now()->startOfWeek())
-            ->count();
+    // ⬇️ بلاغات قيد الانتظار
+    $pendingReports = DB::table('reports')
+        ->where('status', 'pending')
+        ->count();
 
-        $usersLastWeek = DB::table('users')
-            ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])
-            ->count();
+    // ⬇️ إحصائيات المستخدمين والمنتجات بالأسبوع
+    $usersThisWeek = DB::table('users')
+        ->where('created_at', '>=', now()->startOfWeek())
+        ->count();
 
-        $productsThisWeek = DB::table('products')
-            ->where('created_at', '>=', now()->startOfWeek())
-            ->count();
+    $usersLastWeek = DB::table('users')
+        ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])
+        ->count();
 
-        $productsLastWeek = DB::table('products')
-            ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])
-            ->count();
+    $productsThisWeek = DB::table('products')
+        ->where('created_at', '>=', now()->startOfWeek())
+        ->count();
 
-        $dailyReservationsRaw = DB::table('reservations')
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', now()->subDays(6))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+    $productsLastWeek = DB::table('products')
+        ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->startOfWeek()])
+        ->count();
 
-        $dailyReservations = [
-            'labels' => $dailyReservationsRaw->pluck('date')->toArray(),
-            'data' => $dailyReservationsRaw->pluck('count')->toArray()
-        ];
+    // ⬇️ مقارنة حجوزات الشهر الحالي والماضي
+    $startOfLastMonth = now()->subMonth()->startOfMonth();
+    $endOfLastMonth = now()->subMonth()->endOfMonth();
 
-        $reservationsByCategoryRaw = DB::table('reservations')
-            ->where('reservations.created_at', '>=', now()->startOfWeek())
-            ->join('products', 'reservations.product_id', '=', 'products.id')
-            ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->select('categories.name as category', DB::raw('COUNT(reservations.id) as count'))
-            ->groupBy('categories.name')
-            ->orderByDesc('count')
-            ->get();
+    $currentMonthData = DB::table('reservations')
+        ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        ->whereBetween('created_at', [$startOfCurrentMonth, $endOfCurrentMonth])
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get()
+        ->keyBy('date');
 
-        $reservationsByCategory = [
-            'labels' => $reservationsByCategoryRaw->pluck('category')->toArray(),
-            'data' => $reservationsByCategoryRaw->pluck('count')->toArray()
-        ];
+    $lastMonthData = DB::table('reservations')
+        ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get()
+        ->keyBy('date');
 
-        $topUsers = DB::table('users')
-            ->leftJoin('reservations', 'users.id', '=', 'reservations.user_id')
-            ->where('users.user_type', 'user')
-            ->select('users.id', 'users.name', 'users.email', DB::raw('COUNT(reservations.id) as reservations_count'))
-            ->groupBy('users.id', 'users.name', 'users.email')
-            ->orderByDesc('reservations_count')
-            ->take(5)
-            ->get();
+    $daysInCurrentMonth = now()->daysInMonth;
+    $labels = [];
+    $currentMonthCounts = [];
+    $lastMonthCounts = [];
 
-        $topRatedProducts = DB::table('products')
-            ->join('reviews', 'products.id', '=', 'reviews.product_id')
-            ->join('users', 'products.user_id', '=', 'users.id')
-            ->select(
-                'products.id',
-                'products.name',
-                'products.user_id',
-                'users.name as owner_name',
-                DB::raw('AVG(reviews.rating) as average_rating')
-            )
-            ->groupBy('products.id', 'products.name', 'products.user_id', 'users.name')
-            ->orderByDesc('average_rating')
-            ->take(5)
-            ->get();
+    for ($day = 1; $day <= $daysInCurrentMonth; $day++) {
+        $dayFormattedCurrent = now()->copy()->day($day)->format('Y-m-d');
+        $dayFormattedLast = now()->subMonth()->copy()->day($day)->format('Y-m-d');
 
-        return view('admin.partials.dashboard', compact(
-            'totalReservations',
-            'totalProducts',
-            'rentedTools',
-            'cancelledReservations',
-            'totalUsers',
-            'totalMerchants',
-            'totalRevenue',
-            'averageRating',
-            'usersThisWeek',
-            'usersLastWeek',
-            'productsThisWeek',
-            'productsLastWeek',
-            'dailyReservations',
-            'reservationsByCategory',
-            'topUsers',
-            'topRatedProducts'
-        ));
+        $labels[] = $day;
+        $currentMonthCounts[] = $currentMonthData[$dayFormattedCurrent]->count ?? 0;
+        $lastMonthCounts[] = $lastMonthData[$dayFormattedLast]->count ?? 0;
     }
+
+    $monthlyReservationComparison = [
+        'labels' => $labels,
+        'currentMonth' => $currentMonthCounts,
+        'lastMonth' => $lastMonthCounts
+    ];
+
+    // ⬇️ الحجوزات حسب التصنيف لأسبوع سابق
+    $startOfLastWeek = now()->subWeek()->startOfWeek();
+    $endOfLastWeek = now()->subWeek()->endOfWeek();
+
+    $reservationsByCategoryRaw = DB::table('reservations')
+        ->where('reservations.status', 'completed')
+        ->whereBetween('reservations.start_date', [$startOfLastWeek, $endOfLastWeek])
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->join('categories', 'products.category_id', '=', 'categories.id')
+        ->select('categories.name as category', DB::raw('COUNT(reservations.id) as count'))
+        ->groupBy('categories.name')
+        ->orderByDesc('count')
+        ->get();
+
+    $reservationsByCategory = [
+        'labels' => $reservationsByCategoryRaw->pluck('category')->toArray(),
+        'data' => $reservationsByCategoryRaw->pluck('count')->toArray()
+    ];
+
+    // ⬇️ أفضل المستخدمين
+    $topUsers = DB::table('users')
+        ->leftJoin('reservations', 'users.id', '=', 'reservations.user_id')
+        ->where('users.user_type', 'user')
+        ->select('users.id', 'users.name', 'users.email', DB::raw('COUNT(reservations.id) as reservations_count'))
+        ->groupBy('users.id', 'users.name', 'users.email')
+        ->orderByDesc('reservations_count')
+        ->take(5)
+        ->get();
+
+    // ⬇️ أفضل المنتجات تقييماً
+    $topRatedProducts = DB::table('products')
+        ->join('reviews', 'products.id', '=', 'reviews.product_id')
+        ->join('users', 'products.user_id', '=', 'users.id')
+        ->select(
+            'products.id',
+            'products.name',
+            'products.user_id',
+            'users.name as owner_name',
+            DB::raw('AVG(reviews.rating) as average_rating')
+        )
+        ->groupBy('products.id', 'products.name', 'products.user_id', 'users.name')
+        ->orderByDesc('average_rating')
+        ->take(5)
+        ->get();
+
+    return view('admin.partials.dashboard', compact(
+        'totalReservations',
+        'totalProducts',
+        'totalUsers',
+        'totalMerchants',
+        'totalRevenue',
+        'averageRating',
+        'usersThisWeek',
+        'usersLastWeek',
+        'productsThisWeek',
+        'productsLastWeek',
+        'reservationsByCategory',
+        'topUsers',
+        'topRatedProducts',
+        'currentMonthProfit',
+        'currentMonthName',
+        'pendingReports',
+        'monthlyReservationComparison'
+    ));
+}
+
 
 
 

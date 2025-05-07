@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     deleteForms.forEach(form => {
         form.addEventListener('submit', function (e) {
-            e.preventDefault(); // منع الإرسال التلقائي
+            e.preventDefault();
 
             Swal.fire({
                 title: 'Are you sure?',

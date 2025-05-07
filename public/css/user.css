@@ -524,6 +524,16 @@ small.text-danger {
     color: #1a202c;
 }
 
+.review-filter-form input[type="date"].review-select {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #cbd5e0;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #2d3748;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 0.1rem rgba(66, 153, 225, 0.25);
+}
 
 .review-filter-form select.review-select {
     padding: 0.5rem 1rem;

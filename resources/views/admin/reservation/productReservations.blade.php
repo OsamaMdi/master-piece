@@ -39,8 +39,9 @@
         <!-- No Reservations Message -->
         <p class="no-reservations-message">No reservations found.</p>
     @endforelse
-</div>
 
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 <!-- Pagination -->
 @if ($reservations->hasPages())
 <div class="pagination-container">
@@ -48,11 +49,11 @@
 </div>
 @endif
 
-<!-- Back Button (same class as show page) -->
+{{-- <!-- Back Button (same class as show page) -->
 <a href="{{ route('admin.products.index') }}" class="btn-back-fixed">
     🔙 Back
 </a>
-
+ --}}
 @endsection
 
 @push('styles')

@@ -1,6 +1,9 @@
 @extends('layouts.admin.app')
 
 @section('content')
+@php use Illuminate\Support\Str; @endphp
+
+
 <div class="dashboard-section py-4">
     <h2 class="dashboard-title mb-4">📊 Admin Dashboard Overview</h2>
 
@@ -21,14 +24,14 @@
     </div>
     <div class="col">
         <div class="metric-card h-100">
-            <h4><i class="fas fa-hammer me-2 text-warning"></i> Rented Tools</h4>
-            <p>{{ $rentedTools }}</p>
+            <h4><i class="fas fa-coins me-2 text-success"></i> Platform Profit ({{ $currentMonthName }})</h4>
+            <p>{{ number_format($currentMonthProfit, 2) }} JOD</p>
         </div>
     </div>
     <div class="col">
         <div class="metric-card h-100">
-            <h4><i class="fas fa-times-circle me-2 text-danger"></i> Cancelled Reservations</h4>
-            <p>{{ $cancelledReservations }}</p>
+            <h4><i class="fas fa-flag me-2 text-danger"></i> Pending Reports</h4>
+            <p>{{ $pendingReports }}</p>
         </div>
     </div>
     <div class="col">
@@ -69,9 +72,10 @@
         <canvas id="productsGrowthChart"></canvas>
     </div>
     <div class="chart-box">
-        <h5><i class="fas fa-calendar-day me-2 text-info"></i>Daily Reservations</h5>
+        <h5><i class="fas fa-calendar-day me-2 text-info"></i>Monthly Reservations Comparison</h5>
         <canvas id="dailyReservationsChart"></canvas>
     </div>
+
     <div class="chart-box">
         <h5><i class="fas fa-tags me-2 text-warning"></i>Reservations by Category</h5>
         <canvas id="reservationsByCategoryChart"></canvas>
@@ -95,7 +99,7 @@
                 <tbody>
                     @foreach($topUsers as $user)
                     <tr>
-                        <td>{{ $user->name }}</td>
+                        <td>{{ Str::before($user->name, ' ') }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->reservations_count }}</td>
                         <td>
@@ -147,6 +151,11 @@
 
 
 <script>
+      const reservationsByCategoryData = {
+        labels: @json($reservationsByCategory['labels']),
+        data: @json($reservationsByCategory['data'])
+    };
+    console.log(reservationsByCategoryData);
     document.addEventListener('DOMContentLoaded', function () {
         // 🧑‍🤝‍🧑 Users Growth Chart
         new Chart(document.getElementById('usersGrowthChart'), {
@@ -184,27 +193,49 @@
             }
         });
 
-        // 📅 Daily Reservations Chart
+
+
         new Chart(document.getElementById('dailyReservationsChart'), {
-            type: 'line',
-            data: {
-                labels: {!! json_encode($dailyReservations['labels']) !!},
-                datasets: [{
-                    label: 'Reservations',
-                    data: {!! json_encode($dailyReservations['data']) !!},
-                    backgroundColor: 'rgba(74,108,247,0.2)',
-                    borderColor: '#4a6cf7',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true,
-                    pointRadius: 4
-                }]
+    type: 'line',
+    data: {
+        labels: {!! json_encode($monthlyReservationComparison['labels']) !!},
+        datasets: [
+            {
+                label: 'Current Month',
+                data: {!! json_encode($monthlyReservationComparison['currentMonth']) !!},
+                borderColor: '#4a6cf7',
+                backgroundColor: 'rgba(74,108,247,0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } }
+            {
+                label: 'Last Month',
+                data: {!! json_encode($monthlyReservationComparison['lastMonth']) !!},
+                borderColor: '#f56565',
+                backgroundColor: 'rgba(245,101,101,0.1)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
             }
-        });
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+
 
         // 📊 Reservations by Category Chart
         new Chart(document.getElementById('reservationsByCategoryChart'), {
