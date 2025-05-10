@@ -9,7 +9,6 @@
             <div class="col-12">
                 <div class="breadcrumb-content d-flex align-items-center justify-content-between pb-5">
                     <h2 class="room-title">{{ $product->name }}</h2>
-                    <h2 class="room-price">{{ number_format($product->price, 2) }} JOD <span>/ Day</span></h2>
                 </div>
             </div>
         </div>
@@ -81,7 +80,12 @@
                                 <div class="col-6 col-md-3"><h6>Category: <span>{{ $product->category->name }}</span></h6></div>
                                 <div class="col-6 col-md-3"><h6>Merchant: <span>{{ $product->user->name }}</span></h6></div>
                                 <div class="col-6 col-md-3"><h6>Stock: <span>{{ $product->quantity }}</span></h6></div>
-                                <div class="col-6 col-md-3"><h6>Condition: <span class="text-capitalize">{{ $product->condition }}</span></h6></div>
+                                <div class="col-6 col-md-3">
+                                 <h6>
+                                  Price/day: <span>{{ number_format($product->price, 2) }} JOD</span>
+                                </h6>
+</div>
+
                             </div>
                         </div>
 
@@ -91,22 +95,29 @@
                             <p class="text-dark">{{ $product->description }}</p>
 
                         </div>
-
- <!-- Start Chat with Seller & Report Buttons -->
+<!-- Start Chat with Seller & Report Buttons -->
+@auth
+ @if(auth()->user()->user_type === 'user')
 <div class="mb-5 text-end d-flex justify-content-end gap-2">
-    <!-- Start Chat Button -->
-    <form method="POST" action="{{ route('chat.fromProduct', $product->id) }}">
-        @csrf
-        <button type="submit" class="btn btn-sm btn-primary">
-            💬 Chat with Seller
-        </button>
-    </form>
+
+    @if($subscriptionActive)
+        <!-- Start Chat Button -->
+        <form method="POST" action="{{ route('chat.fromProduct', $product->id) }}">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-primary">
+                💬 Chat with Seller
+            </button>
+        </form>
+    @endif
 
     <!-- Report Button -->
     <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#productReportModal">
         🚩 Report this Product
     </button>
 </div>
+ @endif
+@endauth
+
 
 
                       <!-- Reviews -->
@@ -122,11 +133,15 @@
                     Reviews ({{ $reviews->count() }})
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" id="add-review-tab" data-bs-toggle="tab" href="#add-review" role="tab">
-                    Write Review
-                </a>
-            </li>
+            @auth
+    @if(auth()->user()->user_type === 'user')
+        <li class="nav-item">
+            <a class="nav-link" id="add-review-tab" data-bs-toggle="tab" href="#add-review" role="tab">
+                Write Review
+            </a>
+        </li>
+    @endif
+@endauth
         </ul>
 
         <!-- Tab Content -->
@@ -226,6 +241,30 @@
                                               placeholder="Any special instructions or notes?"></textarea>
                                 </div>
 
+
+
+<!-- ✅ START: Delivery Option + Location -->
+<div class="form-group form-check mt-3">
+    <input class="form-check-input" type="checkbox" id="deliveryCheckbox" name="wants_delivery">
+    <label class="form-check-label" for="deliveryCheckbox">
+        I want delivery
+    </label>
+</div>
+
+<div class="form-group mt-3 d-none" id="locationInputWrapper">
+    <label for="deliveryLocation">Your Location (within Amman)</label>
+    <input type="text"
+           class="form-control"
+           name="delivery_location"
+           id="deliveryLocation"
+           placeholder="e.g. Abdoun, Amman or Tla' Al-Ali, Amman">
+    <small class="text-danger d-none" id="locationError">
+        Location is required and must be within Amman.
+    </small>
+</div>
+
+<!-- ✅ END -->
+
                                 <!-- Terms & Conditions Checkbox -->
                                 <div class="form-group form-check mt-3">
                                     <input class="form-check-input" type="checkbox" id="termsCheck" required>
@@ -234,10 +273,26 @@
                                     </label>
                                 </div>
 
-                                <!-- Reserve Button -->
-                                <button id="reserveBtn" type="button" class="btn btn-primary w-100 mt-4">
-                                    Reserve Now
-                                </button>
+                               <!-- Reserve Button -->
+<button id="reserveBtn" type="button"
+    class="btn btn-primary w-100 mt-4"
+    @guest disabled @endguest
+    @auth
+        @if(auth()->user()->user_type !== 'user') disabled @endif
+    @endauth
+>
+    Reserve Now
+</button>
+
+<!-- Message if button is disabled -->
+@guest
+    <p class="text-center text-muted mt-2">Only registered users can make reservations.</p>
+@else
+    @if(auth()->user()->user_type !== 'user')
+        <p class="text-center text-muted mt-2">Only users can make reservations.</p>
+    @endif
+@endguest
+
                             </form>
 
                             <!-- Read Terms Link -->
@@ -309,23 +364,36 @@
 
 <!-- Terms & Conditions Modal -->
 <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="termsModalLabel">Booking Terms & Conditions</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
                 <ul class="list-unstyled">
-                    <li>1. The renter assumes full responsibility for the tool from the moment of pickup.</li>
-                    <li>2. The agreed payment must be made upon receiving the tool.</li>
-                    <li>3. A late return penalty of 10% per day will be added for every day past the return deadline.</li>
-                    <li>4. The company reserves the full legal right to take action in the event of a violation of these terms.</li>
+
+                    <li>1. The renter must respect the rental policy. Any breach of these terms may lead to legal accountability.</li>
+                    <li>2. Please inspect the tool carefully before pickup. Report any issues immediately.</li>
+                    <li>3. If your account is deleted due to misuse, all future reservations will be cancelled without refund.</li>
+                    <li>4. The renter assumes full responsibility for the tool from the moment of pickup.</li>
+                    <li>5. The agreed payment must be made upon receiving the tool.</li>
+
+                    @if($product->usage_notes)
+                        @php
+                            $extraNotes = preg_split("/[\r\n]+/", $product->usage_notes);
+                        @endphp
+                        @foreach($extraNotes as $index => $note)
+                            <li>{{ 8 + $index }}. {{ $note }}</li>
+                        @endforeach
+                    @endif
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
 
 
 

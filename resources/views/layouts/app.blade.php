@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
     <title>{{ config('app.name', 'Laravel') }}</title>
+     <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -66,6 +68,8 @@
 <script src="{{ asset('js/merchant-script.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script src="{{ asset('js/userSearch.js') }}"></script>
+
 <script>
     function confirmDelete() {
         Swal.fire({
@@ -94,6 +98,51 @@
         });
     @endif
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const profileBtn = document.getElementById("profileButton");
+        const profileMenu = document.getElementById("profileMenu");
+
+        if (!profileBtn || !profileMenu) return;
+
+        // عند الضغط على الصورة
+        profileBtn.addEventListener("click", function (e) {
+            e.stopPropagation(); // يمنع الإغلاق التلقائي
+            profileMenu.classList.toggle("hidden");
+            profileMenu.classList.toggle("block");
+        });
+
+        // عند الضغط خارج القائمة
+        document.addEventListener("click", function (e) {
+            if (!profileMenu.contains(e.target) && e.target !== profileBtn) {
+                profileMenu.classList.remove("block");
+                profileMenu.classList.add("hidden");
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchBtn = document.querySelector(".search-btn");
+        const searchForm = document.querySelector(".search-form");
+
+        if (searchBtn && searchForm) {
+            searchBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                searchForm.classList.toggle("search-form-active");
+            });
+
+            // إغلاق عند الضغط خارج الفورم
+            document.addEventListener("click", function (e) {
+                if (!searchForm.contains(e.target) && !searchBtn.contains(e.target)) {
+                    searchForm.classList.remove("search-form-active");
+                }
+            });
+        }
+    });
+</script>
+
 
 </body>
 </html>

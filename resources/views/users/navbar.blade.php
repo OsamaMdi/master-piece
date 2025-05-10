@@ -49,7 +49,6 @@
 <!-- User Search -->
     <span id="isUserAuthenticated" data-auth="{{ auth()->check() ? 'true' : 'false' }}"></span>
 
-
 <!-- Header Area Start -->
 <header class="header-area">
     <!-- Search Form -->
@@ -60,7 +59,6 @@
                 <button type="submit"><i class="icon_search"></i></button>
                 <ul id="liveSearchResults" class="list-group position-absolute w-100 bg-white shadow mt-1" style="z-index: 9999; display: none;"></ul>
             </form>
-
         </div>
     </div>
 
@@ -83,156 +81,186 @@
 
                     <!-- Menu -->
                     <div class="classy-menu">
+
                         <!-- Close Button -->
                         <div class="classycloseIcon">
                             <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
                         </div>
 
-<!-- Nav Start -->
-<div class="classynav d-flex justify-content-between align-items-center w-100">
+                        <!-- Nav Start -->
+                        <div class="classynav d-flex justify-content-between align-items-center w-100" style="height: 80px;">
 
-    <!-- Left Side Nav -->
-    <ul id="nav" class="me-auto">
-        <li class="active"><a href="{{ route('home') }}">Home</a></li>
-        <li><a href="{{ route('tools.all') }}">All Tools</a></li>
-        <li><a href="{{ route('about') }}">About Us</a></li>
-        @auth
-        <li><a href="#">Categories</a>
-            <ul class="dropdown">
-                @foreach($categories as $category)
-                    <li>
-                        <a href="{{ route('products.by.category', ['id' => $category->id]) }}">
-                            - {{ $category->name }}
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
-        </li>
-        @endauth
-        <li><a href="{{ route('contact') }}">Contact</a></li>
-    </ul>
+                            <!-- Desktop Left Section -->
+                            <div class="d-none d-lg-flex align-items-center gap-3">
+                                <!-- Left Nav Links -->
+                                <ul id="nav" class="d-flex align-items-center gap-3 mb-0">
+                                    <li class="active"><a href="{{ route('home') }}">Home</a></li>
+                                    <li><a href="{{ route('tools.all') }}">All Tools</a></li>
+                                    <li><a href="{{ route('about') }}">About Us</a></li>
 
-    <!-- Right Side Auth & Search -->
-    <div class="d-flex align-items-center" style="margin-right: 25px">
+                                    @auth
+                                    <li class="position-relative">
+                                        <a href="#">Categories</a>
+                                        <ul class="dropdown">
+                                            @foreach($categories as $category)
+                                                <li>
+                                                    <a href="{{ route('products.by.category', ['id' => $category->id]) }}">
+                                                        - {{ $category->name }}
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </li>
+                                    @endauth
 
-        @auth
-        @if (auth()->user()->user_type === 'user')
-            <!-- Feedback Button -->
-            <div class="me-3">
-                <a href="#" class="btn btn-sm navbar-feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-                    Leave Feedback
-                </a>
-            </div>
-        @endif
-        @endauth
+                                    <li><a href="{{ route('contact') }}">Contact</a></li>
+                                </ul>
 
-        <!-- Chat Icon for User -->
-        @auth
-           <!-- Chat Icon -->
-<div class="chat-wrapper position-relative">
-    <a href="{{ route('chat.index') }}" class="text-decoration-none position-relative" style="margin-right: 30px">
-        <i class="fas fa-comment-dots fs-5 text-dark"></i>
-        <span id="chat-unread-count" class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill d-none">
-            0
-        </span>
-    </a>
-</div>
-        @endauth
+                                <!-- Feedback -->
+                                @auth
+                                @if (auth()->user()->user_type === 'user')
+                                <a href="#" class="navbar-feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                                    Leave Feedback
+                                </a>
+                                @endif
+                                @endauth
 
-        <!-- Search Icon -->
-        <div class="search-btn me-3">
-            <i class="fa fa-search"></i>
-        </div>
+                                <!-- Chat -->
+                                @auth
+                                <div class="chat-wrapper position-relative">
+                                    <a href="{{ route('chat.index') }}" class="text-decoration-none position-relative">
+                                        <i class="fas fa-comment-dots fs-5 text-dark"></i>
+                                        <span id="chat-unread-count" class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill d-none">
+                                            0
+                                        </span>
+                                    </a>
+                                </div>
+                                @endauth
 
-        @auth
-        <div class="profile-dropdown position-relative d-flex align-items-center gap-2" style="display: inline-block; margin-left:30px;">
-            <img
-                id="profileButton"
-                src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : 'https://i.pravatar.cc/40' }}"
-                alt="Profile"
-                style="cursor: pointer; width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
-            >
-            <span class="fw-semibold">{{ Auth::user()->name }}</span>
+                                <!-- Search -->
+                                <div class="search-btn">
+                                    <i class="fa fa-search"></i>
+                                </div>
+                            </div> <!-- End Desktop Left Section -->
 
-            <div id="profileMenu" class="dropdown-content hidden" style="
-                position: absolute;
-                right: 0;
-                top: 110%;
-                background: white;
-                border: 1px solid #ddd;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                border-radius: 6px;
-                min-width: 200px;
-                padding: 10px;
-                z-index: 1000;
-            ">
-                <a href="{{ route('profile') }}" style="display: block;width: 100%; padding: 8px;">👤 Profile</a>
+                            <!-- Mobile Menu Content -->
+                            <div class="mobile-menu-content d-lg-none w-100">
+                                <ul class="mobile-nav mb-4">
+                                    <li><a href="{{ route('home') }}">Home</a></li>
+                                    <li><a href="{{ route('tools.all') }}">All Tools</a></li>
+                                    <li><a href="{{ route('about') }}">About Us</a></li>
+                                    @auth
+                                  <li class="position-relative">
+  <a href="#">Categories</a>
+  <ul class="dropdown">
+    @foreach($categories as $category)
+      <li>
+        <a href="{{ route('products.by.category', ['id' => $category->id]) }}">
+          - {{ $category->name }}
+        </a>
+      </li>
+    @endforeach
+  </ul>
+</li>
+                                    @endauth
+                                    <li><a href="{{ route('contact') }}">Contact</a></li>
+                                </ul>
 
-                @if (Auth::user()->user_type === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" style="display: block; width: 100%; padding: 8px;">🔧 Admin Dashboard</a>
-                @elseif (Auth::user()->user_type === 'merchant')
-                    <a href="{{ route('merchant.dashboard') }}" style="display: block; width: 100%;  padding: 8px;">🛒 Merchant Dashboard</a>
-                @endif
+                                <div class="mobile-actions d-flex flex-column gap-3">
+                                    @auth
+                                    @if (auth()->user()->user_type === 'user')
+                                    <a href="#" class="navbar-feedback-btn" data-bs-toggle="modal" data-bs-target="#feedbackModal">Leave Feedback</a>
+                                    @endif
+                                    <div class="chat-wrapper">
+                                        <a href="{{ route('chat.index') }}" class="text-decoration-none">
+                                            <i class="fas fa-comment-dots me-2"></i>Chat
+                                        </a>
+                                    </div>
+                                    @endauth
+                                    <div class="search-btn">
+                                        <i class="fa fa-search me-2"></i>Search
+                                    </div>
+                                </div>
+                            </div> <!-- End Mobile Menu Content -->
 
-                @if (auth()->user()->user_type === 'user')
-                    <a href="{{ route('user.activity')  }} " style="display: block; width: 100%; padding: 8px;">📋 My Activity</a>
-                    <button type="button" data-bs-toggle="modal"  data-bs-target="#generalReportModal"
-                        style="
-                            display: block;
-                            width: 100%;
-                            padding: 8px;
-                            text-align: left;
-                            background: none;
-                            border: none;
-                            color: inherit;
-                            font: inherit;
-                            text-decoration: none;
-                            cursor: pointer;
-                        ">
-                        🚩 Report
-                    </button>
-                @endif
+                            <!-- Right Section -->
+                            <div class="profile-dropdown d-flex align-items-center gap-2" style="height: 100%; margin-left: 30px;">
+                                @auth
+                                <img
+                                    id="profileButton"
+                                    src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : 'https://i.pravatar.cc/40' }}"
+                                    alt="Profile"
+                                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+                                >
+                                <span class="fw-semibold">{{ Auth::user()->name }}</span>
 
-                <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
-                    @csrf
-                    <button type="submit"
-                        style="
-                            display: block;
-                            width: 100%;
-                            padding: 8px;
-                            text-align: left;
-                            background: none;
-                            border: none;
-                            color: inherit;
-                            font: inherit;
-                            text-decoration: none;
-                            cursor: pointer;
-                        ">
-                        🚪 Logout
-                    </button>
-                </form>
-            </div>
-        </div>
-        @endauth
+                                <!-- Dropdown Menu -->
+                                <div id="profileMenu" class="dropdown-content hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow z-[9999]">
 
-        @guest
-        <div style="margin-left: 15px;">
-            <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary">Login</a>
-            <a href="{{ route('register') }}" class="btn btn-sm btn-primary">Register</a>
-        </div>
-        @endguest
+                                    <a href="{{ route('profile') }}" style="display: block;width: 100%; padding: 8px;">👤 Profile</a>
 
-    </div>
-</div>
-<!-- Nav End -->
+                                    @if (Auth::user()->user_type === 'admin')
+                                        <a href="{{ route('admin.dashboard') }}" style="display: block; width: 100%; padding: 8px;">🔧 Admin Dashboard</a>
+                                    @elseif (Auth::user()->user_type === 'merchant')
+                                        <a href="{{ route('merchant.dashboard') }}" style="display: block; width: 100%;  padding: 8px;">🛒 Merchant Dashboard</a>
+                                    @endif
 
+                                    @if (auth()->user()->user_type === 'user')
+                                        <a href="{{ route('user.activity')  }} " style="display: block; width: 100%; padding: 8px;">📋 My Activity</a>
+                                        <button type="button" data-bs-toggle="modal"  data-bs-target="#generalReportModal"
+                                            style="
+                                                display: block;
+                                                width: 100%;
+                                                padding: 8px;
+                                                text-align: left;
+                                                background: none;
+                                                border: none;
+                                                color: inherit;
+                                                font: inherit;
+                                                text-decoration: none;
+                                                cursor: pointer;
+                                            ">
+                                            🚩 Report
+                                        </button>
+                                    @endif
 
+                                    <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
+                                        @csrf
+                                        <button type="submit"
+                                            style="
+                                                display: block;
+                                                width: 100%;
+                                                padding: 8px;
+                                                text-align: left;
+                                                background: none;
+                                                border: none;
+                                                color: inherit;
+                                                font: inherit;
+                                                text-decoration: none;
+                                                cursor: pointer;
+                                            ">
+                                            🚪 Logout
+                                        </button>
+                                    </form>
+                                </div>
+                                @endauth
 
+                                @guest
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary">Login</a>
+                                    <a href="{{ route('register') }}" class="btn btn-sm btn-primary">Register</a>
+                                </div>
+                                @endguest
+                            </div> <!-- End Right Section -->
+
+                        </div> <!-- End classynav -->
+                    </div> <!-- End classy-menu -->
+                </nav> <!-- End nav -->
+            </div> <!-- End container -->
+        </div> <!-- End classy-nav-container -->
+    </div> <!-- End main-header-area -->
 </header>
 <!-- Header Area End -->
-
-
-
 
 
                             {{--  General Report Modal --}}

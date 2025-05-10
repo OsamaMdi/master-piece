@@ -276,3 +276,44 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+
+    // ✅ Toggle delivery location input visibility and validate if needed
+    const deliveryCheckbox = document.getElementById("deliveryCheckbox");
+    const locationInputWrapper = document.getElementById("locationInputWrapper");
+    const deliveryLocation = document.getElementById("deliveryLocation");
+    const locationError = document.getElementById("locationError");
+
+    deliveryCheckbox?.addEventListener("change", function () {
+        if (this.checked) {
+            locationInputWrapper.classList.remove("d-none");
+        } else {
+            locationInputWrapper.classList.add("d-none");
+            deliveryLocation.value = "";
+            locationError.classList.add("d-none");
+            deliveryLocation.classList.remove("is-invalid");
+        }
+    });
+
+   reserveBtn?.addEventListener("click", function () {
+    if (deliveryCheckbox?.checked) {
+        const locationValue = deliveryLocation?.value.trim().toLowerCase();
+
+        if (!locationValue) {
+            locationError.textContent = "Location is required when delivery is selected.";
+            locationError.classList.remove("d-none");
+            deliveryLocation.classList.add("is-invalid");
+            deliveryLocation.focus();
+            return;
+        } else if (!locationValue.includes("عمان") && !locationValue.includes("amman")) {
+            locationError.textContent = "Delivery is currently available only in Amman.";
+            locationError.classList.remove("d-none");
+            deliveryLocation.classList.add("is-invalid");
+            deliveryLocation.focus();
+            return;
+        } else {
+            locationError.classList.add("d-none");
+            deliveryLocation.classList.remove("is-invalid");
+        }
+    }
+});
+

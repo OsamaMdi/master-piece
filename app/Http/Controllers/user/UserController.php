@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Services\NotificationService;
 use App\Traits\ReservationStatusTrait;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserController extends Controller
 {
@@ -53,60 +54,133 @@ class UserController extends Controller
 
     //                   show products by category
 
-    public function showByCategory($id)
+ public function showByCategory($id)
 {
     $category = Category::findOrFail($id);
 
-    $products = Product::with(['images', 'reviews', 'favoredBy'])
+    $allProducts = collect();
+
+    // Get all user IDs with active subscriptions
+    $activeSubscriptionUserIds = \App\Models\Subscription::whereDate('start_date', '<=', now())
+        ->whereDate('end_date', '>=', now())
+        ->pluck('user_id')
+        ->toArray();
+
+    // Get products from users with active subscriptions
+    $activeProducts = Product::with(['images', 'reviews', 'favoredBy'])
         ->where('category_id', $id)
         ->where('status', '!=', 'blocked')
+        ->whereIn('user_id', $activeSubscriptionUserIds)
         ->whereHas('user', function ($query) {
             $query->where('status', '!=', 'blocked');
         })
         ->withCount(['favoredBy as is_favorited' => function ($query) {
             $query->where('user_id', auth()->id())->whereNull('favorites.deleted_at');
         }])
-        ->latest()
-        ->paginate(15);
+        ->orderByDesc('created_at')
+        ->get();
+
+    // Get products from users without active subscriptions
+    $inactiveProducts = Product::with(['images', 'reviews', 'favoredBy'])
+        ->where('category_id', $id)
+        ->where('status', '!=', 'blocked')
+        ->whereNotIn('user_id', $activeSubscriptionUserIds)
+        ->whereHas('user', function ($query) {
+            $query->where('status', '!=', 'blocked');
+        })
+        ->withCount(['favoredBy as is_favorited' => function ($query) {
+            $query->where('user_id', auth()->id())->whereNull('favorites.deleted_at');
+        }])
+        ->orderByDesc('created_at')
+        ->get();
+
+    // Merge both active and inactive product collections
+    $allProducts = $activeProducts->concat($inactiveProducts);
+
+    // Manual pagination
+    $currentPage = request()->get('page', 1);
+    $perPage = 15;
+    $paginatedProducts = new LengthAwarePaginator(
+        $allProducts->forPage($currentPage, $perPage),
+        $allProducts->count(),
+        $perPage,
+        $currentPage,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
 
     $categories = Category::all();
 
-    return view('users.products-by-category', compact('category', 'products', 'categories'));
+    return view('users.products-by-category', [
+    'category' => $category,
+    'products' => $paginatedProducts,
+    'categories' => $categories,
+]);
+
 }
-
-
 
 
 public function allTools()
 {
     $categories = Category::orderBy('name')->get();
+    $allProducts = collect();
 
-    $products = Product::with(['images', 'category', 'reviews', 'favoredBy'])
+    $activeSubscriptionUserIds = \App\Models\Subscription::whereDate('start_date', '<=', now())
+        ->whereDate('end_date', '>=', now())
+        ->pluck('user_id')
+        ->toArray();
+
+    // Active subscription products
+    $activeProducts = Product::with(['images', 'category', 'reviews', 'favoredBy'])
         ->where('status', '!=', 'blocked')
+        ->whereIn('user_id', $activeSubscriptionUserIds)
         ->whereHas('user', function ($query) {
             $query->where('status', '!=', 'blocked');
         })
         ->withCount(['favoredBy as is_favorited' => function ($query) {
             $query->where('user_id', auth()->id())->whereNull('favorites.deleted_at');
         }])
-        ->latest()
-        ->paginate(15);
+        ->orderByDesc('created_at')
+        ->get();
 
-    return view('users.tools', compact('products', 'categories'));
+    // Inactive or no subscription products
+    $inactiveProducts = Product::with(['images', 'category', 'reviews', 'favoredBy'])
+        ->where('status', '!=', 'blocked')
+        ->whereNotIn('user_id', $activeSubscriptionUserIds)
+        ->whereHas('user', function ($query) {
+            $query->where('status', '!=', 'blocked');
+        })
+        ->withCount(['favoredBy as is_favorited' => function ($query) {
+            $query->where('user_id', auth()->id())->whereNull('favorites.deleted_at');
+        }])
+        ->orderByDesc('created_at')
+        ->get();
+
+    $allProducts = $activeProducts->concat($inactiveProducts);
+
+    // Manual pagination
+    $currentPage = request()->get('page', 1);
+    $perPage = 15;
+    $paginatedProducts = new LengthAwarePaginator(
+        $allProducts->forPage($currentPage, $perPage),
+        $allProducts->count(),
+        $perPage,
+        $currentPage,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+
+    return view('users.tools', [
+        'products' => $paginatedProducts,
+        'categories' => $categories
+    ]);
 }
 
 
 //                   show tool Details
 public function showProduct($id)
 {
-    // Check if user is not logged in or is blocked
-    if (!Auth::check()) {
-        return redirect()->route('login');
-    }
-
     $user = Auth::user();
 
-    if ($user->status === 'blocked') {
+    if ($user && $user->status === 'blocked') {
         Auth::logout();
         return redirect()->route('blocked.page');
     }
@@ -115,32 +189,54 @@ public function showProduct($id)
     $product = Product::with(['user', 'category', 'images'])->findOrFail($id);
     $mainImage = $product->images->sortByDesc('created_at')->first()?->image_url;
 
-if ($mainImage) {
-    $mainImage = asset('storage/' . $mainImage);
-} else {
-    $mainImage = asset('img/logo.png'); 
-}
-
+    if ($mainImage) {
+        $mainImage = asset('storage/' . $mainImage);
+    } else {
+        $mainImage = asset('img/logo.png');
+    }
 
     $reviews = Review::with('user')
         ->where('product_id', $product->id)
         ->latest()
         ->paginate(5);
 
-    return view('users.show-product', compact('product', 'mainImage', 'reviews', 'categories'));
+    $subscriptionActive = false;
+    $owner = $product->user;
+
+    if ($owner && $owner->subscription) {
+        $today = now();
+        $start = \Carbon\Carbon::parse($owner->subscription->start_date);
+        $end = \Carbon\Carbon::parse($owner->subscription->end_date);
+
+        $subscriptionActive = $today->between($start, $end);
+    }
+
+    return view('users.show-product', compact('product', 'mainImage', 'reviews', 'categories', 'subscriptionActive'));
 }
+
 
 //          store review
 
 public function storeReview(Request $request, $productId)
 {
+    $user = auth()->user();
+
+    $hasReservation = \App\Models\Reservation::where('user_id', $user->id)
+        ->where('product_id', $productId)
+        ->exists();
+
+    if (!$hasReservation) {
+        return redirect()->route('user.products.show', $productId)
+            ->with('error', 'You must have a reservation for this product before submitting a review.');
+    }
+
     $request->validate([
         'rating' => 'required|integer|min:1|max:5',
         'review_text' => 'required|string|max:1000',
     ]);
 
     $review = Review::create([
-        'user_id' => auth()->id(),
+        'user_id' => $user->id,
         'product_id' => $productId,
         'rating' => $request->rating,
         'review_text' => $request->review_text,
@@ -155,12 +251,13 @@ public function storeReview(Request $request, $productId)
             'product_review',
             url('/merchant/products/' . $product->id),
             'normal',
-            auth()->id()
+            $user->id
         );
     }
 
     return redirect()->route('user.products.show', $productId)->with('success', 'Review submitted successfully!');
 }
+
 
 
 

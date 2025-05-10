@@ -104,6 +104,9 @@ protected static function booted()
 
             $reservation->delete();
         }
+
+        $product->reviews()->delete();
+        $product->reports()->delete();
     });
 }
 

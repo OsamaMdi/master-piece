@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="upload-id-route" content="{{ route('upload.id.ajax') }}">
     <title>{{ config('app.name', 'Laravel') }}</title>
+    
+
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- Meta for Upload Script -->

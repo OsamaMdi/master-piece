@@ -235,7 +235,7 @@ class ChatController extends Controller
     }
 
 
-// بدء محادثة جديدة من صفحة منتج
+// Start a new chat from a product page
 public function startFromProduct(Product $product)
 {
     $user = Auth::user();
@@ -244,7 +244,21 @@ public function startFromProduct(Product $product)
     $merchant = User::find($product->user_id);
     $merchantType = get_class($merchant);
 
-    // البحث عن شات موجود مسبقًا بين اليوزر والتاجر (بغض النظر عن من أرسل أولاً)
+    // Check if the merchant has an active subscription
+    $hasActiveSubscription = false;
+
+    if ($merchant && $merchant->subscription) {
+        $now = now();
+        $start = \Carbon\Carbon::parse($merchant->subscription->start_date);
+        $end = \Carbon\Carbon::parse($merchant->subscription->end_date);
+        $hasActiveSubscription = $now->between($start, $end);
+    }
+
+    if (!$hasActiveSubscription) {
+        return back()->with('error', 'This seller is currently unavailable for chat due to inactive subscription.');
+    }
+
+    // Look for an existing chat between the user and merchant (regardless of who initiated it)
     $chat = Chat::where(function ($q) use ($user, $userType, $merchant, $merchantType) {
         $q->where('sender_id', $user->id)
             ->where('sender_type', $userType)
@@ -257,7 +271,7 @@ public function startFromProduct(Product $product)
             ->where('sender_type', $merchantType);
     })->first();
 
-    // إذا ما كان في شات قديم، أنشئ شات جديد
+    // If no previous chat exists, create a new one
     if (!$chat) {
         $chat = Chat::create([
             'sender_id' => $user->id,
@@ -266,8 +280,8 @@ public function startFromProduct(Product $product)
             'receiver_type' => $merchantType,
         ]);
 
-        // أرسل أول رسالة توضح أنها استفسار عن منتج
-        $previewMessage = "🛒 Product Inquiry:\n" .
+        // Send an initial message containing product info
+        $previewMessage = " Product Inquiry:\n" .
             "Name: {$product->name}\n" .
             "Category: {$product->category->name}\n" .
             "Link: " . route('products.show', $product->id);
@@ -282,6 +296,7 @@ public function startFromProduct(Product $product)
 
     return redirect()->route('chat.show', $chat->id);
 }
+
 
 
     public function unreadCount()

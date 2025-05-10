@@ -120,7 +120,6 @@ public function getAllChatsAttribute()
 }
 
 
-
 protected static function booted()
 {
     static::deleting(function ($user) {
@@ -133,9 +132,16 @@ protected static function booted()
             $product->delete();
         });
 
+        $user->reports()->delete();
+
+        if ($user->subscription) {
+            $user->subscription()->delete();
+        }
+
         Mail::to($user->email)->send(new AccountDeletedNotification($user));
     });
 }
+
 
 
 

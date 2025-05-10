@@ -27,4 +27,11 @@ class Review extends Model
     {
          return $this->belongsTo(Product::class)->withTrashed();
     }
+    protected static function booted()
+{
+    static::deleting(function ($review) {
+        $review->reports()->delete();
+    });
+}
+
 }

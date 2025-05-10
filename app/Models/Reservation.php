@@ -51,5 +51,13 @@ class Reservation extends Model
 {
     return $this->morphMany(\App\Models\Report::class, 'reportable');
 }
+protected static function booted()
+{
+    static::deleting(function ($reservation) {
+        $reservation->reports()->delete();
+    });
+}
+
+
 
 }

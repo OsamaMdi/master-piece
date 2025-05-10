@@ -25,9 +25,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     data.forEach(item => {
                         let url = item.url;
-                        if (item.type === 'product' && !isAuthenticated) {
+                       /*  if (item.type === 'product' && !isAuthenticated) {
                             url = '/login';
-                        }
+                        } */
 
                         // ✅ fallback to logof.png if no image available
                         const imageSrc = item.image || '/img/logof.png';

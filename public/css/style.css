@@ -459,6 +459,7 @@ input:focus {
     color: #000000; }
 
 /* :: 7.0 Header Area CSS */
+
 .header-area {
   position: relative;
   z-index: 100;
@@ -466,7 +467,8 @@ input:focus {
   -webkit-transition-duration: 500ms;
   -o-transition-duration: 500ms;
   transition-duration: 500ms;
-  background-color: #2563eb; }
+  background-color: #2563eb;
+}
   .header-area .search-form {
     -webkit-transition-duration: 350ms;
     -o-transition-duration: 350ms;
@@ -476,20 +478,24 @@ input:focus {
     z-index: 1;
     width: 100%;
     height: 0;
-    background-color: #2563eb; }
+    background-color: #2563eb;
+  }
     .header-area .search-form.search-form-active {
       height: 80px;
-      z-index: 99999999; }
+      z-index: 99999999;
+    }
     .header-area .search-form form {
       position: relative;
-      z-index: 1; }
+      z-index: 1;
+    }
       .header-area .search-form form input {
         background-color: transparent;
         width: 100%;
         height: 60px;
         border: none;
         font-size: 14px;
-        color: #ffffff; }
+        color: #ffffff;
+      }
       .header-area .search-form form button {
         position: absolute;
         width: 60px;
@@ -502,236 +508,498 @@ input:focus {
         cursor: pointer;
         font-size: 18px;
         color: #ffffff;
-        text-align: right; }
+        text-align: right;
+      }
         .header-area .search-form form button:focus {
-          outline: none; }
-
+          outline: none;
+        }
 .top-header-area {
   position: relative;
   z-index: 1;
   width: 100%;
   height: 50px;
-  background-color: #0e2737; }
+  background-color: #0e2737;
+}
   .top-header-area .top-header-content {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-align: center;
     -ms-flex-align: center;
-    align-items: center; }
+    align-items: center;
+  }
     .top-header-area .top-header-content > a {
       color: #ffffff;
       font-size: 14px;
       font-weight: 400;
       line-height: 50px;
       display: inline-block;
-      margin-right: 50px; }
+      margin-right: 50px;
+    }
       .top-header-area .top-header-content > a:last-child {
-        margin-right: 0; }
+        margin-right: 0;
+      }
       .top-header-area .top-header-content > a i {
         padding-right: 5px;
-        color: #2563eb; }
+        color: #2563eb;
+      }
+
       @media only screen and (min-width: 768px) and (max-width: 991px) {
         .top-header-area .top-header-content > a {
-          margin-right: 30px; } }
+          margin-right: 30px;
+        }
+      }
+
       @media only screen and (max-width: 767px) {
         .top-header-area .top-header-content > a {
-          margin-right: 15px; } }
+          margin-right: 15px;
+        }
+      }
+
       @media only screen and (min-width: 768px) and (max-width: 991px) {
         .top-header-area .top-header-content > a span {
-          display: none; } }
+          display: none;
+        }
+      }
+
       @media only screen and (max-width: 767px) {
         .top-header-area .top-header-content > a span {
-          display: none; } }
-      .top-header-area .top-header-content > a:hover, .top-header-area .top-header-content > a:focus {
-        color: #afb4bf; }
+          display: none;
+        }
+      }
+
+      .top-header-area .top-header-content > a:hover,
+      .top-header-area .top-header-content > a:focus {
+        color: #afb4bf;
+      }
+
     .top-header-area .top-header-content .top-social-area a {
       display: inline-block;
       margin-right: 30px;
       color: #ffffff;
       line-height: 50px;
-      font-size: 14px; }
+      font-size: 14px;
+    }
       .top-header-area .top-header-content .top-social-area a:last-child {
-        margin-right: 0; }
+        margin-right: 0;
+      }
+
       @media only screen and (max-width: 767px) {
         .top-header-area .top-header-content .top-social-area a {
-          margin-right: 15px; } }
-      .top-header-area .top-header-content .top-social-area a:hover, .top-header-area .top-header-content .top-social-area a:focus {
-        color: #2563eb; }
+          margin-right: 15px;
+        }
+      }
+
+      .top-header-area .top-header-content .top-social-area a:hover,
+      .top-header-area .top-header-content .top-social-area a:focus {
+        color: #2563eb;
+      }
 
 .classy-nav-container {
   background-color: transparent;
-  padding: 0; }
-  .classy-nav-container .classy-navbar {
-    -webkit-transition-duration: 500ms;
-    -o-transition-duration: 500ms;
-    transition-duration: 500ms;
-    height: 80px;
-    padding: 0; }
-    @media only screen and (min-width: 768px) and (max-width: 991px) {
-      .classy-nav-container .classy-navbar {
-        height: 70px; } }
-    @media only screen and (max-width: 767px) {
-      .classy-nav-container .classy-navbar {
-        height: 70px; } }
-    @media only screen and (max-width: 767px) {
-      .classy-nav-container .classy-navbar .nav-brand {
-        max-width: 90px;
-        margin-right: 15px; } }
-    .classy-nav-container .classy-navbar .classynav ul li a {
-      font-size: 16px;
-      text-transform: capitalize;
-      color: #2a303b;
-      font-weight: 500;
-      padding: 0 20px; }
-      @media only screen and (min-width: 992px) and (max-width: 1199px) {
-        .classy-nav-container .classy-navbar .classynav ul li a {
-          font-size: 14px;
-          padding: 0 10px; } }
-      @media only screen and (min-width: 768px) and (max-width: 991px) {
-        .classy-nav-container .classy-navbar .classynav ul li a {
-          font-size: 14px;
-          color: #2a303b; }
-          .classy-nav-container .classy-navbar .classynav ul li a:hover, .classy-nav-container .classy-navbar .classynav ul li a:focus {
-            color: #2563eb; } }
-      @media only screen and (max-width: 767px) {
-        .classy-nav-container .classy-navbar .classynav ul li a {
-          font-size: 14px;
-          color: #2a303b; }
-          .classy-nav-container .classy-navbar .classynav ul li a:hover, .classy-nav-container .classy-navbar .classynav ul li a:focus {
-            color: #2563eb; } }
-      .classy-nav-container .classy-navbar .classynav ul li a:focus, .classy-nav-container .classy-navbar .classynav ul li a:hover {
-        color: #afb4bf;
-        font-weight: 500; }
-    .classy-nav-container .classy-navbar .classynav ul li.cn-dropdown-item ul li a, .classy-nav-container .classy-navbar .classynav ul li.megamenu-item ul li a {
-      font-size: 14px;
-      text-transform: capitalize;
-      height: 42px;
-      line-height: 42px;
-      padding: 0 30px;
-      color: #2a303b; }
-      .classy-nav-container .classy-navbar .classynav ul li.cn-dropdown-item ul li a:focus, .classy-nav-container .classy-navbar .classynav ul li.cn-dropdown-item ul li a:hover, .classy-nav-container .classy-navbar .classynav ul li.megamenu-item ul li a:focus, .classy-nav-container .classy-navbar .classynav ul li.megamenu-item ul li a:hover {
-        color: #2563eb; }
-
-        .classy-navbar .classynav .d-flex.align-items-center.ms-auto > * {
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-
-.navbar-feedback-btn {
-    padding: 6px 15px;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 6px;
-    background-color: #e6f3ff;
-    color: #2563eb;
-    border: 1px solid #cce4ff;
-    transition: 0.3s ease;
+  padding: 0;
 }
+ /* إصلاح ارتفاع الشريط الرئيسي */
+.classy-nav-container .classy-navbar {
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+/* توحيد محاذاة العناصر */
+.classynav > .d-flex {
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* تحسين شكل زر الفيدباك */
+.navbar-feedback-btn {
+
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.classynav ul li .dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 9999; /* ضمان ظهورها فوق كل شيء */
+  background: white;
+  min-width: 200px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  padding: 10px 0;
+  display: none;
+}
+
+.classynav ul li:hover > .dropdown {
+  display: block;
+}
+
+/* إصلاح سياق z-index للعنصر الأب */
+.classynav {
+  position: relative;
+  z-index: 10;
+}
+
+
+/* تحسين شكل أيقونة البحث */
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+
+.search-btn:hover {
+  background: #e2e8f0;
+}
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .classy-nav-container .classy-navbar {
+    height: 70px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .classy-nav-container .classy-navbar {
+    height: 70px;
+  }
+
+  .classy-nav-container .classy-navbar .nav-brand {
+    max-width: 90px;
+    margin-right: 15px;
+  }
+}
+
+.classy-nav-container .classy-navbar .classynav ul li a {
+  font-size: 16px;
+  text-transform: capitalize;
+  color: #2a303b;
+  font-weight: 500;
+  padding: 0 20px;
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .classy-nav-container .classy-navbar .classynav ul li a {
+    font-size: 14px;
+    padding: 0 10px;
+  }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px),
+only screen and (max-width: 767px) {
+  .classy-nav-container .classy-navbar .classynav ul li a {
+    font-size: 14px;
+    color: #2a303b;
+  }
+
+  .classy-nav-container .classy-navbar .classynav ul li a:hover,
+  .classy-nav-container .classy-navbar .classynav ul li a:focus {
+    color: #2563eb;
+  }
+}
+
+.classy-nav-container .classy-navbar .classynav ul li a:focus,
+.classy-nav-container .classy-navbar .classynav ul li a:hover {
+  color: #afb4bf;
+  font-weight: 500;
+}
+
+.classy-nav-container .classy-navbar .classynav ul li.cn-dropdown-item ul li a,
+.classy-nav-container .classy-navbar .classynav ul li.megamenu-item ul li a {
+  font-size: 14px;
+  text-transform: capitalize;
+  height: 42px;
+  line-height: 42px;
+  padding: 0 30px;
+  color: #2a303b;
+}
+
+.classy-nav-container .classy-navbar .classynav ul li.cn-dropdown-item ul li a:focus,
+.classy-nav-container .classy-navbar .classynav ul li.cn-dropdown-item ul li a:hover,
+.classy-nav-container .classy-navbar .classynav ul li.megamenu-item ul li a:focus,
+.classy-nav-container .classy-navbar .classynav ul li.megamenu-item ul li a:hover {
+  color: #2563eb;
+}
+
+.classy-navbar .classynav .d-flex.align-items-center.ms-auto > * {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+/* .navbar-feedback-btn {
+  padding: 6px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  background-color: #e6f3ff;
+  color: #2563eb;
+  border: 1px solid #cce4ff;
+  transition: 0.3s ease;
+} */
 
 .navbar-feedback-btn:hover,
 .navbar-feedback-btn:focus {
-    background-color: #d4e9ff;
-    color: #1d4ed8;
-    border-color: #a3d3ff;
-    text-decoration: none;
+  background-color: #d4e9ff;
+  color: #1d4ed8;
+  border-color: #a3d3ff;
+  text-decoration: none;
 }
 
+.search-btn {
+  font-size: 18px;
+  cursor: pointer;
+  color: #2a303b;
+}
 
-        /* أيقونة البحث */
-         .search-btn {
-            font-size: 18px;
-            cursor: pointer;
-            color: #2a303b;
-        }
-
-        /* صورة البروفايل */
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #e2e8f0;
-        }
-
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+}
 .classynav ul li.active a {
   position: relative;
-  z-index: 1; }
+  z-index: 1;
+}
+.classynav ul li.active a::before {
+  width: 80%;
+  height: 2px;
+  background-color: #ffffff;
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  z-index: 1;
+  content: '';
+}
+@media only screen and (min-width: 768px) and (max-width: 991px),
+only screen and (max-width: 767px) {
   .classynav ul li.active a::before {
-    width: 80%;
-    height: 2px;
-    background-color: #ffffff;
-    position: absolute;
-    bottom: 0;
-    left: 10%;
-    z-index: 1;
-    content: ''; }
-    @media only screen and (min-width: 768px) and (max-width: 991px) {
-      .classynav ul li.active a::before {
-        display: none; } }
-    @media only screen and (max-width: 767px) {
-      .classynav ul li.active a::before {
-        display: none; } }
+    display: none;
+  }
+}
 
 .classynav ul li.has-down > a::after,
 .classynav ul li.has-down.active > a::after,
 .classynav ul li.megamenu-item > a::after {
-  color: #2a303b; }
+  color: #2a303b;
+}
 
 .breakpoint-off .classynav ul li .dropdown,
 .breakpoint-off .classynav ul li .megamenu {
   width: 210px;
   -webkit-box-shadow: 0 2px 40px 8px rgba(15, 15, 15, 0.15);
   box-shadow: 0 2px 40px 8px rgba(15, 15, 15, 0.15);
-  border-radius: 6px; }
+  border-radius: 6px;
+}
 
 .breakpoint-off .classynav ul li .megamenu {
-  width: 100%; }
+  width: 100%;
+}
 
 .classy-navbar-toggler .navbarToggler span {
-  background-color: #2a303b; }
+  background-color: #2a303b;
+}
 
 .main-header-area {
   position: relative;
   z-index: 1;
-  background-color: #ffffff; }
+  background-color: #ffffff;
+}
+.main-header-area .book-now-btn a {
+  padding: 0 30px;
+  background-color: #2563eb;
+  height: 80px;
+  line-height: 80px;
+  text-align: center;
+  color: #ffffff;
+  font-size: 16px;
+}
+.main-header-area .book-now-btn a i {
+  padding-left: 5px;
+}
+@media only screen and (min-width: 768px) and (max-width: 991px),
+only screen and (max-width: 767px) {
   .main-header-area .book-now-btn a {
-    padding: 0 30px;
-    background-color: #2563eb;
-    height: 80px;
-    line-height: 80px;
-    text-align: center;
-    color: #ffffff;
-    font-size: 16px; }
-    .main-header-area .book-now-btn a i {
-      padding-left: 5px; }
-    @media only screen and (min-width: 768px) and (max-width: 991px) {
-      .main-header-area .book-now-btn a {
-        height: 50px;
-        line-height: 50px;
-        border-radius: 30px; } }
-    @media only screen and (max-width: 767px) {
-      .main-header-area .book-now-btn a {
-        height: 50px;
-        line-height: 50px;
-        border-radius: 30px; } }
-    .main-header-area .book-now-btn a:hover, .main-header-area .book-now-btn a:focus {
-      background-color: #2a303b;
-      color: #ffffff; }
+    height: 50px;
+    line-height: 50px;
+    border-radius: 30px;
+  }
+}
+.main-header-area .book-now-btn a:hover,
+.main-header-area .book-now-btn a:focus {
+  background-color: #2a303b;
+  color: #ffffff;
+}
+
+.main-header-area .search-btn {
+  cursor: pointer;
+  -webkit-transition-duration: 500ms;
+  -o-transition-duration: 500ms;
+  transition-duration: 500ms;
+}
+/* ✅ إخفاء القائمة على الشاشات الصغيرة وتفعيلها عند الضغط */
+@media (max-width: 991px) {
+    .mobile-menu-content {
+        display: block !important;
+        order: 2;
+        margin-top: 20px;
+    }
+
+    .mobile-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .mobile-nav li {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .mobile-actions {
+        margin-top: 20px;
+    }
+
+    .d-none.d-lg-flex {
+        display: none !important;
+    }
+
+    .profile-dropdown {
+        order: 1;
+        margin-left: 0 !important;
+    }
+}
+
+/* ✅ ستايل زر البرجر */
+.classy-navbar-toggler {
+  display: none;
+  cursor: pointer;
+}
+
+.classy-navbar-toggler .navbarToggler span {
+  display: block;
+  height: 3px;
+  width: 24px;
+  margin: 4px 0;
+  background-color: #2a303b;
+  transition: 0.3s;
+}
+
+@media (max-width: 991px) {
+  /* إعادة ترتيب العناصر */
+  .classynav {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  /* البروفايل أول عنصر */
+  .profile-dropdown {
+    order: -1 !important; /* جعله أول عنصر */
+    width: 100%;
+    padding: 15px 0;
+    border-bottom: 1px solid #e2e8f0;
+    margin: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  /* بقية العناصر تأتي بعده */
+  #nav {
+    order: 1 !important;
+  }
+
+  /* العناصر الأخرى (بحث، فيدباك...) */
+  .navbar-feedback-btn,
+  .chat-wrapper,
+  .search-btn {
+    order: 2 !important;
+  }
+
+  /* تعديلات التنسيق الداعمة */
+  #nav li a {
+    padding: 12px 15px !important;
+    border-bottom: 1px solid #eee;
+  }
+
+  .dropdown-content {
+    padding-left: 20px !important;
+    background: #f8f9fa !important;
+  }
+
+  /* تعديل صورة البروفايل */
+  .profile-dropdown img {
+    margin-right: 10px !important;
+  }
+}
+
+/* استبدال كود الدروب داون الحالي بهذا الكود */
+.profile-dropdown .dropdown-content {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  transform: translateY(10px);
+  z-index: 1000;
+}
+
+.profile-dropdown:hover .dropdown-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* تحسين عناصر القائمة */
+.dropdown-content a,
+.dropdown-content button {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px !important;
+  color: #2d3748 !important;
+  font-size: 14px !important;
+  transition: background 0.2s ease;
+  text-decoration: none !important;
+  border: none !important;
+  background: none !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.dropdown-content a:hover,
+.dropdown-content button:hover {
+  background: #f7fafc !important;
+}
+
+/* خط فاصل بين العناصر */
+.dropdown-content form {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px),
+only screen and (max-width: 767px) {
   .main-header-area .search-btn {
-    cursor: pointer;
-    -webkit-transition-duration: 500ms;
-    -o-transition-duration: 500ms;
-    transition-duration: 500ms; }
-    @media only screen and (min-width: 768px) and (max-width: 991px) {
-      .main-header-area .search-btn {
-        padding: 30px 0; } }
-    @media only screen and (max-width: 767px) {
-      .main-header-area .search-btn {
-        padding: 30px 0; } }
-    .main-header-area .search-btn:hover, .main-header-area .search-btn:focus {
-      color: #2563eb; }
+    padding: 30px 0;
+  }
+}
+.main-header-area .search-btn:hover,
+.main-header-area .search-btn:focus {
+  color: #2563eb;
+}
 
 /* :: 8.0 Hero Area CSS */
 .welcome-area {
