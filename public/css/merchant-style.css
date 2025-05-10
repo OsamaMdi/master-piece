@@ -735,7 +735,7 @@ body {
     padding: 30px 25px;
     border-radius: 16px;
     width: 100%;
-    max-width: 420px; /* Slightly bigger for comfort */
+    max-width: 600px; /* Slightly bigger for comfort */
     text-align: center;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
     animation: zoomIn 0.4s ease;
@@ -2148,7 +2148,6 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     text-align: center;
     transition: all 0.3s ease-in-out;
-    cursor: pointer;
     border: 1px solid #edf2f7;
 }
 
@@ -2313,3 +2312,58 @@ body {
 }
 
 
+.subscription-status {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: inline-block;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.active-subscription {
+    border: 2px solid #28a745; /* green */
+    color: #28a745;
+    background-color: #e6ffed;
+}
+
+.inactive-subscription {
+    border: 2px solid #ffc107; /* yellow */
+    color: #ffc107;
+    background-color: #fff8e1;
+}
+
+.inactive-subscription:hover {
+    background-color: #fff3cd;
+    color: #d39e00;
+    border-color: #d39e00;
+}
+
+
+.seen-status {
+    color: green !important;
+}
+.active-subscription {
+    border: 2px solid #28a745; /* green */
+    color: #28a745;
+    background-color: #e6ffed;
+}
+
+.inactive-subscription {
+    border: 2px solid #ff0707; /* yellow */
+    color: #ff0707;
+    background-color: #ff39393f;
+}
+
+.inactive-subscription:hover {
+    background-color: #ff39393f;
+    color: #710606;
+    border-color: #710606;
+}
+/* ✅ Center all table headers and cells */
+table th,
+table td {
+    text-align: center;
+    vertical-align: middle;
+}

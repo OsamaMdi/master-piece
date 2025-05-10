@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -107,17 +108,23 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-       
-        $merchants = User::where('user_type', 'merchant')->get();
+        $merchantIds = Product::withTrashed(false)
+            ->where('category_id', $category->id)
+            ->whereNull('deleted_at')
+            ->pluck('user_id')
+            ->unique();
+
+        $merchants = User::whereIn('id', $merchantIds)->get();
 
         foreach ($merchants as $merchant) {
             Mail::to($merchant->email)->send(new CategoryDeletedNotification($category));
         }
 
-
         $category->delete();
 
-        return redirect()->route('admin.categories.index')->with('success', 'Category deleted and all merchants notified.');
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category deleted and all relevant merchants notified.');
     }
+
 
 }

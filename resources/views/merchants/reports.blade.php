@@ -1,26 +1,25 @@
 @extends('layouts.merchants.app')
 
 @section('content')
-
 <h2 class="page-title mb-4">🚩 My Reports</h2>
 
-<!-- Filter Section -->
-<div class="review-filter-bar d-flex justify-content-end align-items-center mb-4">
-    <form method="GET" class="d-flex flex-wrap gap-3 m-0">
-        <select name="target_type" class="form-select form-select-sm">
+<!-- ✅ Unified Filter Row -->
+<div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <select name="target_type" class="review-select">
             <option value="">All Types</option>
             <option value="review" {{ request('target_type') == 'review' ? 'selected' : '' }}>Review</option>
             <option value="reservation" {{ request('target_type') == 'reservation' ? 'selected' : '' }}>Reservation</option>
         </select>
 
-        <select name="status" class="form-select form-select-sm">
+        <select name="status" class="review-select">
             <option value="">All Statuses</option>
             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
             <option value="reviewed" {{ request('status') == 'reviewed' ? 'selected' : '' }}>Reviewed</option>
             <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
         </select>
 
-        <button type="submit" class="btn btn-sm btn-outline-primary">🔍 Filter</button>
+        <button type="submit" class="review-filter-btn">🔍 Filter</button>
     </form>
 </div>
 
@@ -50,12 +49,10 @@
                 };
             @endphp
             <td>
-                <span class="{{ $statusClass }}">
-                    {{ ucfirst($report->status ?? 'Unknown') }}
-                </span>
+                <span class="{{ $statusClass }}">{{ ucfirst($report->status ?? 'Unknown') }}</span>
             </td>
             <td>{{ $report->subject ?? '-' }}</td>
-            <td>{{ Str::limit($report->message, 100) }}</td>
+            <td>{{ \Illuminate\Support\Str::limit($report->message, 100) }}</td>
             <td>{{ $report->created_at->format('Y-m-d') }}</td>
         </tr>
         @endforeach
@@ -66,7 +63,6 @@
     {{ $reports->withQueryString()->links() }}
 </div>
 @else
-    <div class="alert alert-info">You haven't submitted any reports yet.</div>
+<div class="alert alert-info">You haven't submitted any reports yet.</div>
 @endif
-
 @endsection

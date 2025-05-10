@@ -117,24 +117,36 @@ class ReservationController extends Controller
         return view('merchants.reservation.productReservations', compact('product', 'reservations'));
     }
 
-    public function showReservations()
+    public function showReservations(Request $request)
     {
         $user = Auth::user();
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $status = $request->query('status');
 
-        $reservations = Reservation::with(['user', 'product.reviews'])
+        $reservations = Reservation::with(['user', 'product.reviews', 'product.user', 'reports'])
             ->whereHas('product', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
+            ->when($from, fn($q) => $q->whereDate('start_date', '>=', $from))
+            ->when($to, fn($q) => $q->whereDate('end_date', '<=', $to))
+            ->when($status, fn($q) => $q->where('status', $status))
             ->orderBy('created_at', 'desc')
-            ->paginate(30);
+            ->paginate(30)
+            ->appends([
+                'from' => $from,
+                'to' => $to,
+                'status' => $status,
+            ]);
 
-        // Check and update status for each reservation
         foreach ($reservations as $reservation) {
             $this->checkAndUpdateStatus($reservation);
         }
 
         return view('merchants.reservation.reservations', compact('reservations'));
     }
+
+
 
     /**
      * Check and update the reservation status based on dates (only for daily reservations)

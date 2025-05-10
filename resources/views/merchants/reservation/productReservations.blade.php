@@ -28,7 +28,7 @@
                 <p><strong>Status:</strong> {{ ucfirst($reservation->status) }}</p>
             </div>
 
-           
+
 
             <!-- View Details Button -->
             <a href="{{ route('merchant.reservation.details', $reservation->id) }}" class="btn-view-details">
@@ -48,10 +48,6 @@
 </div>
 @endif
 
-<!-- Back Button (same class as show page) -->
-<a href="{{ route('merchant.products.index') }}" class="btn-back-fixed">
-    🔙 Back
-</a>
 
 @endsection
 

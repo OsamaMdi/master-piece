@@ -7,6 +7,18 @@
         <a class="nav-brand" href="{{ route('home') }}">
             <img src="{{ asset('img/logof.png') }}" alt="Rentify Logo" class="logo-img">
         </a>
+
+        @if ($activeSubscription)
+        <div class="subscription-status active-subscription">
+            ✅ Active Subscription
+        </div>
+    @else
+        <a href="{{ route('merchant.subscription') }}" class="subscription-status inactive-subscription">
+            ⚠️ Subscribe Now
+        </a>
+    @endif
+
+
     </div>
 
     <!-- Center Section -->
@@ -83,6 +95,18 @@
                 <a href="{{ route('home') }}" class="dropdown-item py-2">🏠 Home</a>
 
                 <a href="{{ route('merchant.reports.mine') }}" class="dropdown-item py-2">🚩 My Reports</a>
+
+                @php
+                 $activeSub = Auth::user()->subscriptions()
+                 ->whereNull('deleted_at')
+                 ->where('end_date', '>=', now())
+                 ->latest('end_date')
+                 ->first();
+                @endphp
+
+                @if($activeSub)
+                <a href="{{ route('merchant.subscriptionShow') }}" class="dropdown-item py-2">💳 My Subscription</a>
+                @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

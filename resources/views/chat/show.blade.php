@@ -57,16 +57,17 @@
                         {{ \Carbon\Carbon::parse($message->created_at)->format('h:i A') }}
 
                         @if($isMe)
-                            <span class="read-status seen-status">
-                                @if($message->read)
-                                    ✔️✔️
-                                @elseif($message->delivered)
-                                    ✔️
-                                @else
-                                    🕓
-                                @endif
-                            </span>
-                        @endif
+                        <span class="read-status seen-status text-success" >
+                            @if($message->read)
+                            ✔✔
+                            @elseif($message->delivered)
+                            ✔
+                            @else
+                                🕓
+                            @endif
+                        </span>
+                    @endif
+
                     </div>
                 </div>
             </div>

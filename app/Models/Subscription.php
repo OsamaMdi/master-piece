@@ -10,7 +10,7 @@ class Subscription extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['user_id', 'subscription_type', 'start_date', 'end_date'];
+    protected $fillable = ['user_id', 'subscription_type', 'start_date', 'end_date','price'];
 
     public function user()
     {

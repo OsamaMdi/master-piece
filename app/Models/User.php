@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DeleteProductNotification;
+use App\Mail\AccountDeletedNotification;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Mail\ReservationCancelledWithSuggestions;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
 
 class User extends Authenticatable
 {
@@ -35,10 +41,14 @@ class User extends Authenticatable
         return $this->hasMany(Reservation::class);
     }
 
-    public function subscriptions()
+    public function subscription()
     {
-        return $this->hasMany(Subscription::class);
+        return $this->hasOne(Subscription::class)
+            ->whereDate('end_date', '>=', now())
+            ->latestOfMany();
     }
+
+
 
     public function notifications()
     {
@@ -108,5 +118,26 @@ public function getAllChatsAttribute()
           ->where('receiver_type', get_class($this));
     })->get();
 }
+
+
+
+protected static function booted()
+{
+    static::deleting(function ($user) {
+        $user->reservations()->each(function ($reservation) {
+            $reservation->delete();
+        });
+
+        $user->products()->each(function ($product) {
+            $product->reservations()->delete();
+            $product->delete();
+        });
+
+        Mail::to($user->email)->send(new AccountDeletedNotification($user));
+    });
+}
+
+
+
 
 }

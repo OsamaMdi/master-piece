@@ -5,13 +5,15 @@
 
     <meta charset="UTF-8">
     <title>Merchant Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="show-upload-modal" content="{{ session('showUploadModal') ? 'true' : 'false' }}">
     <meta name="new-product-id" content="{{ session('newProductId') }}">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js" defer></script>
     <!-- CSS -->
-
+    @stack('styles')
     @vite('resources/js/app.js')
 
 <!-- Favicon -->
@@ -46,47 +48,48 @@
     </script>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: @json(session('success')),
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            @elseif(session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: @json(session('error')),
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            @elseif(session('warning'))
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning!',
-                    text: @json(session('warning')),
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            @elseif(session('info'))
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Info',
-                    text: @json(session('info')),
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            @endif
-        });
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('success'))
+            sessionStorage.removeItem('success');
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: @json(session('success')),
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @elseif(session('error'))
+            sessionStorage.removeItem('error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: @json(session('error')),
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @elseif(session('warning'))
+            sessionStorage.removeItem('warning');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Warning!',
+                text: @json(session('warning')),
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @elseif(session('info'))
+            sessionStorage.removeItem('info');
+            Swal.fire({
+                icon: 'info',
+                title: 'Info',
+                text: @json(session('info')),
+                timer: 2500,
+                showConfirmButton: false
+            });
+        @endif
+    });
+</script>
 
-
-
-
-    </script>
 @auth
 <script>
     window.userId = {{ auth()->id() }};
@@ -186,8 +189,29 @@
             console.error('❌ Failed to send delivered update on click:', err);
         });
     });
+
+
     </script>
 
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        ['success', 'error', 'warning', 'info'].forEach(type => {
+            const message = sessionStorage.getItem(type);
+            if (message) {
+                Swal.fire({
+                    icon: type,
+                    title: type.charAt(0).toUpperCase() + type.slice(1),
+                    text: message,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                sessionStorage.removeItem(type);
+            }
+        });
+    });
+    </script>
 @endauth
 
 

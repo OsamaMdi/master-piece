@@ -30,84 +30,95 @@ class ProductController extends Controller
     public function index()
     {
         $categories = Category::all();
-    $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
-        ->where('user_id', Auth::id())
-        ->paginate(16);
-    return view('merchants.product.products', compact('products', 'categories'));
+        $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
+            ->where('user_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->paginate(16);
+
+        return view('merchants.product.products', compact('products', 'categories'));
     }
 
 
 
-    public function store(Request $request)
-    {
-        try {
-            // 1. Validate incoming data
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'required|string|min:20',
-                'price' => 'required|numeric|min:0.01',
-                'quantity' => 'required|integer|min:1',
-                'category_id' => 'required|exists:categories,id',
-                'is_deliverable' => 'nullable|boolean',
-                'usage_notes' => 'required|string|min:5',
-            ]);
+    public function create()
+{
+    $categories = Category::all();
+    return view('merchants.product.create', compact('categories'));
+}
 
-            // 2. Create product without slug first
-            $product = Product::create([
-                'name' => $validated['name'],
-                'slug' => '',
-                'description' => $validated['description'],
-                'price' => $validated['price'],
-                'quantity' => $validated['quantity'],
-                'status' => 'available',
-                'user_id' => Auth::id(),
-                'category_id' => $validated['category_id'],
-                'is_deliverable' => $validated['is_deliverable'] ?? 0,
-                'usage_notes' => $validated['usage_notes'],
-            ]);
+public function store(Request $request)
+{
+    try {
+        // ✅ 1. Validate all inputs
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|min:20',
+            'price' => 'required|numeric|min:0.01',
+            'quantity' => 'required|integer|min:1',
+            'category_id' => 'required|exists:categories,id',
+            'is_deliverable' => 'nullable|boolean',
+            'usage_notes' => 'required|string|min:5',
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
 
-            // 3. Update slug with product ID
-            $slug = Str::slug($validated['name']) . '-' . $product->id;
-            $product->update(['slug' => $slug]);
+        // ✅ 2. Create the product
+        $product = Product::create([
+            'name' => $validated['name'],
+            'slug' => '',
+            'description' => $validated['description'],
+            'price' => $validated['price'],
+            'quantity' => $validated['quantity'],
+            'status' => 'available',
+            'user_id' => Auth::id(),
+            'category_id' => $validated['category_id'],
+            'is_deliverable' => $validated['is_deliverable'] ?? 0,
+            'usage_notes' => $validated['usage_notes'],
+        ]);
 
-            // ✅ 4. Notify all admins
-            $category = Category::find($validated['category_id']);
-            $admins = User::where('user_type', 'admin')->get();
+        // ✅ 3. Generate slug
+        $slug = Str::slug($validated['name']) . '-' . $product->id;
+        $product->update(['slug' => $slug]);
 
-            foreach ($admins as $admin) {
-                NotificationService::send(
-                    $admin->id,
-                    'A new product "' . $product->name . '" was added by ' . auth()->user()->name . ' in category "' . $category->name . '".',
-                    'new_product',
-                    url('/admin/products/' . $product->id),
-                    'normal',
-                    auth()->id()
-                );
+        // ✅ 4. Save each image
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
+
+                Image::create([
+                    'product_id' => $product->id,
+                    'image_url' => $path,
+                ]);
             }
-
-            // 5. Return response
-            if ($request->wantsJson()) {
-                return response()->json(['newProductId' => $product->id]);
-            }
-
-            session(['newProductId' => $product->id]);
-
-            return redirect()->route('merchant.products.index')
-                             ->with('success', 'Product added successfully!')
-                             ->with('showUploadModal', true);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->wantsJson()) {
-                return response()->json(['errors' => $e->errors()], 422);
-            }
-
-            Log::error('Validation Error: ' . $e->getMessage());
-            return redirect()->back()->withErrors($e->errors());
-        } catch (\Exception $e) {
-            Log::error('Error while adding product: ' . $e->getMessage());
-            return back()->with('error', 'Something went wrong while adding the product. Please try again.');
         }
+
+        // ✅ 5. Notify admins
+        $category = Category::find($validated['category_id']);
+        $admins = User::where('user_type', 'admin')->get();
+
+        foreach ($admins as $admin) {
+            NotificationService::send(
+                $admin->id,
+                'A new product "' . $product->name . '" was added by ' . auth()->user()->name . ' in category "' . $category->name . '".',
+                'new_product',
+                url('/admin/products/' . $product->id),
+                'normal',
+                auth()->id()
+            );
+        }
+
+        // ✅ 6. Redirect to product show page
+        return redirect()->route('merchant.products.index')
+                         ->with('success', 'Product and images added successfully!');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        Log::error('Error while adding product: ' . $e->getMessage());
+        return back()->with('error', 'Something went wrong while adding the product.');
     }
+}
+
 
 
     public function uploadImage(Request $request)
@@ -115,22 +126,27 @@ class ProductController extends Controller
         try {
             $request->validate([
                 'product_id' => 'required|exists:products,id',
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'images' => 'required|array',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
-            $path = $request->file('image')->store('products', 'public');
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
 
-            Image::create([
-                'product_id' => $request->product_id,
-                'image_url' => $path,
-            ]);
+                Image::create([
+                    'product_id' => $request->product_id,
+                    'image_url' => $path,
+                ]);
+            }
 
-            return back()->with('success', 'Image uploaded successfully!')->with('showUploadModal', true);
+            return back()->with('success', 'Images uploaded successfully!')->with('showUploadModal', true);
+
         } catch (\Exception $e) {
-            Log::error('Error while uploading image: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while uploading the image.');
+            Log::error('Error while uploading images: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while uploading the images.');
         }
     }
+
 
     public function show(string $id)
     {
@@ -165,15 +181,17 @@ class ProductController extends Controller
         ));
     }
 
-
-
     public function edit(string $id)
     {
         $product = Product::findOrFail($id);
-        return view('merchants.product.edit', compact('product'));
+        $categories = Category::all();
+
+        return view('merchants.product.edit', compact('product', 'categories'));
     }
 
-   public function update(Request $request, string $id)
+
+
+public function update(Request $request, string $id)
 {
     try {
         $product = Product::findOrFail($id);
@@ -203,7 +221,7 @@ class ProductController extends Controller
             ]);
         }
 
-        return redirect()->route('merchant.products.index')->with('success', 'Product updated successfully!');
+        return redirect()->route('merchant.products.edit', $product->id)->with('success', 'Product updated successfully!');
 
     } catch (\Illuminate\Validation\ValidationException $e) {
         if ($request->expectsJson() || $request->is('api/*')) {
@@ -226,6 +244,98 @@ class ProductController extends Controller
     }
 }
 
+public function updateImages(Request $request, string $id)
+{
+    try {
+        $product = Product::with('images')->findOrFail($id);
+
+        // ✅ تتبع بداية الطلب
+        Log::info('🔍 Full request payload', $request->all());
+
+        // ✅ تحقق من وجود delete_images
+        $deleteIds = collect($request->input('delete_images', []));
+        Log::info('🗑️ IDs requested for deletion', $deleteIds->toArray());
+
+        // ✅ تحقق من عدد الصور الكلي
+        $currentImageCount = $product->images->count();
+        Log::info("📸 Current image count: $currentImageCount");
+
+        // ✅ منع حذف كل الصور
+        if ($deleteIds->count() >= $currentImageCount) {
+            Log::warning('⚠️ Attempted to delete all images!');
+            return response()->json([
+                'message' => 'At least one image must remain.',
+            ], 422);
+        }
+
+        // ✅ حذف الصور المطلوبة
+        foreach ($deleteIds as $imageId) {
+            $image = $product->images()->find($imageId);
+            if ($image) {
+                Log::info("🚨 Deleting image ID: {$image->id}");
+
+                if (Storage::disk('public')->exists($image->image_url)) {
+                    Storage::disk('public')->delete($image->image_url);
+                    Log::info("🗑️ Deleted file from storage: {$image->image_url}");
+                } else {
+                    Log::warning("❗ File not found in storage: {$image->image_url}");
+                }
+
+                $image->delete();
+            } else {
+                Log::warning("❗ Image ID $imageId not found or doesn't belong to this product.");
+            }
+        }
+
+        // ✅ استبدال الصور الحالية
+        if ($request->hasFile('replace_images')) {
+            foreach ($request->file('replace_images') as $imageId => $newImageFile) {
+                if ($newImageFile) {
+                    $oldImage = $product->images()->find($imageId);
+                    if ($oldImage) {
+                        Storage::disk('public')->delete($oldImage->image_url);
+                        $oldImage->delete();
+                        Log::info("🔄 Replaced image ID: $imageId");
+
+                        $path = $newImageFile->store('products', 'public');
+                        $product->images()->create(['image_url' => $path]);
+                        Log::info("✅ Stored new replacement image: $path");
+                    }
+                }
+            }
+        }
+
+        // ✅ إضافة صور جديدة
+        if ($request->hasFile('new_images')) {
+            foreach ($request->file('new_images') as $newImage) {
+                $path = $newImage->store('products', 'public');
+                $product->images()->create(['image_url' => $path]);
+                Log::info("➕ Added new image: $path");
+            }
+        }
+
+        // ✅ الرد النهائي
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Images updated successfully!']);
+        }
+
+        return redirect()->route('merchant.products.show', $product->id)
+                         ->with('success', 'Images updated successfully!');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('❌ Validation failed', $e->errors());
+        if ($request->expectsJson()) {
+            return response()->json(['errors' => $e->errors(), 'message' => 'Validation error.'], 422);
+        }
+        return redirect()->back()->withErrors($e->errors());
+    } catch (\Exception $e) {
+        Log::error('💥 Unexpected error while updating images: ' . $e->getMessage());
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'An unexpected error occurred.'], 500);
+        }
+        return redirect()->back()->with('error', 'Error updating images.');
+    }
+}
 
 
 
@@ -240,8 +350,22 @@ class ProductController extends Controller
                 }
                 $image->delete();
             }
+                    // بعد $product->delete();
+                  $admins = User::where('user_type', 'admin')->get();
+
+                foreach ($admins as $admin) {
+                NotificationService::send(
+                $admin->id,
+                'The product "' . $product->name . '" was deleted by ' . auth()->user()->name . '.',
+                'deleted_product',
+                 url('/admin/products'),
+                'warning',
+                 auth()->id()
+    );
+}
 
             $product->delete();
+
 
             return redirect()->route('merchant.products.index')->with('success', 'Product deleted successfully!');
         } catch (\Exception $e) {
@@ -250,70 +374,7 @@ class ProductController extends Controller
         }
     }
 
-    public function updateImages(Request $request, string $id)
-    {
-        try {
-            $product = Product::findOrFail($id);
 
-            $request->validate([
-                'replace_images.*' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-                'new_images.*' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-            ]);
-
-            // === Replace existing images ===
-            if ($request->hasFile('replace_images')) {
-                foreach ($request->file('replace_images') as $imageId => $newImageFile) {
-                    if ($newImageFile) {
-                        $oldImage = \App\Models\Image::find($imageId);
-
-                        if ($oldImage) {
-                            if (Storage::disk('public')->exists($oldImage->image_url)) {
-                                Storage::disk('public')->delete($oldImage->image_url);
-                            }
-                            $oldImage->delete();
-                        }
-
-                        $path = $newImageFile->store('products', 'public');
-
-                        $product->images()->create([
-                            'image_url' => $path,
-                        ]);
-                    }
-                }
-            }
-
-            // === Add new images ===
-            if ($request->hasFile('new_images')) {
-                foreach ($request->file('new_images') as $newImage) {
-                    $path = $newImage->store('products', 'public');
-
-                    $product->images()->create([
-                        'image_url' => $path,
-                    ]);
-                }
-            }
-
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Images updated successfully!']);
-            }
-
-            return redirect()->route('merchant.products.show', $product->id)
-                             ->with('success', 'Images updated successfully!');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->expectsJson()) {
-                return response()->json(['errors' => $e->errors(), 'message' => 'Validation error.'], 422);
-            }
-            return redirect()->back()->withErrors($e->errors());
-        } catch (\Exception $e) {
-            Log::error('Error updating images: ' . $e->getMessage());
-
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'An unexpected error occurred.'], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error updating images.');
-        }
-    }
 
     public function disableProduct(Request $request, Product $product)
     {
@@ -376,7 +437,7 @@ class ProductController extends Controller
 
                 $nextAvailable = $this->getNextAvailablePeriod($product, $toDate->copy()->addDays(2), $daysNeeded);
 
-           
+
                 Mail::to($reservation->user->email)->send(new SuggestDelayWithApproval(
                     $reservation,
                     $product,
@@ -406,8 +467,7 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product disabled and all affected reservations processed.']);
     }
 
-
-
+        //   Email Functhins
 
     public function getNextAvailablePeriod(Product $product, Carbon $startFrom, int $daysNeeded): ?array
     {
@@ -470,8 +530,6 @@ class ProductController extends Controller
         return null;
     }
 
-
-
     public function toggleStatus(Product $product)
     {
         if ($product->status === 'maintenance') {
@@ -484,10 +542,6 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Product status updated successfully!');
     }
-
-
-
-
 
     public function approveDelay(Request $request, $id)
     {

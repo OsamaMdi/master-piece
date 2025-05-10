@@ -72,6 +72,22 @@ class AppServiceProvider extends ServiceProvider
 
 
 
+View::composer('merchants.partials.navbar', function ($view) {
+    $activeSubscription = null;
+
+    if (Auth::check() && Auth::user()->user_type === 'merchant') {
+        $user = Auth::user();
+
+        $activeSubscription = $user->subscriptions()
+            ->whereNull('deleted_at')
+            ->where('end_date', '>=', now())
+            ->latest('end_date')
+            ->first();
+    }
+
+    $view->with('activeSubscription', $activeSubscription);
+});
+
     }
 
     }

@@ -253,6 +253,8 @@
         </div> <!-- col-lg-10 -->
     </div> <!-- row -->
 </div> <!-- container -->
+
+
 <!-- 💳 Modal: Payment Info -->
 <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
     <div class="modal-dialog">

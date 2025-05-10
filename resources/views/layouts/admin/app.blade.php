@@ -55,35 +55,51 @@
         window.userId = {{ auth()->id() }};
     </script>
 
-@if(session('success'))
+@if(session('success') || session('error') || session('warning'))
 <script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
+    document.addEventListener('DOMContentLoaded', function () {
+        // استخدم نوع التنبيه بناءً على نوع الرسالة
+        let alertType = '';
+        let alertTitle = '';
+        let alertMessage = '';
+
+        @if(session('success'))
+            alertType = 'success';
+            alertTitle = 'Success';
+            alertMessage = "{{ session('success') }}";
+        @elseif(session('error'))
+            alertType = 'error';
+            alertTitle = 'Error';
+            alertMessage = "{{ session('error') }}";
+        @elseif(session('warning'))
+            alertType = 'warning';
+            alertTitle = 'Warning';
+            alertMessage = "{{ session('warning') }}";
+        @endif
+
+        if (!sessionStorage.getItem('alertShown')) {
+            Swal.fire({
+                icon: alertType,
+                title: alertTitle,
+                text: alertMessage,
+                timer: alertType === 'success' ? 2000 : undefined,
+                showConfirmButton: alertType !== 'success'
+            });
+
+            // منع التكرار عند الرجوع للصفحة
+            sessionStorage.setItem('alertShown', '1');
+
+            // مسح الفلاق بعد ثواني (اختياري)
+            setTimeout(() => {
+                sessionStorage.removeItem('alertShown');
+            }, 5000);
+        }
+
+        // أيضًا نحذف بيانات الجلسة من الـ URL للتأكد
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
     });
-
-    // إزالة بيانات الجلسة من history بعد عرض الرسالة
-    if (window.history.replaceState) {
-        window.history.replaceState(null, null, window.location.href);
-    }
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: "{{ session('error') }}",
-    });
-
-    // إزالة بيانات الجلسة من history بعد عرض الرسالة
-    if (window.history.replaceState) {
-        window.history.replaceState(null, null, window.location.href);
-    }
 </script>
 @endif
 

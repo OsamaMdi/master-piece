@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Mail\ReservationCancelledWithSuggestions;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
@@ -73,4 +75,36 @@ class Product extends Model
     {
         return 'slug';
     } */
+public function allReservationsIncludingTrashed()
+{
+    return $this->hasMany(Reservation::class, 'product_id')->withTrashed();
+}
+
+protected static function booted()
+{
+    static::deleting(function ($product) {
+        $reservations = $product->reservations()->with('user')->get();
+
+        foreach ($reservations as $reservation) {
+            if (
+                $reservation->status === 'not_started' &&
+                $reservation->user &&
+                $reservation->user->email
+            ) {
+                $suggested = Product::where('category_id', $product->category_id)
+                    ->where('id', '!=', $product->id)
+                    ->where('status', 'available')
+                    ->limit(3)
+                    ->get();
+
+                Mail::to($reservation->user->email)->send(
+                    new ReservationCancelledWithSuggestions($reservation, $product, $suggested)
+                );
+            }
+
+            $reservation->delete();
+        }
+    });
+}
+
 }

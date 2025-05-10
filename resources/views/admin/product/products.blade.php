@@ -19,7 +19,7 @@
 
 <!-- Add Product Button -->
 <div class="filter-header">
-    <a id="openAddProductModal" href="javascript:void(0);" class="btn btn-success force-right">
+    <a href="{{ route('admin.products.create') }}" class="btn btn-success force-right">
         ➕ Add New Product
     </a>
 </div>
@@ -159,40 +159,8 @@
     <img id="previewImage" src="" style="...">
 </div>
 
-<!-- ✅ SweetAlert Notifications -->
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: "{{ session('success') }}",
-        timer: 2000,
-        showConfirmButton: false
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: "{{ session('error') }}",
-    });
-</script>
-@endif
-
 <!-- ✅ Custom JS -->
 <script>
-
-    document.getElementById('openAddProductModal').addEventListener('click', function () {
-        document.getElementById('addProductModal').classList.remove('hidden');
-    });
-
-    // إغلاق المودال
-    document.getElementById('cancelAddProduct').addEventListener('click', function () {
-        document.getElementById('addProductModal').classList.add('hidden');
-    });
 
     // تأكيد الحذف
     function confirmDelete(e) {

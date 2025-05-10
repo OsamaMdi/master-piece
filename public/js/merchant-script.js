@@ -1,38 +1,43 @@
 
 document.addEventListener('DOMContentLoaded', function () {
+    // === Sidebar Toggle ===
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
     const toggleSidebar = document.getElementById('toggleSidebar');
+
+    if (toggleSidebar) {
+        toggleSidebar.addEventListener('click', () => {
+            if (window.innerWidth > 992) {
+                sidebar.classList.toggle('hidden');
+                mainContent.style.marginLeft = sidebar.classList.contains('hidden') ? '0' : '220px';
+            } else {
+                sidebar.classList.toggle('show');
+            }
+        });
+    }
+
+    // === Profile Dropdown ===
     const profileButton = document.getElementById('profileButton');
     const profileMenu = document.querySelector('.dropdown-menu');
+
+    if (profileButton && profileMenu) {
+        profileButton.addEventListener('click', function (e) {
+            e.stopPropagation();
+            profileMenu.classList.toggle('show');
+        });
+
+        window.addEventListener('click', function (e) {
+            if (!profileButton.contains(e.target) && !profileMenu.contains(e.target)) {
+                profileMenu.classList.remove('show');
+            }
+        });
+    }
+
+    // === Confirmation Modal ===
     const modal = document.getElementById('confirmationModal');
     const deleteButtons = document.querySelectorAll('.delete-btn');
     let currentForm = null;
 
-    // Sidebar toggle
-    toggleSidebar.addEventListener('click', () => {
-        if (window.innerWidth > 992) {
-            sidebar.classList.toggle('hidden');
-            mainContent.style.marginLeft = sidebar.classList.contains('hidden') ? '0' : '220px';
-        } else {
-            sidebar.classList.toggle('show');
-        }
-    });
-
-    if (!profileButton || !profileMenu) return;
-
-    profileButton.addEventListener('click', function (e) {
-        e.stopPropagation();
-        profileMenu.classList.toggle('show'); // ✅ هذا اللي بفعّل display: block
-    });
-
-    window.addEventListener('click', function (e) {
-        if (!profileButton.contains(e.target) && !profileMenu.contains(e.target)) {
-            profileMenu.classList.remove('show');
-        }
-    });
-
-    // Delete confirmation modal
     deleteButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
@@ -41,260 +46,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    document.getElementById('cancelDelete').addEventListener('click', () => {
-        modal.classList.add('hidden');
-        currentForm = null;
-    });
+    const cancelDelete = document.getElementById('cancelDelete');
+    const confirmDelete = document.getElementById('confirmDelete');
 
-    document.getElementById('confirmDelete').addEventListener('click', () => {
-        if (currentForm) {
-            currentForm.submit();
-        }
-        modal.classList.add('hidden');
-    });
-
-    // Touch support for sidebar
-    let touchStartX = 0;
-    const touchThreshold = 50;
-
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-    });
-
-    document.addEventListener('touchend', (e) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        const diff = touchStartX - touchEndX;
-
-        if (Math.abs(diff) > touchThreshold) {
-            const shouldHide = diff > 0;
-            sidebar.classList.toggle('show', !shouldHide);
-        }
-    });
-
-    // Escape key closes modal
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    if (cancelDelete && confirmDelete) {
+        cancelDelete.addEventListener('click', () => {
             modal.classList.add('hidden');
-        }
-    });
-
-
-
-
-    // Check image upload status
-    const showUploadModalMeta = document.querySelector('meta[name="show-upload-modal"]');
-    const newProductIdMeta = document.querySelector('meta[name="new-product-id"]');
-
-    if (showUploadModalMeta && newProductIdMeta) {
-        const showUploadModal = showUploadModalMeta.getAttribute('content');
-        const newProductId = newProductIdMeta.getAttribute('content');
-
-        if (showUploadModal === 'true') {
-            uploadImageModal.classList.remove('hidden');
-            document.getElementById('uploadedProductId').value = newProductId;
-        }
-    }
-
-   // ===== Finish Uploading Button Logic =====
-   if (finishUploading) {
-    finishUploading.addEventListener('click', function () {
-        const uploadedProductId = document.getElementById('uploadedProductId')?.value;
-        const redirectTo = document.getElementById('redirectTo')?.value;
-
-        if (!uploadedProductId) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Missing product!',
-                text: '❌ You must create a product first before uploading images.',
-            });
-            return;
-        }
-
-        fetch(`/merchant/products/${uploadedProductId}/images/count`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.count > 0) {
-                    showCustomNotification('✅ Image uploaded successfully!', 'success');
-                    setTimeout(() => {
-                        const redirectUrl = redirectTo === 'admin'
-                            ? "/admin/products"
-                            : "/merchant/products";
-                        window.location.href = redirectUrl;
-                    }, 1500);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Upload at least one image!',
-                        text: '❌ You must upload at least one image before finishing!',
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error checking images:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'An error occurred',
-                    text: '❌ Please try again.',
-                });
-            });
-    });
-}
-
-
-
-
-
-    // Add Product Form Validation
-    if (addProductForm) {
-        addProductForm.addEventListener('submit', function (e) {
-            let hasError = false;
-
-            // امسك الحقول
-            const nameInput = addProductForm.querySelector('input[name="name"]');
-            const descInput = addProductForm.querySelector('textarea[name="description"]');
-            const priceInput = addProductForm.querySelector('input[name="price"]');
-            const quantityInput = addProductForm.querySelector('input[name="quantity"]');
-            const categorySelect = addProductForm.querySelector('select[name="category_id"]');
-            const usageNotesInput = addProductForm.querySelector('textarea[name="usage_notes"]');
-
-            // احذف أي Errors قديمة
-            addProductForm.querySelectorAll('.error-text').forEach(e => e.remove());
-
-            // دالة لإظهار الخطأ
-            const showError = (element, message) => {
-                const error = document.createElement('small');
-                error.classList.add('error-text');
-                error.style.color = 'red';
-                error.textContent = message;
-                element.parentElement.appendChild(error);
-                hasError = true;
-            };
-
-            // بدء الفلديشن
-            if (!nameInput.value.trim() || nameInput.value.trim().length < 4) {
-                showError(nameInput, 'Name must be at least 4 characters.');
-            }
-
-            if (!descInput.value.trim() || descInput.value.trim().length < 20) {
-                showError(descInput, 'Description must be at least 20 characters.');
-            }
-
-            const priceValue = parseFloat(priceInput.value);
-            if (!priceInput.value || isNaN(priceValue) || priceValue <= 0) {
-                showError(priceInput, 'Price must be greater than 0 JOD.');
-            }
-
-            const quantityValue = parseInt(quantityInput.value);
-            if (!quantityInput.value || isNaN(quantityValue) || quantityValue < 1) {
-                showError(quantityInput, 'Quantity must be at least 1.');
-            }
-
-            if (!categorySelect.value) {
-                showError(categorySelect, 'Please select a category.');
-            }
-
-
-            if (!usageNotesInput.value.trim()) {
-                showError(usageNotesInput, 'Usage notes are required.');
-            }
-
-            // لو فيه خطأ امنع الفورم
-            if (hasError) {
-                e.preventDefault();
-                showNotification('❌ Please fill all required fields correctly.', 'error');
-            }
+            currentForm = null;
         });
-    }
 
-
-    // Notification popup
-    window.showNotification = function(message, type = 'success', showActions = false) {
-        const popup = document.getElementById('notificationPopup');
-        const messageBox = document.getElementById('notificationMessage');
-        const actions = document.getElementById('notificationActions');
-
-        messageBox.textContent = message;
-
-        if (type === 'success') {
-            popup.style.background = '#d4edda';
-            popup.style.color = '#155724';
-        } else if (type === 'error') {
-            popup.style.background = '#f8d7da';
-            popup.style.color = '#721c24';
-        }
-
-        actions.classList.toggle('hidden', !showActions);
-
-        popup.classList.remove('hidden');
-        popup.classList.add('show');
-
-        if (!showActions) {
-            setTimeout(() => {
-                popup.classList.remove('show');
-                popup.classList.add('hidden');
-            }, 5000);
-        }
-    };
-
-    // Custom notification with progress
-    function showCustomNotification(message, type = 'success') {
-        const popup = document.getElementById('customNotification');
-        const icon = document.getElementById('notificationIcon');
-        const messageBox = document.getElementById('customNotificationMessage');
-        const progressBar = document.getElementById('customProgressBar');
-
-        const duration = 7000;
-
-        messageBox.textContent = message;
-        popup.classList.remove('success', 'error', 'warning');
-
-        let soundSrc = '';
-
-        if (type === 'success') {
-            popup.classList.add('success');
-            icon.innerHTML = '✔️';
-            soundSrc = '/sounds/success.mp3';
-        } else if (type === 'error') {
-            popup.classList.add('error');
-            icon.innerHTML = '❌';
-            soundSrc = '/sounds/error.mp3';
-        } else if (type === 'warning') {
-            popup.classList.add('warning');
-            icon.innerHTML = '⚠️';
-            soundSrc = '/sounds/warning.mp3';
-        }
-
-        if (soundSrc) {
-            const audio = new Audio(soundSrc);
-            audio.play();
-        }
-
-        icon.classList.remove('bounce');
-        popup.classList.remove('hidden');
-        popup.classList.add('show');
-
-        void icon.offsetWidth;
-        icon.classList.add('bounce');
-
-        progressBar.style.transition = 'none';
-        progressBar.style.width = '0%';
-        void progressBar.offsetWidth;
-        progressBar.style.transition = `width ${duration}ms linear`;
-        progressBar.style.width = '100%';
-
-        setTimeout(() => {
-            popup.classList.remove('show');
-            popup.classList.add('hidden');
-            progressBar.style.width = '0%';
-        }, duration);
-    }
-
-    const closeCustomNotificationBtn = document.getElementById('closeCustomNotification');
-    if (closeCustomNotificationBtn) {
-        closeCustomNotificationBtn.addEventListener('click', function() {
-            const popup = document.getElementById('customNotification');
-            popup.classList.remove('show');
-            popup.classList.add('hidden');
+        confirmDelete.addEventListener('click', () => {
+            if (currentForm) currentForm.submit();
+            modal.classList.add('hidden');
         });
     }
 });
@@ -323,210 +86,6 @@ script.onload = function () {
 };
 document.body.appendChild(script);
 
-// Open Edit Product Modal
-document.getElementById('openEditProductModal').addEventListener('click', function() {
-    document.getElementById('editProductModal').classList.remove('hidden');
-});
-
-// Close Edit Product Modal
-document.getElementById('cancelEditProduct').addEventListener('click', function() {
-    document.getElementById('editProductModal').classList.add('hidden');
-});
-
-// Open Edit Images Modal
-document.getElementById('openEditImagesModal').addEventListener('click', function() {
-    document.getElementById('editImagesModal').classList.remove('hidden');
-});
-
-// Close Edit Images Modal
-document.getElementById('cancelEditImages').addEventListener('click', function() {
-    document.getElementById('editImagesModal').classList.add('hidden');
-});
-
-// ======== Edit Product Form Submit (AJAX) ========
-const editProductForm = document.getElementById('editProductForm');
-if (editProductForm) {
-    editProductForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const submitBtn = editProductForm.querySelector('button[type="submit"]');
-
-        // Disable button + loading
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Saving...';
-
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw err; });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.message) {
-                document.getElementById('editProductModal').classList.add('hidden');
-                showCustomNotification('✅ ' + data.message, 'success');
-                setTimeout(() => window.location.reload(), 2000);
-            }
-        })
-        .catch(error => {
-            if (error.errors) {
-                let errorMessages = '';
-                for (const [field, messages] of Object.entries(error.errors)) {
-                    errorMessages += `${messages.join('<br>')}<br>`;
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Errors',
-                    html: errorMessages,
-                    confirmButtonColor: '#d33'
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '❌ Error!',
-                    text: error.message || 'Something went wrong while updating.',
-                    confirmButtonColor: '#d33'
-                });
-            }
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Save Changes';
-        });
-    });
-}
-
-// ======== Edit Images Form Submit (AJAX) ========
-const editImagesForm = document.getElementById('editImagesForm');
-if (editImagesForm) {
-    editImagesForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const submitBtn = editImagesForm.querySelector('button[type="submit"]');
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Saving...';
-
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw err; });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.message) {
-                document.getElementById('editImagesModal').classList.add('hidden');
-                showCustomNotification('✅ ' + data.message, 'success');
-                setTimeout(() => window.location.reload(), 2000);
-            }
-        })
-        .catch(error => {
-            if (error.errors) {
-                let errorMessages = '';
-                for (const [field, messages] of Object.entries(error.errors)) {
-                    errorMessages += `${messages.join('<br>')}<br>`;
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Errors',
-                    html: errorMessages,
-                    confirmButtonColor: '#d33'
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '❌ Error!',
-                    text: error.message || 'Something went wrong while updating images.',
-                    confirmButtonColor: '#d33'
-                });
-            }
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Save Changes';
-        });
-    });
-}
-
-
-
-// Image validation and preview with SweetAlert2
-// SweetAlert2
-const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-const maxSize = 2 * 1024 * 1024;
-
-function showErrorAlert(message) {
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: message,
-        confirmButtonColor: '#d33',
-    });
-}
-
-function handleImageChange(fileInput, imageElement) {
-    const file = fileInput.files[0];
-
-    if (file) {
-        if (!allowedTypes.includes(file.type)) {
-            showErrorAlert('Only JPG, JPEG, PNG, and GIF files are allowed.');
-            fileInput.value = '';
-            return;
-        }
-
-        if (file.size > maxSize) {
-            showErrorAlert('Image size should not exceed 2MB.');
-            fileInput.value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            imageElement.src = event.target.result;
-            imageElement.style.pointerEvents = 'auto'; // Reactivate after preview
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-// Attach click and preview handlers
-document.querySelectorAll('.editable-image').forEach(image => {
-    const fileInput = image.nextElementSibling;
-
-    fileInput.addEventListener('change', function () {
-        handleImageChange(this, image);
-    });
-
-    image.addEventListener('click', function () {
-        console.log('Clicked to change image');
-        image.style.pointerEvents = 'none'; // Temporarily disable clicking to prevent double open
-        fileInput.click();
-        setTimeout(() => {
-            image.style.pointerEvents = 'auto'; // Reactivate after a short delay
-        }, 500);
-    });
-});
-
 
 var link = document.createElement('link');
 link.rel = 'stylesheet';
@@ -553,7 +112,7 @@ script.onload = function () {
 document.body.appendChild(script);
 
 
-function showCustomNotification(message, type = 'success') {
+/* function showCustomNotification(message, type = 'success') {
     const popup = document.getElementById('customNotification');
     const icon = document.getElementById('notificationIcon');
     const messageBox = document.getElementById('customNotificationMessage');
@@ -594,136 +153,10 @@ function showCustomNotification(message, type = 'success') {
         popup.classList.add('hidden');
         progressBar.style.width = '0%';
     }, duration);
-}
-
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('imagePreviewModal');
-    const modalImage = document.getElementById('previewImage');
-
-
-    document.querySelectorAll('.swiper-slide img').forEach(img => {
-        img.addEventListener('click', () => {
-            modalImage.src = img.src;
-            modal.classList.remove('hidden');
-        });
-    });
-
-    modal.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        modalImage.src = '';
-    });
-});
+} */
 
 
 
 
-
-
-
-
-// Chart.js Script for Admin Dashboard Charts
-
-document.addEventListener('DOMContentLoaded', function () {
-    // ========== Accounts Growth Chart ==========
-    const accountsGrowthCtx = document.getElementById('accountsGrowthChart')?.getContext('2d');
-    if (accountsGrowthCtx && typeof lastWeekAccounts !== 'undefined' && typeof thisWeekAccounts !== 'undefined') {
-        new Chart(accountsGrowthCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Last Week', 'This Week'],
-                datasets: [{
-                    label: 'New Accounts',
-                    data: [lastWeekAccounts, thisWeekAccounts],
-                    backgroundColor: ['#e2e8f0', '#4a6cf7']
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
-
-    // ========== Products Growth Chart ==========
-    const productsGrowthCtx = document.getElementById('productsGrowthChart')?.getContext('2d');
-    if (productsGrowthCtx && typeof lastWeekProducts !== 'undefined' && typeof thisWeekProducts !== 'undefined') {
-        new Chart(productsGrowthCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Last Week', 'This Week'],
-                datasets: [{
-                    label: 'New Products',
-                    data: [lastWeekProducts, thisWeekProducts],
-                    backgroundColor: ['#cbd5e0', '#38a169']
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
-
-    // ========== Reservations by Category Chart ==========
-    const reservationsByCategoryCtx = document.getElementById('reservationsByCategoryChart')?.getContext('2d');
-    if (reservationsByCategoryCtx && typeof categoryNames !== 'undefined' && typeof categoryReservationCounts !== 'undefined') {
-        new Chart(reservationsByCategoryCtx, {
-            type: 'doughnut',
-            data: {
-                labels: categoryNames,
-                datasets: [{
-                    label: 'Reservations',
-                    data: categoryReservationCounts,
-                    backgroundColor: [
-                        '#4a6cf7', '#38a169', '#ed8936', '#e53e3e', '#805ad5', '#2b6cb0'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    }
-
-    // ========== Reservations by Product (Grouped by Category) ==========
-    const reservationsByProductCtx = document.getElementById('reservationsByProductChart')?.getContext('2d');
-    if (reservationsByProductCtx && typeof productReservationLabels !== 'undefined' && typeof productReservationData !== 'undefined') {
-        new Chart(reservationsByProductCtx, {
-            type: 'bar',
-            data: {
-                labels: productReservationLabels,
-                datasets: productReservationData // array of { label: categoryName, data: [reservationsCount], backgroundColor: '#color' }
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.parsed.y}`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-});
 
 

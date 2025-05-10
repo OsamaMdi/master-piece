@@ -5,7 +5,7 @@
 
 
 <div class="dashboard-section py-4">
-    <h2 class="dashboard-title mb-4">📊 Admin Dashboard Overview</h2>
+    <h2 class="page-title">Welcome, {{ Auth::user()->name }}</h2>
 
 
      <!-- ===== Metrics Cards ===== -->
@@ -260,3 +260,8 @@
     </script>
 
 @endsection
+
+
+@push('scripts')
+<script src="{{ asset('js/adminChart.js') }}"></script>
+@endpush

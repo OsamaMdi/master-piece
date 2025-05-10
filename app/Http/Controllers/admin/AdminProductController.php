@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\Reservation;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -31,96 +32,127 @@ class AdminProductController extends Controller
         $categories = Category::all();
 
         $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
-            ->latest()
-            ->paginate(16);
+        ->orderBy('created_at', 'desc')
+         ->paginate(16);
 
         $merchants = User::where('user_type', 'merchant')->get();
 
         return view('admin.product.products', compact('products', 'categories', 'merchants'));
     }
 
+    public function create()
+{
+    $categories = Category::all();
+
+    $merchants = User::where('user_type', 'merchant')
+        ->where('status', '!=', 'blocked')
+        ->get();
+
+    return view('admin.product.create', compact('categories', 'merchants'));
+}
 
 
-    public function store(Request $request)
-    {
-        try {
-            // Validation
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'required|string|min:10',
-                'price' => 'required|numeric|min:0.01',
-                'quantity' => 'required|integer|min:1',
-                'category_id' => 'required|exists:categories,id',
-                'merchant_id' => 'required|exists:users,id',
-                'usage_notes' => 'nullable|string|max:1000',
-            ]);
 
-            // Extra check just in case
-            if (!$request->has('merchant_id') || empty($request->merchant_id)) {
-                return redirect()->back()->with('error', 'Merchant is required to assign the product.')->withInput();
-            }
+public function store(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'name' => 'required|string|min:4|max:255',
+            'description' => 'nullable|string|min:10',
+            'price' => 'required|numeric|min:0.01',
+            'quantity' => 'required|integer|min:1',
+            'category_id' => 'required|exists:categories,id',
+            'merchant_id' => 'required|exists:users,id',
+            'usage_notes' => 'nullable|string|max:1000',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
 
-            // Generate slug from name
-            $slug = Str::slug($request->name);
-
-            // Create product
-            $product = Product::create([
-                'name' => $request->name,
-                'slug' => $slug,  
-                'description' => $request->description,
-                'price' => $request->price,
-                'quantity' => $request->quantity,
-                'status' => 'available',
-                'user_id' => $request->merchant_id,
-                'category_id' => $request->category_id,
-                'usage_notes' => $request->usage_notes,
-            ]);
-
-            if ($request->wantsJson()) {
-                return response()->json(['newProductId' => $product->id]);
-            }
-
-            session(['newProductId' => $product->id]);
-            return redirect()->route('admin.products.index')
-                             ->with('success', 'Product added successfully!')
-                             ->with('showUploadModal', true);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->wantsJson()) {
-                return response()->json(['errors' => $e->errors()], 422);
-            }
-
-            Log::error('Validation Error: ' . $e->getMessage());
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $e) {
-            Log::error('Unexpected error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Unexpected error occurred.')->withInput();
+        if (!$request->has('merchant_id') || empty($request->merchant_id)) {
+            return redirect()->back()->with('error', 'Merchant is required to assign the product.')->withInput();
         }
-    }
 
+        DB::beginTransaction();
 
+        $slug = Str::slug($request->name);
 
-    public function uploadImage(Request $request)
-    {
-        try {
-            $request->validate([
-                'product_id' => 'required|exists:products,id',
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
+        $product = Product::create([
+            'name' => $request->name,
+            'slug' => $slug,
+            'description' => $request->description,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'status' => 'available',
+            'user_id' => $request->merchant_id,
+            'category_id' => $request->category_id,
+            'usage_notes' => $request->usage_notes,
+        ]);
 
-            $path = $request->file('image')->store('products', 'public');
+        // ✅ حفظ الصور المرتبطة (إن وجدت)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $path = $imageFile->store('products', 'public');
 
-            Image::create([
-                'product_id' => $request->product_id,
-                'image_url' => $path,
-            ]);
-
-            return back()->with('success', 'Image uploaded successfully!')->with('showUploadModal', true);
-        } catch (\Exception $e) {
-            Log::error('Error while uploading image: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while uploading the image.');
+                Image::create([
+                    'product_id' => $product->id,
+                    'image_url' => $path,
+                ]);
+            }
         }
+
+        DB::commit();
+
+        if ($request->wantsJson()) {
+            return response()->json(['newProductId' => $product->id]);
+        }
+
+        session(['newProductId' => $product->id]);
+
+        return redirect()->route('admin.products.index')
+                         ->with('success', 'Product added successfully!');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        if ($request->wantsJson()) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        Log::error('Validation Error: ' . $e->getMessage());
+        return redirect()->back()->withErrors($e->errors())->withInput();
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Unexpected error: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Unexpected error occurred.')->withInput();
     }
+}
+
+
+
+public function uploadImage(Request $request)
+{
+    try {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('products', 'public');
+
+        Image::create([
+            'product_id' => $request->product_id,
+            'image_url' => $path,
+        ]);
+
+        return back()->with('success', 'Image uploaded successfully!')
+                     ->with('showUploadModal', true)
+                     ->with('imagePreview', Storage::url($path));
+
+    } catch (\Exception $e) {
+        Log::error('Error while uploading image: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'An error occurred while uploading the image.');
+    }
+}
+
+
 
     public function show(string $id)
     {

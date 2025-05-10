@@ -2,30 +2,148 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\Subscription;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class MerchantController extends Controller
 {
+
+
     public function dashboard()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
+    $now = Carbon::now();
 
-        $totalProducts = $user->products()->count();
+    $startOfMonth = $now->copy()->startOfMonth();
+    $endOfMonth = $now->copy()->endOfMonth();
+    $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+    $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
 
-        $totalReservations = DB::table('reservations')
-                            ->join('products', 'reservations.product_id', '=', 'products.id')
-                            ->where('products.user_id', $user->id)
-                            ->count();
+    $totalActiveProducts = $user->products()
+        ->where('status', 'available')
+        ->whereNull('deleted_at')
+        ->count();
 
-        $rentedTools = DB::table('reservations')
-                        ->join('products', 'reservations.product_id', '=', 'products.id')
-                        ->where('products.user_id', $user->id)
-                        ->distinct('reservations.product_id')
-                        ->count('reservations.product_id');
+    $cancelledReservations = DB::table('reservations')
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->where('reservations.status', 'cancelled')
+        ->whereBetween('reservations.created_at', [$startOfMonth, $endOfMonth])
+        ->where('products.status', 'available')
+        ->whereNull('products.deleted_at')
+        ->whereNull('reservations.deleted_at')
+        ->count();
 
-        return view('merchants.partials.dashboard', compact('totalProducts', 'totalReservations', 'rentedTools'));
-    }
+    $averageRating = DB::table('reviews')
+        ->join('products', 'reviews.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->whereNull('reviews.deleted_at')
+        ->whereNull('products.deleted_at')
+        ->avg('reviews.rating');
+
+    $totalPaid = DB::table('reservations')
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->where('reservations.status', 'completed')
+        ->whereBetween('reservations.created_at', [$startOfMonth, $endOfMonth])
+        ->whereNull('products.deleted_at')
+        ->whereNull('reservations.deleted_at')
+        ->sum('reservations.paid_amount');
+
+    $completedReservations = DB::table('reservations')
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->where('reservations.status', 'completed')
+        ->whereBetween('reservations.created_at', [$startOfMonth, $endOfMonth])
+        ->whereNull('products.deleted_at')
+        ->whereNull('reservations.deleted_at')
+        ->count();
+
+    $platformCommission = DB::table('reservations')
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->where('reservations.status', 'completed')
+        ->whereBetween('reservations.created_at', [$startOfMonth, $endOfMonth])
+        ->whereNull('products.deleted_at')
+        ->whereNull('reservations.deleted_at')
+        ->sum('reservations.platform_fee');
+
+    $blockedProducts = DB::table('products')
+        ->where('user_id', $user->id)
+        ->whereNull('deleted_at')
+        ->where(function ($query) use ($now) {
+            $query->where('status', 'blocked')
+                  ->orWhere('blocked_until', '>', $now);
+        })->count();
+
+    $productReports = DB::table('reports')
+        ->join('products', 'reports.reportable_id', '=', 'products.id')
+        ->where('reports.target_type', 'product')
+        ->where('products.user_id', $user->id)
+        ->whereNull('products.deleted_at')
+        ->whereNull('reports.deleted_at')
+        ->count();
+
+    $completedThisMonth = DB::table('reservations')
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->where('reservations.status', 'completed')
+        ->whereBetween('reservations.start_date', [$startOfMonth, $endOfMonth])
+        ->whereNull('products.deleted_at')
+        ->whereNull('reservations.deleted_at')
+        ->count();
+
+    $completedLastMonth = DB::table('reservations')
+        ->join('products', 'reservations.product_id', '=', 'products.id')
+        ->where('products.user_id', $user->id)
+        ->where('reservations.status', 'completed')
+        ->whereBetween('reservations.start_date', [$startOfLastMonth, $endOfLastMonth])
+        ->whereNull('products.deleted_at')
+        ->whereNull('reservations.deleted_at')
+        ->count();
+
+    $topProductsCombined = DB::table('products')
+        ->leftJoin('reviews', 'products.id', '=', 'reviews.product_id')
+        ->leftJoin('reservations', function ($join) {
+            $join->on('products.id', '=', 'reservations.product_id')
+                 ->where('reservations.status', '=', 'completed')
+                 ->whereNull('reservations.deleted_at');
+        })
+        ->where('products.user_id', $user->id)
+        ->whereNull('products.deleted_at')
+        ->where(function ($query) {
+            $query->whereNull('reviews.deleted_at')->orWhereNull('reviews.id'); // لأن leftJoin
+        })
+        ->groupBy('products.id', 'products.name')
+        ->select(
+            'products.id',
+            'products.name',
+            DB::raw('COALESCE(AVG(reviews.rating), 0) as avg_rating'),
+            DB::raw('COUNT(DISTINCT reservations.id) as completed_count')
+        )
+        ->orderByDesc('completed_count')
+        ->limit(5)
+        ->get();
+
+    return view('merchants.partials.dashboard', compact(
+        'totalActiveProducts',
+        'cancelledReservations',
+        'averageRating',
+        'totalPaid',
+        'completedReservations',
+        'platformCommission',
+        'blockedProducts',
+        'productReports',
+        'completedThisMonth',
+        'completedLastMonth',
+        'topProductsCombined'
+    ));
+}
+
+
 
     public function adminDashboard()
 {
@@ -181,8 +299,6 @@ class MerchantController extends Controller
         'monthlyReservationComparison'
     ));
 }
-
-
 
 
 

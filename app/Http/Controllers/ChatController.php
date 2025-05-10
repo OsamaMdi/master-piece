@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\Chat;
+use App\Models\User;
 use App\Models\Message;
 use App\Models\Product;
 use MessagesMarkedAsRead;
@@ -93,7 +94,7 @@ class ChatController extends Controller
         $user = Auth::user();
         $userType = get_class($user);
 
-       
+
         $chatIds = \App\Models\Chat::where(function ($q) use ($user, $userType) {
                 $q->where('receiver_id', $user->id)->where('receiver_type', $userType);
             })
@@ -234,34 +235,38 @@ class ChatController extends Controller
     }
 
 
+// بدء محادثة جديدة من صفحة منتج
+public function startFromProduct(Product $product)
+{
+    $user = Auth::user();
+    $userType = get_class($user);
 
-    // بدء محادثة جديدة من صفحة منتج
-    public function startFromProduct(Product $product)
-    {
-        $user = Auth::user();
-        $userType = get_class($user);
+    $merchant = User::find($product->user_id);
+    $merchantType = get_class($merchant);
 
-        $chat = Chat::where(function ($q) use ($user, $userType, $product) {
-            $q->where('sender_id', $user->id)
-                ->where('sender_type', $userType)
-                ->where('receiver_id', $product->user_id)
-                ->where('receiver_type', 'App\Models\Merchant');
-        })->orWhere(function ($q) use ($user, $userType, $product) {
-            $q->where('receiver_id', $user->id)
-                ->where('receiver_type', $userType)
-                ->where('sender_id', $product->user_id)
-                ->where('sender_type', 'App\Models\Merchant');
-        })->first();
+    // البحث عن شات موجود مسبقًا بين اليوزر والتاجر (بغض النظر عن من أرسل أولاً)
+    $chat = Chat::where(function ($q) use ($user, $userType, $merchant, $merchantType) {
+        $q->where('sender_id', $user->id)
+            ->where('sender_type', $userType)
+            ->where('receiver_id', $merchant->id)
+            ->where('receiver_type', $merchantType);
+    })->orWhere(function ($q) use ($user, $userType, $merchant, $merchantType) {
+        $q->where('receiver_id', $user->id)
+            ->where('receiver_type', $userType)
+            ->where('sender_id', $merchant->id)
+            ->where('sender_type', $merchantType);
+    })->first();
 
-        if (!$chat) {
-            $chat = Chat::create([
-                'sender_id' => $user->id,
-                'sender_type' => $userType,
-                'receiver_id' => $product->user_id,
-                'receiver_type' => 'App\Models\Merchant',
-            ]);
-        }
+    // إذا ما كان في شات قديم، أنشئ شات جديد
+    if (!$chat) {
+        $chat = Chat::create([
+            'sender_id' => $user->id,
+            'sender_type' => $userType,
+            'receiver_id' => $merchant->id,
+            'receiver_type' => $merchantType,
+        ]);
 
+        // أرسل أول رسالة توضح أنها استفسار عن منتج
         $previewMessage = "🛒 Product Inquiry:\n" .
             "Name: {$product->name}\n" .
             "Category: {$product->category->name}\n" .
@@ -273,9 +278,11 @@ class ChatController extends Controller
             'sender_type' => $userType,
             'message' => $previewMessage,
         ]);
-
-        return redirect()->route('chat.show', $chat->id);
     }
+
+    return redirect()->route('chat.show', $chat->id);
+}
+
 
     public function unreadCount()
 {

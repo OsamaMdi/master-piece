@@ -40,7 +40,7 @@ class NotificationController extends Controller
 
 public function adminClearAll()
 {
-  
+
     Notification::where('user_id', auth()->id())->delete();
 
     return redirect()->back()->with('success', 'All notifications deleted.');
@@ -57,16 +57,17 @@ public function merchantIndex(Request $request)
         ->where('is_read', false)
         ->update(['is_read' => true]);
 
-    $query = Notification::where('user_id', auth()->id());
-
-    if ($priority) {
-        $query->where('priority', $priority);
-    }
-
-    $notifications = $query->orderByDesc('created_at')->paginate(10);
+    $notifications = Notification::where('user_id', auth()->id())
+        ->when($priority, function ($query, $priority) {
+            $query->where('priority', $priority);
+        })
+        ->orderByDesc('created_at')
+        ->paginate(10)
+        ->appends(['priority' => $priority]);
 
     return view('merchants.notifications', compact('notifications'));
 }
+
 
     public function destroy(Notification $notification)
 {

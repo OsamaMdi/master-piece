@@ -49,6 +49,11 @@
             </a>
         </li>
 
+        <li>
+            <a href="{{ route('admin.subscribers.adminIndex') }}">
+                <i class="fas fa-credit-card"></i> Subscriptions
+            </a>
+        </li>
 
 
     </ul>

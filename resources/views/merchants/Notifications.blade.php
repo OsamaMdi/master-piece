@@ -6,19 +6,21 @@
 <h2 class="page-title mb-4">🔔 Merchant Notifications</h2>
 
 <!-- ✅ Filter + Delete All -->
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <form method="GET" class="d-flex gap-2 flex-wrap m-0">
-        <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+<div class="review-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <form method="GET" class="review-filter-form d-flex flex-wrap gap-3 m-0">
+        <select name="priority" class="review-select" onchange="this.form.submit()">
             <option value="">All Priorities</option>
             <option value="normal" {{ request('priority') == 'normal' ? 'selected' : '' }}>Normal</option>
             <option value="important" {{ request('priority') == 'important' ? 'selected' : '' }}>Important</option>
         </select>
     </form>
+</div>
 
+<div class="filter-header">
     <form id="clearAllForm" method="POST" action="{{ route('merchant.notifications.clear') }}">
         @csrf
         @method('DELETE')
-        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirmClearAll(event)">
+        <button type="submit" class="btn btn-danger force-right" onclick="return confirmClearAll(event)">
             <i class="fas fa-trash-alt me-1"></i> Clear All Notifications
         </button>
     </form>
@@ -31,6 +33,7 @@
             <th>#</th>
             <th>Message</th>
             <th>Type</th>
+            <th>From</th>
             <th>Priority</th>
             <th>Status</th>
             <th>Created At</th>
@@ -42,32 +45,31 @@
         <tr>
             <td>{{ $loop->iteration + ($notifications->currentPage() - 1) * $notifications->perPage() }}</td>
             <td class="fw-semibold">{{ $notification->message }}</td>
-            <td>{{ ucfirst($notification->type) }}</td>
-            @php
-                $priorityClass = 'custom-status ' . $notification->priority;
-            @endphp
+            <td>{{ ucfirst(str_replace('_', ' ', $notification->type)) }}</td>
             <td>
-                <span class="{{ $priorityClass }}">
+                @php
+                    $fromUser = \App\Models\User::find($notification->from_user_id);
+                @endphp
+                {{ $fromUser ? $fromUser->name : 'System' }}
+            </td>
+            <td>
+                <span class="custom-status {{ $notification->priority }}">
                     {{ ucfirst($notification->priority) }}
                 </span>
             </td>
-            @php
-                $readClass = $notification->is_read ? 'custom-status read' : 'custom-status unread';
-            @endphp
             <td>
-                <span class="{{ $readClass }}">
+                <span class="custom-status {{ $notification->is_read ? 'read' : 'unread' }}">
                     {{ $notification->is_read ? 'Read' : 'Unread' }}
                 </span>
             </td>
             <td>{{ $notification->created_at->format('Y-m-d') }}</td>
             <td class="text-center">
                 @if($notification->url)
-                <a href="{{ $notification->url }}" class="btn btn-sm btn-outline-info" title="Go to">
+                <a href="{{ $notification->url }}" class="btn btn-sm btn-outline-primary" title="Go to">
                     <i class="fas fa-arrow-right"></i>
                 </a>
                 @endif
-
-                <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirmDelete(event)">
+                <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="display:inline-block;" class="delete-form">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
@@ -91,6 +93,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function confirmDelete(e) {
         e.preventDefault();
@@ -127,5 +130,12 @@
         });
         return false;
     }
+
+    // Attach SweetAlert to delete buttons
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', confirmDelete);
+        });
+    });
 </script>
 @endpush

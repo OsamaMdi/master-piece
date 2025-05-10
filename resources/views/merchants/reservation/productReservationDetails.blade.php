@@ -146,7 +146,7 @@
 @php
     $report = $reservation->reports()->where('status', 'pending')->first();
 @endphp
-
+<a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 @if (!$report)
     <!-- Button to open the report modal -->
     <button type="button"
@@ -176,10 +176,10 @@
 
 
 {{-- Back Button --}}
-<a href="{{ route('merchant.reservations', $reservation->product_id) }}" class="btn-back-fixed">
+{{-- <a href="{{ route('merchant.reservations', $reservation->product_id) }}" class="btn-back-fixed">
     🔙 Back
 </a>
-
+ --}}
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

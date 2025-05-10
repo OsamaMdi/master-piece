@@ -13,6 +13,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SystemCheckController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\merchants\ProductController;
@@ -149,6 +150,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'block.check', 'admi
     Route::patch('reports/{report}/status', [ReportsController::class, 'updateStatus'])->name('reports.updateStatus');
     Route::get('notifications', [NotificationController::class, 'adminIndex'])->name('notifications.index');
     Route::delete('/notifications/clearrr', [NotificationController::class, 'adminClearAll'])->name('notifications.clear');
+    Route::get('subscribers', [SubscriptionController::class, 'adminIndex'])->name('subscribers.adminIndex');
 
 });
 
@@ -185,7 +187,11 @@ Route::prefix('merchant')->name('merchant.')->middleware(['auth', 'block.check',
     Route::get('/my-reports', [ReportsController::class, 'myReports'])->name('reports.mine');
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
-      Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show'); // ممكن تستخدم نفس show
+    Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
+    Route::get('/subscription', [SubscriptionController::class, 'showSubscriptionPage'])->name('subscription');
+    Route::post('/subscription', [SubscriptionController::class, 'subscriptionStore'])->name('subscription.store');
+    Route::get('/subscriptionShow', [SubscriptionController::class, 'showMySubscription'])->name('subscriptionShow');
+
     });
 
 
