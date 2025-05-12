@@ -1,38 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Title -->
+    <title>Rentify - Merchant Dashboard</title>
+
+    <!-- Description for SEO -->
+    <meta name="description" content="Manage your tool listings, reservations, and earnings with Rentify's smart and easy-to-use merchant dashboard.">
 
     <!-- Favicon -->
-<link rel="icon" href="{{ asset('img/logo.png') }}">
+    <link rel="icon" href="{{ asset('img/logo.png') }}">
 
-    ...
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Open Graph (Social sharing) -->
+    <meta property="og:title" content="Rentify - Merchant Dashboard" />
+    <meta property="og:description" content="Manage your tool listings, reservations, and earnings with Rentify." />
+    <meta property="og:image" content="{{ asset('img/logo.png') }}" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:type" content="website" />
 
-
-
-    <meta charset="UTF-8">
-    <title>Merchant Dashboard</title>
-    <!-- Font Awesome 6 Free CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- CSRF + Custom Meta -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="upload-id-route" content="{{ route('admin.users.upload.identity') }}">
+    <meta name="upload-id-route" content="{{ route('users.upload.identity') }}">
     <meta name="show-upload-modal" content="{{ session('showUploadModal') ? 'true' : 'false' }}">
     <meta name="new-product-id" content="{{ session('newProductId') }}">
+
+    <!-- External Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js" defer></script>
-    <!-- CSS -->
 
-
-    @vite('resources/js/app.js')
-   {{--  <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}"> --}}
+    <!-- Internal Styles -->
     <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js" defer></script>
+
+    @vite('resources/js/app.js')
 </head>
+
 <body>
     @include('admin.partials.sidebar')
     @include('admin.partials.navbar')

@@ -63,10 +63,10 @@
         <p class="{{ $statusClass }}">{{ ucfirst($product->status ?? 'Unknown') }}</p>
     </div>
 
-    <div class="info-row">
+    {{-- <div class="info-row">
         <h3>Deliverable:</h3>
         <p>{{ $product->is_deliverable ? 'Yes' : 'No' }}</p>
-    </div>
+    </div> --}}
 
     <h3>Usage Notes:</h3>
     <p>{{ $product->usage_notes }}</p>

@@ -56,13 +56,21 @@ public function store(Request $request)
             'price' => 'required|numeric|min:0.01',
             'quantity' => 'required|integer|min:1',
             'category_id' => 'required|exists:categories,id',
-            'is_deliverable' => 'nullable|boolean',
+            /* 'is_deliverable' => 'nullable|boolean', */
             'usage_notes' => 'required|string|min:5',
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // ✅ 2. Create the product
+        // ✅ 2. Check if merchant exceeded product limit
+        $user = Auth::user();
+        $currentProductCount = Product::where('user_id', $user->id)->count(); // soft deletes are ignored by default
+
+        if ($currentProductCount >= $user->product_limit) {
+            return back()->with('error', 'You have reached your product limit. Please remove an existing product before adding a new one.');
+        }
+
+        // ✅ 3. Create the product
         $product = Product::create([
             'name' => $validated['name'],
             'slug' => '',
@@ -70,17 +78,17 @@ public function store(Request $request)
             'price' => $validated['price'],
             'quantity' => $validated['quantity'],
             'status' => 'available',
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'category_id' => $validated['category_id'],
-            'is_deliverable' => $validated['is_deliverable'] ?? 0,
+            /* 'is_deliverable' => $validated['is_deliverable'] ?? 0, */
             'usage_notes' => $validated['usage_notes'],
         ]);
 
-        // ✅ 3. Generate slug
+        // ✅ 4. Generate slug
         $slug = Str::slug($validated['name']) . '-' . $product->id;
         $product->update(['slug' => $slug]);
 
-        // ✅ 4. Save each image
+        // ✅ 5. Save images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('products', 'public');
@@ -92,22 +100,22 @@ public function store(Request $request)
             }
         }
 
-        // ✅ 5. Notify admins
+        // ✅ 6. Notify all admins
         $category = Category::find($validated['category_id']);
         $admins = User::where('user_type', 'admin')->get();
 
         foreach ($admins as $admin) {
             NotificationService::send(
                 $admin->id,
-                'A new product "' . $product->name . '" was added by ' . auth()->user()->name . ' in category "' . $category->name . '".',
+                'A new product "' . $product->name . '" was added by ' . $user->name . ' in category "' . $category->name . '".',
                 'new_product',
                 url('/admin/products/' . $product->id),
                 'normal',
-                auth()->id()
+                $user->id
             );
         }
 
-        // ✅ 6. Redirect to product show page
+        // ✅ 7. Redirect with success
         return redirect()->route('merchant.products.index')
                          ->with('success', 'Product and images added successfully!');
 
@@ -118,6 +126,7 @@ public function store(Request $request)
         return back()->with('error', 'Something went wrong while adding the product.');
     }
 }
+
 
 
 
@@ -207,8 +216,8 @@ public function update(Request $request, string $id)
             'is_deliverable' => 'nullable|boolean',
         ]);
 
-        // 2. Prepare the final validated data
-        $validated['is_deliverable'] = $request->has('is_deliverable') ? 1 : 0;
+        /* // 2. Prepare the final validated data
+        $validated['is_deliverable'] = $request->has('is_deliverable') ? 1 : 0; */
 
         // 3. Update the product
         $product->update($validated);

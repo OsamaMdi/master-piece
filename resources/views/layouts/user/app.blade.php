@@ -135,7 +135,10 @@
 
 @endauth
 
-  @include('users.footer')
+ @if (!Request::is('chat') && !Request::is('chat/*'))
+    @include('users.footer')
+@endif
+
 
 
 

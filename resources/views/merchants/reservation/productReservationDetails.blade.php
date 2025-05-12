@@ -127,7 +127,7 @@
             <p>This user has not written any reviews for this product yet.</p>
         @endif
     </div>
-
+<a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 {{-- Cancel Reservation Button --}}
 @php
     $startDate = \Carbon\Carbon::parse($reservation->start_date);
@@ -146,7 +146,7 @@
 @php
     $report = $reservation->reports()->where('status', 'pending')->first();
 @endphp
-<a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
+
 @if (!$report)
     <!-- Button to open the report modal -->
     <button type="button"

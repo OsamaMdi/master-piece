@@ -10,13 +10,39 @@
     <h2 class="mb-4 fw-bold">Choose Your Subscription Plan</h2>
 
     <div class="row g-4">
-        @php
-            $plans = [
-                ['label' => '3 Months', 'duration' => 3, 'price' => 15, 'features' => ['Priority product listing', 'Chat with users']],
-                ['label' => '6 Months', 'duration' => 6, 'price' => 25, 'features' => ['Priority listing', 'Chat', 'Highlighted tools']],
-                ['label' => '12 Months', 'duration' => 12, 'price' => 40, 'features' => ['All features unlocked', 'Dedicated support']],
-            ];
-        @endphp
+       @php
+    $plans = [
+        [
+            'label' => '3 Months',
+            'duration' => 3,
+            'price' => 15,
+            'features' => [
+                'Feature your tools at the top of search results',
+                'Enable chat with users'
+            ]
+        ],
+        [
+            'label' => '6 Months',
+            'duration' => 6,
+            'price' => 25,
+            'features' => [
+                'Feature your tools at the top of search results',
+                'Enable chat with users',
+                'Increase product listing limit to 15 tools'
+            ]
+        ],
+        [
+            'label' => '12 Months',
+            'duration' => 12,
+            'price' => 40,
+            'features' => [
+                'Feature your tools at the top of search results',
+                'Enable chat with users',
+                'Increase product listing limit to 15 tools'
+            ]
+        ],
+    ];
+@endphp
 
         @foreach ($plans as $plan)
         <div class="col-md-4">

@@ -37,10 +37,10 @@
             </div>
 
             <div class="form-col">
-                <label class="form-label">Phone</label>
-                <input type="text" name="phone" class="form-control" value="{{ old('phone') }}">
-                @error('phone')<small class="text-danger">{{ $message }}</small>@enderror
-            </div>
+        <label class="form-label">Product Limit</label>
+        <input type="number" name="product_limit" class="form-control" min="1" value="{{ old('product_limit', 10) }}">
+        @error('product_limit')<small class="text-danger">{{ $message }}</small>@enderror
+    </div>
         </div>
 
         <div class="form-row">
@@ -88,6 +88,8 @@
             <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">← Back to Users</a>
         </div>
     </form>
+
+
 </div>
 
 

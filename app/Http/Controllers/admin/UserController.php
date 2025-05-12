@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class UserController extends Controller
-{public function index(Request $request)
+{
+
+    public function index(Request $request)
     {
         $query = User::query()
             ->where('id', '!=', auth()->id());
@@ -59,7 +61,6 @@ class UserController extends Controller
             'name' => ['nullable', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'phone' => ['nullable', 'regex:/^[0-9]{8,10}$/'],
             'status' => ['required', 'in:active,blocked,under_review'],
             'user_type' => ['required', 'in:user,merchant,admin,delivery'],
             'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -68,6 +69,7 @@ class UserController extends Controller
             'identity_country' => ['nullable', 'in:Jordan,Other'],
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:255'],
+            'product_limit' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $profilePicturePath = $request->hasFile('profile_picture')
@@ -98,7 +100,6 @@ class UserController extends Controller
             'slug' => Str::slug($validated['name'] ?? $identityData['name'] ?? 'user') . '-' . Str::random(5),
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'phone' => $validated['phone'] ?? null,
             'status' => $validated['status'],
             'user_type' => $validated['user_type'],
             'profile_picture' => $profilePicturePath,
@@ -107,6 +108,8 @@ class UserController extends Controller
             'identity_country' => $validated['identity_country'] ?? 'Jordan',
             'city' => $validated['city'] ?? $detectedCity ?? null,
             'address' => $validated['address'] ?? null,
+            'product_limit' => $request->input('product_limit', 10),
+            'phone' => $validated['phone'] ?? '0000000000',
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
@@ -137,8 +140,6 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         return view('admin.users.edit', compact('user'));
     }
-
-
 
     public function update(Request $request, string $id)
     {
@@ -198,8 +199,6 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
-
-
     public function destroy(string $id)
     {
         $user = User::findOrFail($id);
@@ -207,6 +206,7 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
+
     public function uploadIdentity(Request $request)
     {
         $request->validate([

@@ -98,8 +98,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
-
               /*  {{-- Script For Block User --}} */
 
               document.addEventListener('DOMContentLoaded', function () {

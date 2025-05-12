@@ -1,15 +1,15 @@
 <x-guest-layout>
 
-
-
     <!-- Register Form -->
-    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" id="register-form" class="auth-card relative">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" id="register-form"
+        class="auth-card relative">
         @csrf
 
         <!-- Name -->
         <div class="input-group">
-            <label class="input-label" for="name">Name</label>
-            <input id="name" class="input-field" type="text" name="name" required minlength="2" pattern="[A-Za-z ]+" />
+            <label class="input-label" for="name">Name <small>(store name in parentheses if merchant)</small></label>
+            <input id="name" class="input-field" type="text" name="name" required minlength="2"
+                pattern="[A-Za-z ]+" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
@@ -19,51 +19,63 @@
             <input id="email" class="input-field" type="email" name="email" required />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
-
         <!-- Phone -->
+<div class="input-group">
+    <label class="input-label" for="phone">Phone Number</label>
+    <div class="flex">
+        <span class="inline-flex items-center px-3 border border-r-0 rounded-l-md bg-gray-100 text-gray-600 text-sm">
+            +962
+        </span>
+        <input id="phone"
+               class="input-field rounded-none rounded-r-md border-gray-300"
+               type="tel"
+               name="phone"
+               required
+               maxlength="9"
+               minlength="9"
+               pattern="7[0-9]{8}"
+               title="Phone number must start with 7 and be exactly 9 digits"
+               placeholder="7XXXXXXXX" />
+    </div>
+    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+</div>
+        <!-- Password Field -->
         <div class="input-group">
-            <label class="input-label" for="phone">Phone Number</label>
-            <div class="flex">
-                <span class="inline-flex items-center px-3 border border-r-0 rounded-l-md bg-gray-100 text-gray-600 text-sm">+962</span>
-                <input id="phone" class="input-field rounded-none rounded-r-md border-gray-300" type="tel" name="phone" required pattern="[0-9]{8,10}" />
-            </div>
-            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
-        </div>
-
-        <!-- Identity Country -->
-        <div class="input-group">
-            <label class="input-label" for="identity_country">Country</label>
-            <select id="identity_country" name="identity_country" class="input-field" required>
-                <option value="">Select Country</option>
-                <option value="Jordan">Jordan</option>
-                <option value="Other">Other</option>
-            </select>
-            <x-input-error :messages="$errors->get('identity_country')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="input-group relative">
             <label class="input-label" for="register_password">Password</label>
-            <input id="register_password" class="input-field pr-10" type="password" name="password" required minlength="8" />
-            <button type="button" id="toggleRegisterPassword" aria-label="Show password" class="absolute right-3 top-14 transform -translate-y-1/2 text-gray-500 text-xl">
-                <i id="toggleRegisterPasswordIcon" class="fa-regular fa-eye"></i>
-            </button>
+
+            <div class="relative">
+                <input id="register_password" type="password" name="password" class="input-field input-with-icon"
+                    required minlength="8" />
+
+                <button type="button" id="toggleRegisterPassword" class="password-toggle-btn"
+                    aria-label="Show password">
+                    <i id="toggleRegisterPasswordIcon" class="fa-regular fa-eye"></i>
+                </button>
+            </div>
+
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Confirm Password -->
-        <div class="input-group relative">
+        <!-- Confirm Password Field -->
+        <div class="input-group">
             <label class="input-label" for="password_confirmation">Confirm Password</label>
-            <input id="password_confirmation" class="input-field pr-10" type="password" name="password_confirmation" required minlength="8" />
-            <button type="button" id="toggleRegisterPasswordConfirm" aria-label="Show confirm password" class="absolute right-3 top-14 transform -translate-y-1/2 text-gray-500 text-xl">
-                <i id="toggleRegisterPasswordConfirmIcon" class="fa-regular fa-eye"></i>
-            </button>
+
+            <div class="relative">
+                <input id="password_confirmation" type="password" name="password_confirmation"
+                    class="input-field input-with-icon" required minlength="8" />
+
+                <button type="button" id="toggleRegisterPasswordConfirm" class="password-toggle-btn"
+                    aria-label="Show confirm password">
+                    <i id="toggleRegisterPasswordConfirmIcon" class="fa-regular fa-eye"></i>
+                </button>
+            </div>
+
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
         <!-- Profile Picture -->
         <div class="input-group">
-            <label class="input-label" for="profile_picture">Profile Picture</label>
+            <label class="input-label" for="profile_picture">Profile Picture <small>(optional)</small></label>
             <input id="profile_picture" class="file-upload" type="file" name="profile_picture" />
             <x-input-error :messages="$errors->get('profile_picture')" class="mt-2" />
         </div>
@@ -75,10 +87,14 @@
                     <i class="fa fa-spinner fa-spin text-blue-500 text-2xl"></i>
                     <p class="text-sm text-gray-500 mt-1">Uploading ID...</p>
                 </div>
-        </label>
-            <input id="identity_image" class="file-upload" type="file" name="identity_image" required />
+            </label>
+
+            <input id="identity_image" class="file-upload" type="file" name="identity_image" required
+                accept="image/jpeg,image/png,image/webp,image/jpg,image/gif" />
+
             <x-input-error :messages="$errors->get('identity_image')" class="mt-2" />
         </div>
+
 
         <!-- User Type -->
         <div class="input-group">

@@ -1,21 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ===== Toggle Password Visibility =====
-    const setupPasswordToggle = (toggleId, iconId, inputId) => {
-        const toggle = document.getElementById(toggleId);
-        const icon = document.getElementById(iconId);
-        const input = document.getElementById(inputId);
+   // ===== Toggle Password Visibility =====
+const setupPasswordToggle = (toggleId, iconId, inputId) => {
+    const toggle = document.getElementById(toggleId);
+    const icon = document.getElementById(iconId);
+    const input = document.getElementById(inputId);
 
-        if (toggle && icon && input) {
-            toggle.addEventListener('click', () => {
-                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                input.setAttribute('type', type);
-                icon.classList.toggle('fa-eye');
-                icon.classList.toggle('fa-eye-slash');
-                toggle.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
-            });
-        }
-    };
+
+    if (toggle && icon && input && !toggle.dataset.listenerAttached) {
+        toggle.dataset.listenerAttached = 'true';
+
+        toggle.addEventListener('click', () => {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+            toggle.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+        });
+    }
+};
+
 
     // ===== Initialize Password Toggling (Login & Register Forms) =====
     setupPasswordToggle('toggleLoginPassword', 'toggleLoginPasswordIcon', 'login_password');
@@ -109,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 } else {
                     Swal.fire('Error', data.message || 'An error occurred while reading the ID.', 'error');
+                    identityImage.value = '';
                 }
             } catch (error) {
                 Swal.fire('Error', 'An unexpected error occurred.', 'error');

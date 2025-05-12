@@ -1,27 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
-
     <meta charset="UTF-8">
-    <title>Merchant Dashboard</title>
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Title -->
+    <title>Rentify - Merchant Dashboard</title>
+
+    <!-- Description -->
+    <meta name="description" content="Easily manage your products, reservations, and clients with Rentify's smart merchant dashboard.">
+
+    <!-- Open Graph Meta (for Facebook/WhatsApp preview) -->
+    <meta property="og:title" content="Rentify - Merchant Dashboard" />
+    <meta property="og:description" content="Easily manage your products, reservations, and clients with Rentify." />
+    <meta property="og:image" content="{{ asset('img/logo.png') }}" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:type" content="website" />
+
+    <!-- CSRF & Session Meta -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="show-upload-modal" content="{{ session('showUploadModal') ? 'true' : 'false' }}">
     <meta name="new-product-id" content="{{ session('newProductId') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js" defer></script>
-    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     @stack('styles')
+ 
     @vite('resources/js/app.js')
 
-<!-- Favicon -->
-<link rel="icon" href="{{ asset('img/logo.png') }}">
-
-    <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Scripts -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js" defer></script>
 </head>
+
 <body>
     @include('merchants.partials.sidebar')
     @include('merchants.partials.navbar')

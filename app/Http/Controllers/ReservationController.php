@@ -22,6 +22,15 @@ class ReservationController extends Controller
             'end_date'     => 'required|date|after_or_equal:start_date',
             'note'         => 'nullable|string|max:1000',
             'amount_paid'  => 'required|numeric|min:0',
+            'delivery_location' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!Str::contains(strtolower($value), ['jordan', 'amman'])) {
+                        $fail('Delivery address must be within Jordan.');
+                    }
+                },
+            ],
         ]);
 
         $product = Product::findOrFail($request->product_id);
@@ -101,7 +110,9 @@ class ReservationController extends Controller
             'quantity'         => 1,
             'status'           => 'not_started',
             'comment'          => $comment,
+            'delivery_address' => $request->input('delivery_location'),
         ]);
+
 
         Mail::to(auth()->user()->email)->send(new BookingConfirmed(auth()->user(), $product, $reservation));
 
@@ -120,61 +131,54 @@ class ReservationController extends Controller
     }
 
 
-
-
-
-
     public function getUnavailableDates(Product $product)
-{
-    $today = Carbon::today();
+    {
+        $today = Carbon::today();
 
-    // جلب الحجوزات النشطة
-    $reservations = Reservation::where('product_id', $product->id)
-        ->where('status', '!=', 'cancelled')
-        ->where('end_date', '>=', $today)
-        ->get();
+        // جلب الحجوزات النشطة
+        $reservations = Reservation::where('product_id', $product->id)
+            ->where('status', '!=', 'cancelled')
+            ->where('end_date', '>=', $today)
+            ->get();
 
-    $dateCounts = [];
+        $dateCounts = [];
 
-    foreach ($reservations as $res) {
-        $start = Carbon::parse($res->start_date);
-        $end = Carbon::parse($res->end_date);
+        foreach ($reservations as $res) {
+            $start = Carbon::parse($res->start_date);
+            $end = Carbon::parse($res->end_date);
 
-        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-            $key = $date->toDateString();
-            $dateCounts[$key] = ($dateCounts[$key] ?? 0) + 1;
+            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+                $key = $date->toDateString();
+                $dateCounts[$key] = ($dateCounts[$key] ?? 0) + 1;
+            }
         }
-    }
 
-    $disabledDates = [];
+        $disabledDates = [];
 
-    // 🛑 إضافة الأيام المحجوزة بالكامل
-    foreach ($dateCounts as $date => $reservedQty) {
-        if ($reservedQty >= $product->quantity) {
-            $disabledDates[] = $date;
+        // 🛑 إضافة الأيام المحجوزة بالكامل
+        foreach ($dateCounts as $date => $reservedQty) {
+            if ($reservedQty >= $product->quantity) {
+                $disabledDates[] = $date;
+            }
         }
-    }
 
-    // 🔧 إضافة أيام الصيانة إن وجدت
-    if ($product->maintenance_from && $product->maintenance_to) {
-        $from = Carbon::parse($product->maintenance_from)->startOfDay();
-        $to = Carbon::parse($product->maintenance_to)->endOfDay();
+        // 🔧 إضافة أيام الصيانة إن وجدت
+        if ($product->maintenance_from && $product->maintenance_to) {
+            $from = Carbon::parse($product->maintenance_from)->startOfDay();
+            $to = Carbon::parse($product->maintenance_to)->endOfDay();
 
-        for ($date = $from->copy(); $date->lte($to); $date->addDay()) {
-            $disabledDates[] = $date->toDateString();
+            for ($date = $from->copy(); $date->lte($to); $date->addDay()) {
+                $disabledDates[] = $date->toDateString();
+            }
         }
+
+        // إزالة التكرارات
+        $disabledDates = array_values(array_unique($disabledDates));
+
+        return response()->json([
+            'product_quantity'     => $product->quantity,
+            'reserved_quantities'  => $dateCounts,
+            'disabled_dates'       => $disabledDates,
+        ]);
     }
-
-    // إزالة التكرارات
-    $disabledDates = array_values(array_unique($disabledDates));
-
-    return response()->json([
-        'product_quantity'     => $product->quantity,
-        'reserved_quantities'  => $dateCounts,
-        'disabled_dates'       => $disabledDates,
-    ]);
-}
-
-
-
 }

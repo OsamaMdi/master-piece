@@ -46,7 +46,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Identity #</th>
+            <th>User Type </th>
             <th>Status</th>
             <th>Joined</th>
             <th>Actions</th>
@@ -59,7 +59,7 @@
             <td>{{ $user->name }}</td>
             <td>{{ $user->email }}</td>
             <td>{{ $user->phone ?? '—' }}</td>
-            <td>{{ $user->identity_number ?? '—' }}</td>
+            <td>{{ $user->user_type  ?? '—' }}</td>
             @php
             $statusClass = match($user->status) {
                 'active' => 'custom-status active',

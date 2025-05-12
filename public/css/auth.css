@@ -268,13 +268,53 @@ select.input-field {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-
-  /* Custom Hide/Show Classes */
-  .loading-hidden {
+/* Custom Hide/Show Classes */
+.loading-hidden {
     display: none;
-  }
-  .loading-flex {
+}
+.loading-flex {
     display: flex;
-  }
+}
+
+/* Input field with space for icon */
+.input-with-icon {
+    padding-right: 2.75rem;
+}
+
+/* Relative wrapper to position toggle inside it */
+.relative {
+    position: relative;
+}
+
+/* Password toggle button styling */
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    width: 2.5rem;               /* Ensures button has clickable size */
+    height: 2.5rem;
+    font-size: 1.2rem;
+    color: #6b7280;
+    z-index: 1000;
+    background: transparent;
+    border: none;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Optional: On toggle (slash icon) */
+.password-toggle-btn i.fa-eye-slash {
+    color: #374151; /* Darker when hidden */
+}
+
+
+.input-with-icon {
+    padding-right: 2.75rem;
+}
 
 

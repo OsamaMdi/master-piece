@@ -27,18 +27,26 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminProductController extends Controller
 {
-    public function index()
-    {
-        $categories = Category::all();
+    public function index(Request $request)
+{
+    $categories = Category::all();
+    $merchants = User::where('user_type', 'merchant')->get();
 
-        $products = Product::with(['user', 'category', 'images', 'reviews', 'reservations'])
-        ->orderBy('created_at', 'desc')
-         ->paginate(16);
+    $query = Product::with(['user', 'category', 'images', 'reviews', 'reservations']);
 
-        $merchants = User::where('user_type', 'merchant')->get();
-
-        return view('admin.product.products', compact('products', 'categories', 'merchants'));
+   
+    if ($request->filled('merchant_name')) {
+        $merchantName = $request->input('merchant_name');
+        $query->whereHas('user', function ($q) use ($merchantName) {
+            $q->where('name', 'like', '%' . $merchantName . '%');
+        });
     }
+
+    $products = $query->orderBy('created_at', 'desc')->paginate(16);
+
+    return view('admin.product.products', compact('products', 'categories', 'merchants'));
+}
+
 
     public function create()
 {

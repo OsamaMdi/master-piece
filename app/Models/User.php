@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name', 'slug', 'email', 'password',
         'identity_number', 'profile_picture', 'identity_image', 'identity_country',
         'status', 'user_type', 'phone', 'address', 'city',
-        'block_reason', 'blocked_until'
+        'block_reason','product_limit', 'blocked_until'
     ];
 
     protected $dates = ['deleted_at'];
@@ -81,6 +81,7 @@ class User extends Authenticatable
                     ->withTimestamps()
                     ->withPivot('slug')
                     ->whereNull('favorites.deleted_at');
+
     }
 
     public function reports()

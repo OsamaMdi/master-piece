@@ -54,13 +54,13 @@
 
         <div class="form-row mt-4">
 
-            <!-- Deliverable -->
+           {{--  <!-- Deliverable -->
             <div class="form-col" style="display: flex-row;">
                 <label class="form-label d-block">Is Deliverable?</label>
                 <input type="checkbox" name="is_deliverable" id="is_deliverable" value="1" {{ old('is_deliverable') ? 'checked' : '' }}>
                 <label for="is_deliverable">Yes</label>
                 @error('is_deliverable') <small class="text-danger d-block">{{ $message }}</small> @enderror
-            </div>
+            </div> --}}
 
           <!-- Image Upload -->
            <div class="form-col">

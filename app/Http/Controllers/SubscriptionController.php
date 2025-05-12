@@ -35,7 +35,7 @@ class SubscriptionController extends Controller
 
 
 
-    public function subscriptionStore(Request $request)
+ public function subscriptionStore(Request $request)
 {
     $request->validate([
         'subscription_type' => 'required|string',
@@ -60,7 +60,7 @@ class SubscriptionController extends Controller
     $startDate = now();
     $endDate = now()->addMonths($duration);
 
-    $existingSubscription = $user->subscriptions()
+    $existingSubscription = $user->subscription()
         ->whereNull('deleted_at')
         ->latest('end_date')
         ->first();
@@ -73,6 +73,7 @@ class SubscriptionController extends Controller
         $existingSubscription->delete();
     }
 
+    // Create the new subscription
     Subscription::create([
         'user_id' => $user->id,
         'subscription_type' => $request->subscription_type,
@@ -81,14 +82,21 @@ class SubscriptionController extends Controller
         'price' => $price,
     ]);
 
+    // ✅ If plan is 6 or 12 months → upgrade max products
+    if (in_array($duration, [6, 12])) {
+        $user->max_products = 15;
+        $user->save();
+    }
+
     return redirect()->route('merchant.subscription')->with('success', 'Subscription activated successfully!');
 }
+
 
 public function showSubscriptionPage()
 {
     $user = Auth::user();
 
-    $hasActiveSubscription = $user->subscriptions()
+    $hasActiveSubscription = $user->subscription()
         ->whereNull('deleted_at')
         ->where('end_date', '>=', now())
         ->exists();
@@ -104,7 +112,7 @@ public function showMySubscription()
 {
     $user = Auth::user();
 
-    $subscription = $user->subscriptions()
+    $subscription = $user->subscription()
         ->whereNull('deleted_at')
         ->where('end_date', '>=', now())
         ->latest('end_date')

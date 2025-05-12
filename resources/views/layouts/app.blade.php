@@ -3,24 +3,43 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
-    <title>{{ config('app.name', 'Laravel') }}</title>
-     <!-- Stylesheet -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    <!-- Title -->
+    <title>Rentify - Smart Tool Rental</title>
+
+    <!-- Description -->
+    <meta name="description" content="Rentify helps you easily rent and manage tools with a smart, user-friendly platform.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Rentify - Smart Tool Rental" />
+    <meta property="og:description" content="Rentify helps you easily rent and manage tools with a smart, user-friendly platform." />
+    <meta property="og:image" content="{{ asset('img/logo.png') }}" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:type" content="website" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/logo.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Styles and Scripts -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ asset('css/merchant-style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Vite -->
     @vite([
-        'resources/css/app.css',
-        'resources/css/profile.css',
-        'resources/js/app.js'
-    ])
+    'resources/css/app.css',
+    'resources/css/profile.css',
+    'resources/js/app.js'
+])
 </head>
+
 
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
 
@@ -141,6 +160,7 @@
             });
         }
     });
+
 </script>
 
 

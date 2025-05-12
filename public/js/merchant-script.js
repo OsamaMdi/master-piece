@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function () {
     // === Sidebar Toggle ===
     const sidebar = document.getElementById('sidebar');
@@ -33,8 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // === Confirmation Modal ===
-    const modal = document.getElementById('confirmationModal');
+    // === Confirmation Modal (Replaced with SweetAlert) ===
     const deleteButtons = document.querySelectorAll('.delete-btn');
     let currentForm = null;
 
@@ -42,7 +40,21 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             currentForm = e.target.closest('form');
-            modal.classList.remove('hidden');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed && currentForm) {
+                    currentForm.submit();
+                }
+            });
         });
     });
 
@@ -51,13 +63,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (cancelDelete && confirmDelete) {
         cancelDelete.addEventListener('click', () => {
-            modal.classList.add('hidden');
+            document.getElementById('confirmationModal')?.classList.add('hidden');
             currentForm = null;
         });
 
         confirmDelete.addEventListener('click', () => {
             if (currentForm) currentForm.submit();
-            modal.classList.add('hidden');
+            document.getElementById('confirmationModal')?.classList.add('hidden');
         });
     }
 });
@@ -66,12 +78,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 var link = document.createElement('link');
 link.rel = 'stylesheet';
-link.href = 'https://unpkg.com/swiper/swiper-bundle.min.css';
+link.href = '[https://unpkg.com/swiper/swiper-bundle.min.css](https://unpkg.com/swiper/swiper-bundle.min.css)';
 document.head.appendChild(link);
 
 // Load Swiper JS
 var script = document.createElement('script');
-script.src = 'https://unpkg.com/swiper/swiper-bundle.min.js';
+script.src = '[https://unpkg.com/swiper/swiper-bundle.min.js](https://unpkg.com/swiper/swiper-bundle.min.js)';
 script.onload = function () {
     var swiper = new Swiper(".mySwiper", {
         navigation: false,
@@ -86,14 +98,13 @@ script.onload = function () {
 };
 document.body.appendChild(script);
 
-
 var link = document.createElement('link');
 link.rel = 'stylesheet';
-link.href = 'https://unpkg.com/swiper/swiper-bundle.min.css';
+link.href = '[https://unpkg.com/swiper/swiper-bundle.min.css](https://unpkg.com/swiper/swiper-bundle.min.css)';
 document.head.appendChild(link);
 
 var script = document.createElement('script');
-script.src = 'https://unpkg.com/swiper/swiper-bundle.min.js';
+script.src = '[https://unpkg.com/swiper/swiper-bundle.min.js](https://unpkg.com/swiper/swiper-bundle.min.js)';
 script.onload = function () {
     var swiper = new Swiper(".mySwiper", {
         navigation: {

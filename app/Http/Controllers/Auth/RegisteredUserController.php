@@ -24,63 +24,75 @@ class RegisteredUserController extends Controller
 
 
     public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'regex:/@(gmail\.com|hotmail\.com|yahoo\.com)$/i'],
-            'phone' => ['nullable', 'regex:/^[0-9]{8,10}$/'],
-            'identity_country' => ['required', 'in:Jordan,Other'],
-            'identity_number' => ['required', 'string', 'min:8', 'max:20'],
-            'city' => ['required', 'string', 'max:100'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'profile_picture' => ['nullable', 'image'],
-            'identity_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'user_type' => ['required', 'in:user,merchant'],
-        ]);
+{
+    $city = $request->input('city');
+    $jordanianCities = [
+        "Amman", "Irbid", "Zarqa", "Aqaba", "Jerash", "Madaba",
+        "Balqa", "Mafraq", "Ajloun", "Karak", "Tafilah", "Ma'an"
+    ];
 
-        $profilePicturePath = $request->hasFile('profile_picture')
-            ? $request->file('profile_picture')->store('profile_pictures', 'public')
-            : null;
+    $request->merge([
+        'identity_country' => in_array($city, $jordanianCities) ? 'Jordan' : 'Other',
+    ]);
 
-        $identityImagePath = $request->hasFile('identity_image')
-            ? $request->file('identity_image')->store('identity_images', 'public')
-            : null;
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'min:2', 'max:255'],
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:users',
+            'regex:/@(gmail\.com|hotmail\.com|yahoo\.com)$/i'],
+        'phone' => ['required', 'regex:/^7(7|8|9)[0-9]{7}$/'],
+        'identity_country' => ['required', 'in:Jordan,Other'],
+        'identity_number' => ['required', 'string', 'min:8', 'max:20'],
+        'city' => ['required', 'string', 'max:100'],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'profile_picture' => ['nullable', 'image'],
+        'identity_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+        'user_type' => ['required', 'in:user,merchant'],
+    ]);
 
-        $status = $validated['user_type'] === 'merchant' ? 'under_review' : 'active';
+    $profilePicturePath = $request->hasFile('profile_picture')
+        ? $request->file('profile_picture')->store('profile_pictures', 'public')
+        : null;
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']) . '-' . Str::random(5),
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'identity_number' => $validated['identity_number'],
-            'identity_image' => $identityImagePath,
-            'profile_picture' => $profilePicturePath,
-            'identity_country' => $validated['identity_country'],
-            'phone' => $validated['phone'],
-            'address' => $request->address ?? null,
-            'city' => $validated['city'],
-            'status' => $status,
-            'user_type' => $validated['user_type'],
-        ]);
+    $identityImagePath = $request->hasFile('identity_image')
+        ? $request->file('identity_image')->store('identity_images', 'public')
+        : null;
 
-        if ($user->user_type === 'merchant') {
-            $admins = User::where('user_type', 'admin')->get();
-            foreach ($admins as $admin) {
-                NotificationService::send(
-                    $admin->id,
-                    'A new merchant registration request was submitted by ' . $user->name,
-                    'merchant_registration',
-                    url('/admin/users/' . $user->id),
-                    'important',
-                    $user->id
-                );
-            }
+    $status = $validated['user_type'] === 'merchant' ? 'under_review' : 'active';
+
+    $user = User::create([
+        'name' => $validated['name'],
+        'slug' => Str::slug($validated['name']) . '-' . Str::random(5),
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'identity_number' => $validated['identity_number'],
+        'identity_image' => $identityImagePath,
+        'profile_picture' => $profilePicturePath,
+        'identity_country' => $validated['identity_country'],
+        'phone' => '+962' . $validated['phone'],
+        'address' => $request->address ?? null,
+        'city' => $validated['city'],
+        'status' => $status,
+        'user_type' => $validated['user_type'],
+    ]);
+
+    if ($user->user_type === 'merchant') {
+        $admins = User::where('user_type', 'admin')->get();
+        foreach ($admins as $admin) {
+            NotificationService::send(
+                $admin->id,
+                'A new merchant registration request was submitted by ' . $user->name,
+                'merchant_registration',
+                url('/admin/users/' . $user->id),
+                'important',
+                $user->id
+            );
         }
-
-        event(new Registered($user));
-
-        return redirect()->route('login')->with('success', 'Account created successfully. Please login.');
     }
+
+    event(new Registered($user));
+
+    return redirect()->route('login')->with('success', 'Account created successfully. Please login.');
+}
+
 
 }

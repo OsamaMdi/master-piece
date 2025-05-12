@@ -3,6 +3,7 @@
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProfileController;
@@ -29,9 +30,9 @@ use App\Http\Controllers\merchants\ReservationController as MerchantReservationC
 |--------------------------------------------------------------------------
 */
 
-Route::get('/blocked', function () {
-    return view('users.blocked');
-})->name('blocked.page');
+Route::get('/blocked', [BlockController::class, 'show'])
+    ->middleware(['auth'])
+    ->name('blocked.page');
 
 
 Route::get('/reservation/approve-delay/{id}', [ProductController::class, 'approveDelay'])->name('reservation.approve_delay');
@@ -57,6 +58,7 @@ Route::get('/chat/unread-count', [ChatController::class, 'unreadCount'])
 
 // Profile routes
 Route::middleware('auth')->group(function () {
+    Route::post('users/upload-identity', [UserController::class, 'uploadIdentity'])->name('users.upload.identity');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -132,7 +134,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'block.check', 'admi
     Route::patch('products/{product}/unblock', [AdminProductController::class, 'unblock'])->name('products.unblock'); // << جديد
     Route::get('/search', [SearchController::class, 'adminSearch'])->name('search');
     Route::resource('users', UserController::class);
-    Route::post('users/upload-identity', [UserController::class, 'uploadIdentity'])->name('users.upload.identity');
     Route::resource('categories', CategoryController::class);
     Route::resource('reviews', ReviewController::class);
     Route::resource('website-reviews', WebsiteReviewController::class);

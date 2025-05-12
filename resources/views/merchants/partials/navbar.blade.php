@@ -97,7 +97,7 @@
                 <a href="{{ route('merchant.reports.mine') }}" class="dropdown-item py-2">🚩 My Reports</a>
 
                 @php
-                 $activeSub = Auth::user()->subscriptions()
+                 $activeSub = Auth::user()->subscription()
                  ->whereNull('deleted_at')
                  ->where('end_date', '>=', now())
                  ->latest('end_date')

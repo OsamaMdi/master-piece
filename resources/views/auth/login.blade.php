@@ -7,24 +7,30 @@
         <!-- Email -->
         <div class="input-group">
             <label class="input-label" for="email">Email</label>
-            <input id="email" class="input-field" type="email" name="email" required autofocus />
+            <input id="email" class="input-field" type="email" name="email" required autofocus autocomplete="username" />
+
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password with Eye Icon -->
-        <div class="input-group relative">
+        <!-- Password Field (Login) -->
+        <div class="input-group">
             <label class="input-label" for="login_password">Password</label>
-            <input id="login_password" class="input-field pr-10" type="password" name="password" required autocomplete="current-password" />
-            <button type="button" id="toggleLoginPassword" aria-label="Show password" class="absolute right-3 top-14 transform -translate-y-1/2 text-gray-500 text-xl">
-                <i id="toggleLoginPasswordIcon" class="fa-regular fa-eye"></i>
-            </button>
+
+            <div class="relative">
+<input id="login_password" type="password" name="password" class="input-field input-with-icon" required autocomplete="current-password" />
+                <button type="button" id="toggleLoginPassword" class="password-toggle-btn" aria-label="Show password">
+                    <i id="toggleLoginPasswordIcon" class="fa-regular fa-eye"></i>
+                </button>
+            </div>
+
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
+                <input id="remember_me" type="checkbox"
+                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
                 <span class="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
         </div>
