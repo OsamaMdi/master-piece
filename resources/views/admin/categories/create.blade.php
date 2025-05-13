@@ -48,6 +48,9 @@
                     <option value="#dc143c" style="background-color: #dc143c; color: #fff;">Crimson</option>
                     <option value="#daa520" style="background-color: #daa520; color: #000;">Goldenrod</option>
                     <option value="#8b4513" style="background-color: #8b4513; color: #fff;">Saddle Brown</option>
+                      <option value="#34495E" style="background-color: #34495E ; color: #fff;">Charcoal Blue</option>
+                      <option value="#1ABC9C" style="background-color: #1ABC9C; color: #fff;">Light Teal</option>
+
                 </select>
                 @error('color')<small class="text-danger">{{ $message }}</small>@enderror
             </div>
